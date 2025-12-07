@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8">
+    <title>꾸지뽕사업단 관리자</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="../js/jquery-2.1.4.min.js"></script>
+    <style>
+        body {
+            background: #f4f6f9;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        .admin-wrap {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #343a40;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.25rem;
+            font-weight: bold;
+            border-bottom: 1px solid #4b545c;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 15px 20px;
+            color: #c2c7d0;
+            text-decoration: none;
+            border-bottom: 1px solid #4b545c;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: #494e53;
+            color: #fff;
+        }
+
+        .content {
+            flex-grow: 1;
+            padding: 30px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 1px 3px rgba(0, 0, 0, .2);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, .125);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #dee2e6;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #f8f9fa;
+        }
+
+        .btn {
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #007bff;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        textarea.form-control {
+            height: 150px;
+            resize: vertical;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="admin-wrap">
+        <div class="sidebar">
+            <div class="sidebar-header">관리자 페이지</div>
+            <nav>
+                <a href="#" class="nav-link active" data-target="dashboard">대시보드</a>
+                <a href="#" class="nav-link" data-target="orders">주문 관리</a>
+                <a href="#" class="nav-link" data-target="notices">공지사항 관리</a>
+                <a href="#" class="nav-link" data-target="inquiries">문의 관리</a>
+                <a href="../index.html" class="nav-link" style="margin-top: 20px; background: #c31d22;">홈페이지로 이동</a>
+            </nav>
+        </div>
+
+        <div class="content">
+            <!-- Dashboard -->
+            <div id="dashboard" class="page-section">
+                <h2 style="margin-bottom: 20px;">대시보드</h2>
+                <div style="display: flex; gap: 20px;">
+                    <div class="card" style="flex: 1;">
+                        <div class="card-body">
+                            <h3>신규 주문</h3>
+                            <p style="font-size: 2rem; font-weight: bold; color: #28a745;" id="dash-order-count">0</p>
+                        </div>
+                    </div>
+                    <div class="card" style="flex: 1;">
+                        <div class="card-body">
+                            <h3>접수 문의</h3>
+                            <p style="font-size: 2rem; font-weight: bold; color: #17a2b8;" id="dash-inquiry-count">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders -->
+            <div id="orders" class="page-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">주문 관리</h3>
+                        <button class="btn btn-sm btn-primary" onclick="addMockOrder()">테스트 주문 추가</button>
+                    </div>
+                    <div class="card-body">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>주문번호</th>
+                                    <th>주문자</th>
+                                    <th>상품명</th>
+                                    <th>금액</th>
+                                    <th>상태</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="order-list">
+                                <!-- JS populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notices -->
+            <div id="notices" class="page-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">공지사항 관리</h3>
+                        <button class="btn btn-primary" onclick="showNoticeForm()">글쓰기</button>
+                    </div>
+                    <div class="card-body">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>번호</th>
+                                    <th>제목</th>
+                                    <th>작성일</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="notice-list">
+                                <!-- JS populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inquiries -->
+            <div id="inquiries" class="page-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">문의 관리</h3>
+                    </div>
+                    <div class="card-body">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>작성자</th>
+                                    <th>제목</th>
+                                    <th>작성일</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inquiry-list">
+                                <!-- JS populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Notice Write Modal/dForm placeholder -->
+    <div id="notice-form-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+        <div class="card" style="width: 600px; max-width:90%;">
+            <div class="card-header">
+                <h3 class="card-title">공지사항 작성</h3>
+                <button class="btn btn-danger" onclick="$('#notice-form-modal').hide()">닫기</button>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label>제목</label>
+                    <input type="text" id="notice-title" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>내용</label>
+                    <textarea id="notice-content" class="form-control"></textarea>
+                </div>
+                <button class="btn btn-success" onclick="saveNotice()">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation
+        $('.nav-link').click(function (e) {
+            if ($(this).attr('href').startsWith('#')) {
+                e.preventDefault();
+                $('.nav-link').removeClass('active');
+                $(this).addClass('active');
+                $('.page-section').hide();
+                $('#' + $(this).data('target')).show();
+                renderAll();
+            }
+        });
+
+        // Data Management
+        const DB = {
+            orders: JSON.parse(localStorage.getItem('kkuzy_orders')) || [],
+            notices: JSON.parse(localStorage.getItem('kkuzy_notices')) || [],
+            inquiries: JSON.parse(localStorage.getItem('kkuzy_inquiries')) || []
+        };
+
+        function saveDB() {
+            localStorage.setItem('kkuzy_orders', JSON.stringify(DB.orders));
+            localStorage.setItem('kkuzy_notices', JSON.stringify(DB.notices));
+            localStorage.setItem('kkuzy_inquiries', JSON.stringify(DB.inquiries));
+            renderAll();
+        }
+
+        function renderAll() {
+            // Dashboard Counts
+            $('#dash-order-count').text(DB.orders.length);
+            $('#dash-inquiry-count').text(DB.inquiries.length);
+
+            // Orders
+            let orderHtml = '';
+            DB.orders.forEach((o, i) => {
+                orderHtml += `<tr>
+                <td>${o.id || Date.now()}</td>
+                <td>${o.name}</td>
+                <td>${o.product}</td>
+                <td>${o.price}</td>
+                <td>${o.status || '접수'}</td>
+                <td><button class="btn btn-danger btn-sm" onclick="deleteItem('orders', ${i})">삭제</button></td>
+            </tr>`;
+            });
+            $('#order-list').html(orderHtml || '<tr><td colspan="6" class="text-center">주문 내역이 없습니다.</td></tr>');
+
+            // Notices
+            let noticeHtml = '';
+            DB.notices.forEach((n, i) => {
+                noticeHtml += `<tr>
+                <td>${i + 1}</td>
+                <td>${n.title}</td>
+                <td>${n.date}</td>
+                <td><button class="btn btn-danger btn-sm" onclick="deleteItem('notices', ${i})">삭제</button></td>
+            </tr>`;
+            });
+            $('#notice-list').html(noticeHtml || '<tr><td colspan="4" class="text-center">등록된 공지사항이 없습니다.</td></tr>');
+
+            // Inquiries
+            let inquiryHtml = '';
+            DB.inquiries.forEach((q, i) => {
+                inquiryHtml += `<tr>
+                <td>${q.writer}</td>
+                <td>${q.title}</td>
+                <td>${q.date}</td>
+                <td><button class="btn btn-danger btn-sm" onclick="deleteItem('inquiries', ${i})">삭제</button></td>
+            </tr>`;
+            });
+            $('#inquiry-list').html(inquiryHtml || '<tr><td colspan="4" class="text-center">접수된 문의가 없습니다.</td></tr>');
+        }
+
+        // Actions
+        function addMockOrder() {
+            DB.orders.push({
+                id: 'ORD-' + Date.now(),
+                name: '김철수',
+                product: '세심귀뜸봉 1세트',
+                price: '200,000원',
+                status: '결제대기'
+            });
+            saveDB();
+        }
+
+        function showNoticeForm() {
+            $('#notice-title').val('');
+            $('#notice-content').val('');
+            $('#notice-form-modal').css('display', 'flex');
+        }
+
+        function saveNotice() {
+            const title = $('#notice-title').val();
+            const content = $('#notice-content').val();
+            if (!title) return alert('제목을 입력하세요');
+
+            DB.notices.unshift({
+                title: title,
+                content: content,
+                date: new Date().toLocaleDateString()
+            });
+            saveDB();
+            $('#notice-form-modal').hide();
+        }
+
+        function deleteItem(type, index) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                DB[type].splice(index, 1);
+                saveDB();
+            }
+        }
+
+        // Initialize
+        $(document).ready(function () {
+            // Add sample data if empty
+            if (DB.notices.length === 0) {
+                DB.notices.push({ title: '사이트 리뉴얼 오픈 안내', content: '새로운 사이트가 오픈되었습니다.', date: '2025.12.01' });
+                saveDB();
+            }
+            renderAll();
+        });
+    </script>
+
+</body>
+
+</html>
