@@ -32,7 +32,7 @@ function renderNoticeList(containerId, limit = 0) {
                 html += `
                     <tr>
                         <td class="latest_space">
-                            <a href="community/notice.html">${notice.title}</a>
+                            <a href="community/notice.html?id=${notice.id}">${notice.title}</a>
                         </td>
                     </tr>
                 `;
@@ -44,7 +44,7 @@ function renderNoticeList(containerId, limit = 0) {
                 tr.innerHTML = `
                     <td class="num">${notices.length - index}</td>
                     <td class="title" style="text-align:left; padding-left:10px;">
-                        <a href="#">${notice.title}</a>
+                        <a href="community/notice.html?id=${notice.id}">${notice.title}</a>
                     </td>
                     <td class="name"><span class="member">${notice.author}</span></td>
                     <td class="date">${notice.date}</td>
@@ -83,7 +83,7 @@ function renderInquiryList(containerId, limit = 0) {
                 html += `
                     <tr>
                         <td class="latest_space">
-                            <a href="community/inquiry.html">${inq.title}</a>
+                            <a href="community/inquiry.html?id=${inq.id}">${inq.title}</a>
                         </td>
                     </tr>
                 `;

@@ -335,7 +335,7 @@
             let inquiryHtml = '';
             DB.inquiries.forEach((q, i) => {
                 inquiryHtml += `<tr>
-                <td>${q.writer}</td>
+                <td>${q.author || q.writer}</td>
                 <td>${q.title}</td>
                 <td>${q.date}</td>
                 <td><button class="btn btn-danger btn-sm" onclick="deleteItem('inquiries', ${i})">삭제</button></td>

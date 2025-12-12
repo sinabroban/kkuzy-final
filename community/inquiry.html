@@ -70,7 +70,6 @@
 	<link rel="stylesheet" href="../css/responsive.css" type="text/css">
 
 	<div id="wrap">
-
 		<!--오른쪽 퀵메뉴-->
 		<div id="right_quick">
 
@@ -118,7 +117,7 @@
 
 		<div class="menu_area">
 			<div class="sub_logo">
-				<a href="../index.html" target="_self"><img src="../images/logo_new.jpg" alt="대전꾸지뽕"
+				<a href="../index.html" target="_self"><img src="../images/logo_v2.jpg" alt="대전꾸지뽕"
 						style="height: 50px; width: auto;" /></a>
 			</div>
 			<div class="menu_icon">
@@ -153,6 +152,7 @@
 								<li><a href="../community/notice.html" target="_self" class="">공지사항</a></li>
 								<li><a href="../community/inquiry.html" target="_self" class="on_menu_active">문의</a>
 								</li>
+								<li><a href="../community/review.html" target="_self" class="">구매후기</a></li>
 							</ul>
 						</li>
 					</ul>
@@ -164,7 +164,8 @@
 		<div id="div2" style="display:none;">
 			<div class="div2_fix">
 				<div class="hide_logo" style="display:none;">
-					<a href="../index.html" target="_self"><img src="../images/logo_on.png" /></a>
+					<a href="../index.html" target="_self"><img src="../images/logo_v2.jpg"
+							style="height: 40px; width: auto;" /></a>
 				</div>
 				<div class="hide_icon">
 					<ul>
@@ -195,6 +196,7 @@
 								<li><a href="../community/notice.html" target="_self" class="">공지사항</a></li>
 								<li><a href="../community/inquiry.html" target="_self" class="on_menu_active">문의</a>
 								</li>
+								<li><a href="../community/review.html" target="_self" class="">구매후기</a></li>
 							</ul>
 						</li>
 					</ul>
@@ -324,7 +326,7 @@
 					<script src="../js/data_loader.js"></script>
 					<script>
 						document.addEventListener('DOMContentLoaded', () => {
-							renderInquiryList('inquiry-list-container');
+							renderInquiryTable('inquiry-list-container');
 						});
 					</script>
 
@@ -335,6 +337,32 @@
 						<div class="btn_box_right">
 							<a href="#" onclick="toggleWriteForm(); return false;" class="list_write_btn2"
 								style="display: inline-block; padding: 10px 20px; background: #333; color: #fff; text-decoration: none;">글쓰기</a>
+						</div>
+					</div>
+
+					<!-- Detail View (Hidden by default) -->
+					<div id="view_container" style="display:none; margin-top: 30px;">
+						<div
+							style="border-top: 2px solid #4a4a4a; border-bottom: 1px solid #ddd; padding: 20px; background: #fff;">
+							<h3 id="view_title" style="font-size: 24px; font-weight: bold; margin-bottom: 10px;"></h3>
+							<div
+								style="font-size: 14px; color: #888; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
+								<span id="view_author" style="margin-right: 20px;"></span>
+								<span id="view_date"></span>
+							</div>
+
+							<!-- File Attachment Area -->
+							<div id="view_file_area" style="margin-bottom: 20px;"></div>
+
+							<div id="view_content" style="min-height: 200px; line-height: 1.6; font-size: 16px;"></div>
+						</div>
+
+						<!-- Comment Section -->
+						<div id="comment-section"></div>
+
+						<div style="text-align: center; margin-top: 30px;">
+							<button onclick="showList()"
+								style="padding: 10px 30px; background: #666; color: #fff; border: none; cursor: pointer;">목록으로</button>
 						</div>
 					</div>
 
@@ -360,6 +388,12 @@
 								<textarea id="inq_content" required
 									style="width: 100%; height: 200px; padding: 10px; border: 1px solid #ccc;"></textarea>
 							</div>
+							<div style="margin-bottom: 15px;">
+								<label style="display: block; font-weight: bold; margin-bottom: 5px;">첨부파일</label>
+								<input type="file" id="inq_file" style="padding: 10px; background: #fff;">
+								<p style="font-size: 12px; color: #888; margin-top: 5px;">이미지(jpg, png, gif) 또는 동영상 파일.
+									(동영상은 용량 제한으로 인해 파일명만 표시될 수 있습니다.)</p>
+							</div>
 							<div style="text-align: center;">
 								<button type="submit"
 									style="padding: 10px 30px; background: #c31d22; color: #fff; border: none; font-size: 16px; cursor: pointer;">등록하기</button>
@@ -369,123 +403,256 @@
 						</form>
 					</div>
 
+					<script src="../js/community_common.js"></script>
 					<script>
+						const BOARD_KEY = COMM_KEYS.INQUIRY;
+
 						function toggleWriteForm() {
 							var form = document.getElementById('write_form_container');
+							var list = document.querySelector('.tbl_type');
+							var btnBox = document.querySelector('.btn_box');
+							var view = document.getElementById('view_container');
+							var paging = document.getElementById('pagingNew');
+							var search = document.querySelector('form[name="fsearch"]').parentNode.parentNode.parentNode; // Rough Search Box Selector
+
 							if (form.style.display === 'none') {
 								form.style.display = 'block';
-								// Scroll to form
+								list.style.display = 'none';
+								btnBox.style.display = 'none';
+								view.style.display = 'none';
+								paging.style.display = 'none';
+								search.style.display = 'none';
 								form.scrollIntoView({ behavior: "smooth" });
 							} else {
-								form.style.display = 'none';
+								showList();
 							}
 						}
 
-						function submitInquiry(e) {
+						function showList() {
+							document.getElementById('write_form_container').style.display = 'none';
+							document.getElementById('view_container').style.display = 'none';
+							document.querySelector('.tbl_type').style.display = 'table';
+							document.querySelector('.btn_box').style.display = 'block';
+							document.getElementById('pagingNew').style.display = 'block';
+							document.querySelector('form[name="fsearch"]').parentNode.parentNode.parentNode.style.display = 'block';
+							renderInquiryTable('inquiry-list-container');
+
+							// Clear URL param
+							history.pushState(null, null, location.pathname);
+						}
+
+						async function submitInquiry(e) {
 							e.preventDefault();
 							var title = document.getElementById('inq_title').value;
 							var author = document.getElementById('inq_author').value;
 							var content = document.getElementById('inq_content').value;
+							var fileInput = document.getElementById('inq_file');
 							var date = new Date().toISOString().split('T')[0];
 
-							var inquiries = JSON.parse(localStorage.getItem('kkuzy_inquiries') || '[]');
-							// Determine new ID
-							var newId = inquiries.length > 0 ? Math.max(...inquiries.map(i => i.id || 0)) + 1 : 1;
+							// Handle File
+							const fileData = await readFile(fileInput.files[0]);
 
 							var newInquiry = {
-								id: newId,
 								title: title,
 								author: author,
 								content: content,
 								date: date,
-								views: 0
+								status: '답변대기',
+								file: fileData
 							};
 
-							inquiries.unshift(newInquiry);
-							localStorage.setItem('kkuzy_inquiries', JSON.stringify(inquiries));
+							savePost(BOARD_KEY, newInquiry);
 
 							alert('문의가 등록되었습니다.');
-							location.reload();
+							document.querySelector('form').reset();
+							showList();
 						}
+
+						// Renamed to avoid conflict with data_loader.js
+						function renderInquiryTable(containerId, limit = 0) {
+							const inquiries = getPosts(BOARD_KEY);
+							const tbody = document.getElementById(containerId);
+							if (!tbody) return;
+
+							inquiries.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+							let html = '';
+							const displayInquiries = limit > 0 ? inquiries.slice(0, limit) : inquiries;
+
+							if (displayInquiries.length === 0) {
+								const colspan = limit > 0 ? 1 : 5;
+								html = `<tr><td colspan="${colspan}" style="text-align:center; padding: 50px;">등록된 문의가 없습니다.</td></tr>`;
+							} else {
+								displayInquiries.forEach((inq, index) => {
+									if (limit > 0) {
+										// Main Page Layout
+										html += `
+					<tr>
+						<td class="latest_space">
+							<a href="community/inquiry.html?id=${inq.id}">${inq.title}</a>
+						</td>
+					</tr>
+				`;
+									} else {
+										// Subpage Layout
+										const statusBadge = inq.status === '답변완료'
+											? '<span style="color:blue;">[답변완료]</span>'
+											: '<span style="color:gray;">[대기]</span>';
+
+										html += `
+					<tr onmouseover="this.style.backgroundColor='#fcfcfc'" onmouseout="this.style.backgroundColor=''">
+						<td class="num">${inquiries.length - index}</td>
+						<td class="title" style="text-align:left; padding-left:10px;">
+							<a href="#" onclick="viewPost(event, ${inq.id})">${inq.title}</a> <img src="../skin/board/basic2018/img/icon_secret.gif" align="absmiddle">
+						</td>
+						<td class="name"><span class="guest">${inq.author}</span></td>
+						<td class="date">${inq.date}</td>
+						<td class="status">${statusBadge}</td>
+					</tr>
+				`;
+									}
+								});
+							}
+							tbody.innerHTML = html;
+						}
+
+						function viewPost(e, id) {
+							if (e) e.preventDefault();
+
+							const post = getPost(BOARD_KEY, id);
+							if (!post) {
+								alert('존재하지 않는 게시물입니다.');
+								return;
+							}
+
+							document.getElementById('view_title').innerText = post.title;
+							document.getElementById('view_author').innerText = post.author;
+							document.getElementById('view_date').innerText = post.date;
+							document.getElementById('view_content').innerText = post.content;
+
+							// File Display
+							const fileArea = document.getElementById('view_file_area');
+							fileArea.innerHTML = '';
+							if (post.file) {
+								if (post.file.data) {
+									// Image
+									fileArea.innerHTML = `<img src="${post.file.data}" style="max-width:100%; margin-top:10px;">`;
+								} else {
+									// Just name (Large file or non-image)
+									fileArea.innerHTML = `<div style="background:#eee; padding:10px; margin-top:10px;">첨부파일: ${post.file.name} (${Math.round(post.file.size / 1024)}KB)</div>`;
+								}
+							}
+
+							document.getElementById('view_container').style.display = 'block';
+							document.querySelector('.tbl_type').style.display = 'none';
+							document.querySelector('.btn_box').style.display = 'none';
+							document.getElementById('pagingNew').style.display = 'none';
+							document.querySelector('form[name="fsearch"]').parentNode.parentNode.parentNode.style.display = 'none';
+
+							// Render Comments
+							renderCommentSection('comment-section', BOARD_KEY, post.id);
+
+							// Update URL
+							history.pushState({ id: id }, null, `?id=${id}`);
+						}
+
+						// Check URL for direct link
+						window.onload = function () {
+							const urlParams = new URLSearchParams(window.location.search);
+							const id = urlParams.get('id');
+							if (id) {
+								viewPost(null, id);
+							} else {
+								// Init List
+								renderInquiryTable('inquiry-list-container');
+							}
+						}
+
+						// Handle Back Button
+						window.onpopstate = function (event) {
+							if (event.state && event.state.id) {
+								viewPost(null, event.state.id);
+							} else {
+								showList();
+							}
+						};
 					</script>
+					<br><br>
+
+					<div style="width:100%; height:50px; visibility:hidden;">copy_space</div>
 
 				</div>
-				<br><br>
-
-				<div style="width:100%; height:50px; visibility:hidden;">copy_space</div>
-
 			</div>
-		</div>
 
-		<!-- Floating Talk Button -->
-		<div class="floating_talk">
-			<a href="https://open.kakao.com/o/s02JZeUh" target="_blank">
-				<img src="../images/quick_kakao_new.png" alt="톡상담/주문"
-					style="width: 100px; height: 100px; display: block;">
-			</a>
-		</div>
-
-		<div id="copy_bt">
-			<div class="copy_bt_fix">
-				<ul class="u_left">
-					<li><a href="../shop/list.html" target="_self">꾸지뽕 상품안내</a></li>
-					<li>|</li>
-					<li><a href="../pages/sub02_2.html" target="_self">회사소개</a></li>
-					<li>|</li>
-					<li><a href="../story/story.html" target="_self">꾸지뽕이야기</a></li>
-					<li>|</li>
-					<li><a href="javascript:alert('준비중입니다.');" target="_self">개인정보처리지침</a></li>
-					<li>|</li>
-					<li><a href="../admin/admin.html" target="_self">관리자화면</a></li>
-
-				</ul>
-				<ul class="u_right">
-					<li><a href="#" target="_blank"><img src="../images/sns_icon01.png" /></a></li>
-					<li><a href="#" target="_blank"><img src="../images/sns_icon02.png" /></a></li>
-					<li><a href="#" target="_blank"><img src="../images/sns_icon03.png" /></a></li>
-					<li><a href="#" target="_blank"><img src="../images/sns_icon04.png" /></a></li>
-				</ul>
+			<!-- Floating Talk Button -->
+			<div class="floating_talk">
+				<a href="https://open.kakao.com/o/s02JZeUh" target="_blank">
+					<img src="../images/quick_kakao_new.png" alt="톡상담/주문"
+						style="width: 100px; height: 100px; display: block;">
+				</a>
 			</div>
-		</div>
-		<div id="copy">
-			<div class="copy_fix">
-				<div class="copy01" style="padding-top: 60px;">
-					상호명 : 농업회사법인 꾸지뽕 사업단&nbsp;&nbsp;|&nbsp;&nbsp;대표자 : 김선몽<br>
-					주 소 : 대전광역시 서구 괴곡동 28&nbsp;&nbsp;|&nbsp;&nbsp;사업자등록번호 : 768-45-01182<br>
-					통신판매신고번호 : 제 2025-대전서구-00061 호&nbsp;&nbsp;|&nbsp;&nbsp;TEL : 010-5403-4778<br>
-					개인정보관리책임자 : 김선몽&nbsp;&nbsp;|&nbsp;&nbsp;특판,대량문의 : told7890@naver.com<br><br>
-					<p class="copy01_2">
-						COPYRIGHT 2025(C)&nbsp;&nbsp;&nbsp;<span>농업회사법인 꾸지뽕 사업단</span>&nbsp;&nbsp;&nbsp;ALL
-						RIGHTS RESERVED.
-					</p>
-					<br>
-					농업회사법인 꾸지뽕사업단은 정직한 상품만을 취급합니다.
+
+			<div id="copy_bt">
+				<div class="copy_bt_fix">
+					<ul class="u_left">
+						<li><a href="../shop/list.html" target="_self">꾸지뽕 상품안내</a></li>
+						<li>|</li>
+						<li><a href="../pages/sub02_2.html" target="_self">회사소개</a></li>
+						<li>|</li>
+						<li><a href="../story/story.html" target="_self">꾸지뽕이야기</a></li>
+						<li>|</li>
+						<li><a href="javascript:alert('준비중입니다.');" target="_self">개인정보처리지침</a></li>
+						<li>|</li>
+						<li><a href="../admin/admin.html" target="_self">관리자화면</a></li>
+
+					</ul>
+					<ul class="u_right">
+						<li><a href="#" target="_blank"><img src="../images/sns_icon01.png" /></a></li>
+						<li><a href="#" target="_blank"><img src="../images/sns_icon02.png" /></a></li>
+						<li><a href="#" target="_blank"><img src="../images/sns_icon03.png" /></a></li>
+						<li><a href="#" target="_blank"><img src="../images/sns_icon04.png" /></a></li>
+					</ul>
 				</div>
-				<div class="copy02">
-					<p class="copy02_title"><span>CS</span> Center</p>
-					<p class="copy02_p01">010-5403-4778</p>
-					<p class="copy02_p02">
-						운영시간 : 평일 08:00 ~ 17:00 / 토요일 08:00 ~ 12:00<br>
-						점심시간 : PM 12:00 ~ PM 13:00<br>
-						고객센터 (토요일 오후, 휴일 휴무)
-					</p>
-				</div>
-				<div class="copy03">
-					<p class="copy03_title"><span>Bank info</span></p>
-					<p class="copy03_p01"><img src="../images/bank_icon.png" />농협 : 351-0730-6712-43</p>
-					<p class="copy03_p02">예금주 : 김선몽(꾸지봉사업단대표)</p>
-					<div style="margin-top: 20px;">
-						<p style="font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #fff;">오시는길</p>
-						<p style="font-size: 12px; color: #888; margin-bottom: 10px;">주소: 대전광역시 서구 괴곡동 28</p>
-						<img src="../images/map_location.png" alt="오시는길 지도"
-							style="max-width: 100%; height: auto; border-radius: 5px;">
+			</div>
+			<div id="copy">
+				<div class="copy_fix">
+					<div class="copy01" style="padding-top: 60px;">
+						상호명 : 농업회사법인 꾸지뽕 사업단&nbsp;&nbsp;|&nbsp;&nbsp;대표자 : 김선몽<br>
+						주 소 : 대전광역시 서구 괴곡동 28&nbsp;&nbsp;|&nbsp;&nbsp;사업자등록번호 : 768-45-01182<br>
+						통신판매신고번호 : 제 2025-대전서구-00061 호&nbsp;&nbsp;|&nbsp;&nbsp;TEL : 010-5403-4778<br>
+						개인정보관리책임자 : 김선몽&nbsp;&nbsp;|&nbsp;&nbsp;특판,대량문의 : told7890@naver.com<br><br>
+						<p class="copy01_2">
+							COPYRIGHT 2025(C)&nbsp;&nbsp;&nbsp;<span>농업회사법인 꾸지뽕 사업단</span>&nbsp;&nbsp;&nbsp;ALL
+							RIGHTS RESERVED.
+						</p>
+						<br>
+						농업회사법인 꾸지뽕사업단은 정직한 상품만을 취급합니다.
+					</div>
+					<div class="copy02">
+						<p class="copy02_title"><span>CS</span> Center</p>
+						<p class="copy02_p01">010-5403-4778</p>
+						<p class="copy02_p02">
+							운영시간 : 평일 08:00 ~ 17:00 / 토요일 08:00 ~ 12:00<br>
+							점심시간 : PM 12:00 ~ PM 13:00<br>
+							고객센터 (토요일 오후, 휴일 휴무)
+						</p>
+					</div>
+					<div class="copy03">
+						<p class="copy03_title"><span>Bank info</span></p>
+						<p class="copy03_p01"><img src="../images/bank_icon.png" />농협 : 351-0730-6712-43</p>
+						<p class="copy03_p02">예금주 : 김선몽(꾸지봉사업단대표)</p>
+						<div style="margin-top: 20px;">
+							<p style="font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #fff;">오시는길</p>
+							<p style="font-size: 12px; color: #888; margin-bottom: 10px;">주소: 대전광역시 서구 괴곡동 28</p>
+							<img src="../images/map_location.png" alt="오시는길 지도"
+								style="max-width: 100%; height: auto; border-radius: 5px;">
+						</div>
 					</div>
 				</div>
 			</div>
+
+
 		</div>
-
-
-	</div>
 
 </body>
 
