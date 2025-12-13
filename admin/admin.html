@@ -145,10 +145,11 @@
             <div class="sidebar-header">愿由ъ옄 ?섏씠吏</div>
             <nav>
                 <a href="#" class="nav-link active" data-target="dashboard">??쒕낫??/a>
-                <a href="#" class="nav-link" data-target="orders">二쇰Ц 愿由?/a>
-                <a href="#" class="nav-link" data-target="notices">怨듭??ы빆 愿由?/a>
-                <a href="#" class="nav-link" data-target="inquiries">臾몄쓽 愿由?/a>
-                <a href="../index.html" class="nav-link" style="margin-top: 20px; background: #c31d22;">?덊럹?댁?濡??대룞</a>
+                    <a href="#" class="nav-link" data-target="orders">二쇰Ц 愿由?/a>
+                        <a href="#" class="nav-link" data-target="notices">怨듭??ы빆 愿由?/a>
+                            <a href="#" class="nav-link" data-target="inquiries">臾몄쓽 愿由?/a>
+                                <a href="../index.html" class="nav-link"
+                                    style="margin-top: 20px; background: #c31d22;">?덊럹?댁?濡??대룞</a>
             </nav>
         </div>
 
@@ -156,20 +157,22 @@
             <!-- Dashboard -->
             <div id="dashboard" class="page-section">
                 <h2 style="margin-bottom: 20px;">??쒕낫??/h2>
-                <div style="display: flex; gap: 20px;">
-                    <div class="card" style="flex: 1;">
-                        <div class="card-body">
-                            <h3>?좉퇋 二쇰Ц</h3>
-                            <p style="font-size: 2rem; font-weight: bold; color: #28a745;" id="dash-order-count">0</p>
+                    <div style="display: flex; gap: 20px;">
+                        <div class="card" style="flex: 1;">
+                            <div class="card-body">
+                                <h3>?좉퇋 二쇰Ц</h3>
+                                <p style="font-size: 2rem; font-weight: bold; color: #28a745;" id="dash-order-count">0
+                                </p>
+                            </div>
+                        </div>
+                        <div class="card" style="flex: 1;">
+                            <div class="card-body">
+                                <h3>?묒닔 臾몄쓽</h3>
+                                <p style="font-size: 2rem; font-weight: bold; color: #17a2b8;" id="dash-inquiry-count">0
+                                </p>
+                            </div>
                         </div>
                     </div>
-                    <div class="card" style="flex: 1;">
-                        <div class="card-body">
-                            <h3>?묒닔 臾몄쓽</h3>
-                            <p style="font-size: 2rem; font-weight: bold; color: #17a2b8;" id="dash-inquiry-count">0</p>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Orders -->
@@ -177,7 +180,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">二쇰Ц 愿由?/h3>
-                        <button class="btn btn-sm btn-primary" onclick="addMockOrder()">?뚯뒪??二쇰Ц 異붽?</button>
+                            <button class="btn btn-sm btn-primary" onclick="addMockOrder()">?뚯뒪??二쇰Ц 異붽?</button>
                     </div>
                     <div class="card-body">
                         <table>
@@ -204,7 +207,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">怨듭??ы빆 愿由?/h3>
-                        <button class="btn btn-primary" onclick="showNoticeForm()">湲?곌린</button>
+                            <button class="btn btn-primary" onclick="showNoticeForm()">湲?곌린</button>
                     </div>
                     <div class="card-body">
                         <table>
@@ -326,32 +329,37 @@
                 <td>${i + 1}</td>
                 <td>${n.title}</td>
                 <td>${n.date}</td>
-                <td><button class="btn btn-danger btn-sm" onclick="deleteItem('notices', ${i})">??젣</button></td>
+                <td><button class="btn btn-danger btn-sm" onclick="deleteItem('notices', ${i})">삭제</button></td>
             </tr>`;
             });
-            $('#notice-list').html(noticeHtml || '<tr><td colspan="4" class="text-center">?깅줉??怨듭??ы빆???놁뒿?덈떎.</td></tr>');
+            $('#notice-list').html(noticeHtml || '<tr><td colspan="4" class="text-center">등록된 공지사항이 없습니다.</td></tr>');
 
             // Inquiries
             let inquiryHtml = '';
             DB.inquiries.forEach((q, i) => {
+                const statusColor = q.status === '답변완료' ? 'blue' : 'red';
                 inquiryHtml += `<tr>
                 <td>${q.author || q.writer}</td>
                 <td>${q.title}</td>
+                <td><span style="color:${statusColor}">${q.status || '답변대기'}</span></td>
                 <td>${q.date}</td>
-                <td><button class="btn btn-danger btn-sm" onclick="deleteItem('inquiries', ${i})">??젣</button></td>
+                <td>
+                    <button class="btn btn-success btn-sm" onclick="showReplyForm(${i})">답변</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteItem('inquiries', ${i})">삭제</button>
+                </td>
             </tr>`;
             });
-            $('#inquiry-list').html(inquiryHtml || '<tr><td colspan="4" class="text-center">?묒닔??臾몄쓽媛 ?놁뒿?덈떎.</td></tr>');
+            $('#inquiry-list').html(inquiryHtml || '<tr><td colspan="5" class="text-center">접수된 문의가 없습니다.</td></tr>');
         }
 
         // Actions
         function addMockOrder() {
             DB.orders.push({
                 id: 'ORD-' + Date.now(),
-                name: '源泥좎닔',
-                product: '?몄떖洹?몃큺 1?명듃',
-                price: '200,000??,
-                status: '寃곗젣?湲?
+                name: '김철수',
+                product: '세심귀뜸봉 1세트',
+                price: '200,000원',
+                status: '결제대기'
             });
             saveDB();
         }
@@ -365,19 +373,63 @@
         function saveNotice() {
             const title = $('#notice-title').val();
             const content = $('#notice-content').val();
-            if (!title) return alert('?쒕ぉ???낅젰?섏꽭??);
+            if (!title) return alert('제목을 입력하세요.');
 
             DB.notices.unshift({
+                id: Date.now(),
                 title: title,
                 content: content,
-                date: new Date().toLocaleDateString()
+                date: new Date().toLocaleDateString(),
+                author: '관리자'
             });
             saveDB();
             $('#notice-form-modal').hide();
         }
 
+        // Inquiry Reply
+        let currentReplyIndex = -1;
+
+        function showReplyForm(index) {
+            currentReplyIndex = index;
+            const inq = DB.inquiries[index];
+            $('#reply-inq-title').text(inq.title);
+            $('#reply-inq-content').text(inq.content);
+            $('#reply-content').val('');
+            $('#reply-form-modal').css('display', 'flex');
+        }
+
+        function saveReply() {
+            if (currentReplyIndex === -1) return;
+            const content = $('#reply-content').val();
+            if (!content) return alert('답변 내용을 입력하세요.');
+
+            const inq = DB.inquiries[currentReplyIndex];
+            const comment = {
+                id: Date.now(),
+                author: '꾸지뽕사업단', // Admin Name
+                password: '', // Admin doesn't need password
+                content: content,
+                date: new Date().toISOString().split('T')[0] // YYYY-MM-DD
+            };
+
+            // Save to Comments DB
+            const commentsDB = JSON.parse(localStorage.getItem('kkuzy_comments')) || {};
+            const key = 'kkuzy_inquiries_' + inq.id;
+
+            if (!commentsDB[key]) commentsDB[key] = [];
+            commentsDB[key].push(comment);
+            localStorage.setItem('kkuzy_comments', JSON.stringify(commentsDB));
+
+            // Update Inquiry Status
+            inq.status = '답변완료';
+            saveDB();
+
+            $('#reply-form-modal').hide();
+            alert('답변이 등록되었습니다.');
+        }
+
         function deleteItem(type, index) {
-            if (confirm('?뺣쭚 ??젣?섏떆寃좎뒿?덇퉴?')) {
+            if (confirm('정말 삭제하시겠습니까?')) {
                 DB[type].splice(index, 1);
                 saveDB();
             }
@@ -387,14 +439,36 @@
         $(document).ready(function () {
             // Add sample data if empty
             if (DB.notices.length === 0) {
-                DB.notices.push({ title: '?ъ씠??由щ돱???ㅽ뵂 ?덈궡', content: '?덈줈???ъ씠?멸? ?ㅽ뵂?섏뿀?듬땲??', date: '2025.12.01' });
+                DB.notices.push({ id: 1, title: '사이트 리뉴얼 오픈 안내', content: '새로운 사이트가 오픈되었습니다.', date: '2025.12.01', author: '관리자' });
                 saveDB();
             }
             renderAll();
         });
     </script>
 
+    <!-- Reply Modal -->
+    <div id="reply-form-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+        <div class="card" style="width: 600px; max-width:90%;">
+            <div class="card-header">
+                <h3 class="card-title">문의 답변하기</h3>
+                <button class="btn btn-danger" onclick="$('#reply-form-modal').hide()">닫기</button>
+            </div>
+            <div class="card-body">
+                <div class="form-group" style="background:#f9f9f9; padding:10px; border-radius:5px;">
+                    <label>문의 제목</label>
+                    <p id="reply-inq-title" style="font-weight:bold;"></p>
+                    <label style="margin-top:10px;">문의 내용</label>
+                    <p id="reply-inq-content" style="white-space:pre-wrap; color:#666;"></p>
+                </div>
+                <div class="form-group">
+                    <label>답변 내용</label>
+                    <textarea id="reply-content" class="form-control" style="height:100px;"></textarea>
+                </div>
+                <button class="btn btn-success" onclick="saveReply()">등록</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
-

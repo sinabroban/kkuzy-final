@@ -123,17 +123,17 @@
                                 class=" ">회사소개</a></li>
                         <li class="menu3_"><a href="../story/story.html" target="_self" id="bt_menu_tab3"
                                 class=" ">꾸지뽕이야기</a></li>
-                        <li class="menu4_"><a href="../pages/sesim_gwitteumbong.html" target="_self"
-                                id="bt_menu_tab4_1" class=" ">세심귀뜸봉</a></li>
+                        <li class="menu4_"><a href="../pages/sesim_gwitteumbong.html" target="_self" id="bt_menu_tab4_1"
+                                class=" ">세심귀뜸봉</a></li>
                         <li class="menu4_"><a href="../community/testimonials.html" target="_self" id="bt_menu_tab4"
                                 class=" ">체험인터뷰</a></li>
                         <li class="menu7_"><a href="../gallery/farm.html" target="_self" id="bt_menu_tab7"
                                 class=" ">농장갤러리</a></li>
-                        <li class="menu5_"><a href="../community/notice.html" target="_self" id="bt_menu_tab5"
-                                class=" ">커뮤니티</a>
+                        <li class="menu5_"><a href="#" target="_self" id="bt_menu_tab5" class=" ">커뮤니티</a>
                             <ul style="margin-left:-20px;">
                                 <li><a href="../community/notice.html" target="_self" class="">공지사항</a></li>
                                 <li><a href="../community/inquiry.html" target="_self" class="">문의</a></li>
+                                <li><a href="../community/review.html" target="_self" class="">구매후기</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -157,7 +157,8 @@
         <div id="div2" style="display:none;">
             <div class="div2_fix">
                 <div class="hide_logo" style="display:none;">
-                    <li><a href="../index.html" target="_self"><img src="../images/logo_v2.jpg" style="height: 40px; width: auto;" /></a></li>
+                    <li><a href="../index.html" target="_self"><img src="../images/logo_v2.jpg"
+                                style="height: 40px; width: auto;" /></a></li>
                 </div>
                 <div class="hide_icon">
                     <ul>
@@ -181,11 +182,11 @@
                                 class=" ">체험인터뷰</a></li>
                         <li class="menu7_"><a href="../gallery/farm.html" target="_self" id="bt_menu_tab77"
                                 class=" ">농장갤러리</a></li>
-                        <li class="menu5_"><a href="../community/notice.html" target="_self" id="bt_menu_tab55"
-                                class=" ">커뮤니티</a>
+                        <li class="menu5_"><a href="#" target="_self" id="bt_menu_tab55" class=" ">커뮤니티</a>
                             <ul style="margin-left:-20px;">
                                 <li><a href="../community/notice.html" target="_self" class="">공지사항</a></li>
                                 <li><a href="../community/inquiry.html" target="_self" class="">문의</a></li>
+                                <li><a href="../community/review.html" target="_self" class="">구매후기</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -324,6 +325,108 @@
                         margin-bottom: 100px;
                     }
 
+                    /* Updated Branch Card Styles */
+                    .branch_grid {
+                        display: grid;
+                        grid-template-columns: repeat(3, 1fr);
+                        gap: 30px;
+                    }
+
+                    .branch_card {
+                        background: #fff;
+                        border: 1px solid #eee;
+                        border-radius: 15px;
+                        padding: 25px;
+                        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+                        transition: transform 0.3s ease;
+                        height: 100%;
+                        /* Make cards full height */
+                        box-sizing: border-box;
+                        display: flex;
+                        flex-direction: column;
+                    }
+
+                    .branch_card:hover {
+                        transform: translateY(-5px);
+                        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+                    }
+
+                    .branch_card h4 {
+                        font-size: 22px;
+                        color: #c31d22;
+                        font-family: 'NotoKrB';
+                        margin-bottom: 15px;
+                        margin-top: 0;
+                    }
+
+                    .branch_images {
+                        display: flex;
+                        gap: 10px;
+                        margin-bottom: 20px;
+                        height: 150px;
+                        overflow: hidden;
+                        border-radius: 10px;
+                        background: #f9f9f9;
+                    }
+
+                    .branch_images img {
+                        width: 50%;
+                        /* Show 2 images side by side */
+                        height: 100%;
+                        object-fit: cover;
+                    }
+
+                    .branch_images .placeholder {
+                        width: 100%;
+                        height: 100%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: #ccc;
+                        font-size: 14px;
+                        background: #f0f0f0;
+                    }
+
+                    /* For single image or if only one is available, flexible */
+                    .branch_images.single img {
+                        width: 100%;
+                    }
+
+                    .branch_info_box {
+                        margin-top: auto;
+                        /* Push to bottom */
+                        background: #fcfcfc;
+                        border-radius: 10px;
+                        padding: 15px;
+                        border: 1px solid #eee;
+                        text-align: left;
+                    }
+
+                    .info_row {
+                        margin-bottom: 8px;
+                        font-size: 14px;
+                        color: #444;
+                        display: flex;
+                    }
+
+                    .info_row:last-child {
+                        margin-bottom: 0;
+                    }
+
+                    .info_row .label {
+                        display: inline-block;
+                        width: 70px;
+                        /* Fixed width for labels */
+                        font-weight: bold;
+                        color: #222;
+                        flex-shrink: 0;
+                    }
+
+                    .info_row .value {
+                        word-break: keep-all;
+                        line-height: 1.4;
+                    }
+
                     .hq_img {
                         flex: 1;
                         border-radius: 15px;
@@ -422,7 +525,12 @@
                                 <p style="margin-bottom: 10px; font-size: 16px; color: #333;"><strong>주소:</strong> 대전광역시
                                     중구 보문산공원로 123 (대사동)</p>
                                 <a href="tel:010-5403-4778"
-                                    style="font-size: 18px; font-family: 'NotoKrB'; color: #c31d22;">010-5403-4778</a>
+                                    style="font-size: 18px; font-family: 'NotoKrB'; color: #c31d22; display:block; margin-bottom:10px;">010-5403-4778</a>
+                                <p style="margin-bottom: 5px; font-size: 16px; color: #333;"><strong>대표 김선몽</strong></p>
+                                <div style="font-size: 14px; color: #666; line-height: 1.6;">
+                                    운영시간 : 화~일 08:00 ~ 17:00 (동계 18:00)<br>
+                                    휴일: 매주 월요일 / 점심시간: 12:00 ~ 13:00
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -435,29 +543,76 @@
                         <div class="branch_section">
                             <h3>대전권 네트워크</h3>
                             <div class="branch_grid">
+                                <!-- 1. Daejeon Banseok -->
                                 <div class="branch_card">
+                                    <div class="branch_images single">
+                                        <img src="../images/branch_img_01.jpg" alt="반석점 테라피">
+                                    </div>
                                     <h4>대전 반석점</h4>
-                                    <p>유성구 지역 주민들의 건강 라이프스타일을 책임지는 프리미엄 상담 센터입니다.</p>
-                                    <div class="branch_info">
-                                        <a href="tel:042-934-1053">?? 042-934-1053</a>
-                                        <a href="https://m.blog.naver.com/PostList.naver?blogId=hopsgym&tab=1"
-                                            target="_blank">?? 홈페이지 방문</a>
+                                    <div class="branch_info_box">
+                                        <div class="info_row">
+                                            <span class="label">전화번호</span>
+                                            <span class="value"><a href="tel:042-934-1053"
+                                                    style="text-decoration:none; color:#444;">042-934-1053</a></span>
+                                        </div>
+                                        <div class="info_row">
+                                            <span class="label">대표자</span>
+                                            <span class="value">김영길</span>
+                                        </div>
+                                        <div class="info_row">
+                                            <span class="label">주소</span>
+                                            <span class="value">대전 유성구 반석동 640-1 더존타워 901호</span>
+                                        </div>
+                                        <div class="info_row">
+                                            <span class="label">홈페이지</span>
+                                            <span class="value"><a
+                                                    href="https://m.blog.naver.com/PostList.naver?blogId=hopsgym&tab=1"
+                                                    target="_blank" style="color:#c31d22;">방문하기</a></span>
+                                        </div>
                                     </div>
                                 </div>
+
+                                <!-- 2. Daejeon Gayang (With Photos) -->
                                 <div class="branch_card">
+                                    <div class="branch_images">
+                                        <img src="../images/branch_gayang_01.jpg" alt="가양점 내부">
+                                        <img src="../images/branch_gayang_02.jpg" alt="가양점 전경">
+                                    </div>
                                     <h4>대전 가양점</h4>
-                                    <p>동구 지역의 거점으로, 편안한 체험존과 전문적인 케어 서비스를 제공합니다.</p>
-                                    <div class="branch_info">
-                                        <a href="tel:042-555-6666">?? 042-555-6666</a>
-                                        <a href="#" target="_blank">?? 홈페이지 방문</a>
+                                    <div class="branch_info_box">
+                                        <div class="info_row">
+                                            <span class="label">전화번호</span>
+                                            <span class="value"><a href="tel:010-6643-0627"
+                                                    style="text-decoration:none; color:#444;">010-6643-0627</a></span>
+                                        </div>
+                                        <div class="info_row">
+                                            <span class="label">대표자</span>
+                                            <span class="value">이필균</span>
+                                        </div>
+                                        <div class="info_row">
+                                            <span class="label">주소</span>
+                                            <span class="value">대전 동구 동대전로 243 2층</span>
+                                        </div>
                                     </div>
                                 </div>
+
+                                <!-- 3. Daejeon Goejeong (Existing) -->
                                 <div class="branch_card">
+                                    <div class="branch_images single">
+                                        <img src="../images/branch_img_02.jpg" alt="귀뜸봉 컨셉">
+                                    </div>
                                     <h4>대전 괴정점</h4>
-                                    <p>서구 중심가에 위치하여 뛰어난 접근성과 프라이빗한 상담 환경을 갖추었습니다.</p>
-                                    <div class="branch_info">
-                                        <a href="tel:042-777-8888">?? 042-777-8888</a>
-                                        <a href="#" target="_blank">?? 홈페이지 방문</a>
+                                    <div class="branch_info_box">
+                                        <div class="info_row">
+                                            <span class="label">전화번호</span>
+                                            <span class="value"><a href="tel:042-777-8888"
+                                                    style="text-decoration:none; color:#444;">042-777-8888</a></span>
+                                        </div>
+                                        <div class="info_row">
+                                            <span class="label">홈페이지</span>
+                                            <span class="value"><a href="#" target="_blank"
+                                                    style="color:#c31d22;">방문하기</a></span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -466,28 +621,50 @@
                         <div class="branch_section" style="margin-bottom: 0;">
                             <h3>전국 지점 안내</h3>
                             <div class="branch_grid">
+                                <!-- 1. Chungnam Dangjin -->
                                 <div class="branch_card">
+                                    <div class="branch_images single">
+                                        <img src="../images/branch_img_03.png" alt="WHO 리포트">
+                                    </div>
                                     <h4>충남 당진점</h4>
-                                    <p>충남 서북부의 중심 당진에서 꾸지뽕의 건강함을 전하는 지역 거점입니다.</p>
-                                    <div class="branch_info">
-                                        <a href="tel:041-355-1004">?? 041-355-1004</a>
-                                        <a href="#" target="_blank">?? 홈페이지 방문</a>
+                                    <div class="branch_info_box">
+                                        <div class="info_row">
+                                            <span class="label">전화번호</span>
+                                            <span class="value"><a href="tel:010-4464-7772"
+                                                    style="text-decoration:none; color:#444;">010-4464-7772</a></span>
+                                        </div>
+                                        <div class="info_row">
+                                            <span class="label">대표자</span>
+                                            <span class="value">김지희</span>
+                                        </div>
+                                        <div class="info_row">
+                                            <span class="label">주소</span>
+                                            <span class="value">충남 당진시 합덕읍 남부포 1635</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="branch_card">
-                                    <h4>대구 북구점 (준비중)</h4>
-                                    <p>대구·경북 고객님들을 찾아뵙기 위해 현재 입점 준비 중입니다.</p>
-                                    <div class="branch_info">
-                                        <span style="color:#999; display:block; margin-bottom:5px;">?? 오픈 준비중</span>
-                                        <span style="color:#999;">?? 준비중</span>
+
+                                <!-- 2. Daegu Buk-gu (Preparing) -->
+                                <div class="branch_card" style="opacity: 0.9;">
+                                    <div class="branch_images single">
+                                        <img src="../images/branch_img_04.jpg" alt="귀뜸봉 제품">
+                                    </div>
+                                    <h4 style="color:#666;">대구 북구점 (준비중)</h4>
+                                    <div class="branch_info_box"
+                                        style="text-align:center; height:100%; display:flex; align-items:center; justify-content:center;">
+                                        <span style="color:#999;">오픈 준비중입니다</span>
                                     </div>
                                 </div>
-                                <div class="branch_card">
-                                    <h4>광주 서구점 (준비중)</h4>
-                                    <p>호남의 중심 광주에서 곧 새로운 모습으로 인사드리겠습니다.</p>
-                                    <div class="branch_info">
-                                        <span style="color:#999; display:block; margin-bottom:5px;">?? 오픈 준비중</span>
-                                        <span style="color:#999;">?? 준비중</span>
+
+                                <!-- 3. Gwangju Seogu (Preparing) -->
+                                <div class="branch_card" style="opacity: 0.9;">
+                                    <div class="branch_images single">
+                                        <img src="../images/branch_img_05.png" alt="꾸지뽕 세트">
+                                    </div>
+                                    <h4 style="color:#666;">광주 서구점 (준비중)</h4>
+                                    <div class="branch_info_box"
+                                        style="text-align:center; height:100%; display:flex; align-items:center; justify-content:center;">
+                                        <span style="color:#999;">오픈 준비중입니다</span>
                                     </div>
                                 </div>
                             </div>
@@ -573,7 +750,7 @@
                 </div>
                 <div class="copy03">
                     <p class="copy03_title"><span>Bank info</span></p>
-                    <p class="copy03_p01"><img src="../images/bank_icon.png" />농협 : 351-0730-6712-43</p>
+                    <p class="copy03_p01"><img src="../images/bank_icon.png" />농협 : 301-0376-1153-21</p>
                     <p class="copy03_p02">예금주 : 김선몽(꾸지봉사업단대표)</p>
                     <div style="margin-top: 20px;">
                         <p style="font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #fff;">오시는길</p>
@@ -590,4 +767,3 @@
 </body>
 
 </html>
-

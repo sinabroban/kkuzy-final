@@ -235,33 +235,35 @@
 					<link href="../skin/board/basic2018/b_style.css" rel="stylesheet" type="text/css" />
 
 					<!-- Search -->
-					<table width="460" cellspacing="0" cellpadding="0" style="float:right; margin:20px 0;">
-						<form name="fsearch" method="get">
-							<input type="hidden" name="sfl" value="wr_subject||wr_content">
-							<input type="hidden" name="sop" value="and">
-							<tr>
-								<td width="200">
-									<form name="fsearch" method="get">
-										<input type="hidden" name="bo_table" value="sub05_5">
-										<input type="hidden" name="sca" value="">
-										<select name="sfl" id="head_gr_id">
-											<option value="wr_subject||wr_content||wr_name">전체</option>
-											<option value="wr_subject">제목</option>
-											<option value="wr_content">내용</option>
-											<option value="wr_subject||wr_content">제목+내용</option>
-											<option value="wr_name">작성자</option>
-										</select>
-								</td>
-								<td width="120" align="right" style="border-bottom:1px solid #000000;">
-									<INPUT name=stx class='search_box' value='검색' onfocus="this.value=''" itemname="검색어"
-										size=37 minlength="2" maxlength='20'>
-								</td>
-								<td width="50" style="border-bottom:1px solid #000000;">
-									<button type="submit" class="btn_search">검색</button>
-								</td>
-							</tr>
-						</form>
-					</table>
+					<div id="search_box_container">
+						<table width="460" cellspacing="0" cellpadding="0" style="float:right; margin:20px 0;">
+							<form name="fsearch" method="get">
+								<input type="hidden" name="sfl" value="wr_subject||wr_content">
+								<input type="hidden" name="sop" value="and">
+								<tr>
+									<td width="200">
+										<form name="fsearch" method="get">
+											<input type="hidden" name="bo_table" value="sub05_5">
+											<input type="hidden" name="sca" value="">
+											<select name="sfl" id="head_gr_id">
+												<option value="wr_subject||wr_content||wr_name">전체</option>
+												<option value="wr_subject">제목</option>
+												<option value="wr_content">내용</option>
+												<option value="wr_subject||wr_content">제목+내용</option>
+												<option value="wr_name">작성자</option>
+											</select>
+									</td>
+									<td width="120" align="right" style="border-bottom:1px solid #000000;">
+										<INPUT name=stx class='search_box' value='검색' onfocus="this.value=''"
+											itemname="검색어" size=37 minlength="2" maxlength='20'>
+									</td>
+									<td width="50" style="border-bottom:1px solid #000000;">
+										<button type="submit" class="btn_search">검색</button>
+									</td>
+								</tr>
+							</form>
+						</table>
+					</div>
 
 					<style>
 						td.title {
@@ -413,15 +415,15 @@
 							var btnBox = document.querySelector('.btn_box');
 							var view = document.getElementById('view_container');
 							var paging = document.getElementById('pagingNew');
-							var search = document.querySelector('form[name="fsearch"]').parentNode.parentNode.parentNode; // Rough Search Box Selector
+							var search = document.getElementById('search_box_container');
 
 							if (form.style.display === 'none') {
 								form.style.display = 'block';
-								list.style.display = 'none';
-								btnBox.style.display = 'none';
-								view.style.display = 'none';
-								paging.style.display = 'none';
-								search.style.display = 'none';
+								if (list) list.style.display = 'none';
+								if (btnBox) btnBox.style.display = 'none';
+								if (view) view.style.display = 'none';
+								if (paging) paging.style.display = 'none';
+								if (search) search.style.display = 'none';
 								form.scrollIntoView({ behavior: "smooth" });
 							} else {
 								showList();
@@ -431,10 +433,10 @@
 						function showList() {
 							document.getElementById('write_form_container').style.display = 'none';
 							document.getElementById('view_container').style.display = 'none';
-							document.querySelector('.tbl_type').style.display = 'table';
-							document.querySelector('.btn_box').style.display = 'block';
-							document.getElementById('pagingNew').style.display = 'block';
-							document.querySelector('form[name="fsearch"]').parentNode.parentNode.parentNode.style.display = 'block';
+							if (document.querySelector('.tbl_type')) document.querySelector('.tbl_type').style.display = 'table';
+							if (document.querySelector('.btn_box')) document.querySelector('.btn_box').style.display = 'block';
+							if (document.getElementById('pagingNew')) document.getElementById('pagingNew').style.display = 'block';
+							if (document.getElementById('search_box_container')) document.getElementById('search_box_container').style.display = 'block';
 							renderInquiryTable('inquiry-list-container');
 
 							// Clear URL param
@@ -639,7 +641,7 @@
 					</div>
 					<div class="copy03">
 						<p class="copy03_title"><span>Bank info</span></p>
-						<p class="copy03_p01"><img src="../images/bank_icon.png" />농협 : 351-0730-6712-43</p>
+						<p class="copy03_p01"><img src="../images/bank_icon.png" />농협 : 301-0376-1153-21</p>
 						<p class="copy03_p02">예금주 : 김선몽(꾸지봉사업단대표)</p>
 						<div style="margin-top: 20px;">
 							<p style="font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #fff;">오시는길</p>
@@ -657,4 +659,3 @@
 </body>
 
 </html>
-
