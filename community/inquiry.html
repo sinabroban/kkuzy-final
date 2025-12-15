@@ -150,9 +150,9 @@
 								class="on_menu_active">커뮤니티</a>
 							<ul>
 								<li><a href="../community/notice.html" target="_self" class="">공지사항</a></li>
-								<li><a href="../community/inquiry.html" target="_self" class="on_menu_active">문의</a>
+								<li><a href="../community/inquiry.html" target="_self" class="on_menu_active">활동사항</a>
 								</li>
-								<li><a href="../community/review.html" target="_self" class="">구매후기</a></li>
+								<li><a href="../community/review.html" target="_self" class="">사용후기</a></li>
 							</ul>
 						</li>
 					</ul>
@@ -194,9 +194,9 @@
 								class="on_menu_active">커뮤니티</a>
 							<ul style="margin-left:-20px;">
 								<li><a href="../community/notice.html" target="_self" class="">공지사항</a></li>
-								<li><a href="../community/inquiry.html" target="_self" class="on_menu_active">문의</a>
+								<li><a href="../community/inquiry.html" target="_self" class="on_menu_active">활동사항</a>
 								</li>
-								<li><a href="../community/review.html" target="_self" class="">구매후기</a></li>
+								<li><a href="../community/review.html" target="_self" class="">사용후기</a></li>
 							</ul>
 						</li>
 					</ul>
@@ -209,12 +209,12 @@
 			<div class="subvisual_text01">
 				<h2>
 					<p class="title_text01">
-						<span>문의</span>
+						<span>활동사항</span>
 					</p>
 				</h2>
 				<p class="title_text02">
-					궁금한 사항을 남겨주시면<br>
-					친절하게 답변해드립니다.
+					농업회사법인 꾸지뽕 사업단의<br>
+					주요 활동 소식을 전해드립니다.
 				</p>
 			</div>
 		</div>
@@ -373,7 +373,7 @@
 						style="display:none; margin-top: 30px; border: 1px solid #ddd; padding: 30px; background: #f9f9f9;">
 						<h3
 							style="font-size: 20px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px;">
-							문의 작성하기</h3>
+							활동사항 등록</h3>
 						<form onsubmit="submitInquiry(event)">
 							<div style="margin-bottom: 15px;">
 								<label style="display: block; font-weight: bold; margin-bottom: 5px;">제목</label>
@@ -465,7 +465,7 @@
 
 							savePost(BOARD_KEY, newInquiry);
 
-							alert('문의가 등록되었습니다.');
+							alert('활동사항이 등록되었습니다.');
 							document.querySelector('form').reset();
 							showList();
 						}
@@ -483,7 +483,7 @@
 
 							if (displayInquiries.length === 0) {
 								const colspan = limit > 0 ? 1 : 5;
-								html = `<tr><td colspan="${colspan}" style="text-align:center; padding: 50px;">등록된 문의가 없습니다.</td></tr>`;
+								html = `<tr><td colspan="${colspan}" style="text-align:center; padding: 50px;">등록된 활동사항이 없습니다.</td></tr>`;
 							} else {
 								displayInquiries.forEach((inq, index) => {
 									if (limit > 0) {

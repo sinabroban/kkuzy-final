@@ -147,7 +147,7 @@
                 <a href="#" class="nav-link active" data-target="dashboard">대시보드</a>
                 <a href="#" class="nav-link" data-target="orders">주문 관리</a>
                 <a href="#" class="nav-link" data-target="notices">공지사항 관리</a>
-                <a href="#" class="nav-link" data-target="inquiries">문의 관리</a>
+                <a href="#" class="nav-link" data-target="inquiries">활동사항 관리</a>
                 <a href="../index.html" class="nav-link" style="margin-top: 20px; background: #c31d22;">홈페이지로 이동</a>
             </nav>
         </div>
@@ -166,7 +166,7 @@
                     </div>
                     <div class="card" style="flex: 1;">
                         <div class="card-body">
-                            <h3>접수 문의</h3>
+                            <h3>접수된 활동사항</h3>
                             <p style="font-size: 2rem; font-weight: bold; color: #17a2b8;" id="dash-inquiry-count">0
                             </p>
                         </div>
@@ -230,7 +230,7 @@
             <div id="inquiries" class="page-section" style="display: none;">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">문의 관리</h3>
+                        <h3 class="card-title">활동사항 관리</h3>
                     </div>
                     <div class="card-body">
                         <table>
@@ -349,7 +349,7 @@
                 </td>
             </tr>`;
             });
-            $('#inquiry-list').html(inquiryHtml || '<tr><td colspan="5" class="text-center">접수된 문의가 없습니다.</td></tr>');
+            $('#inquiry-list').html(inquiryHtml || '<tr><td colspan="5" class="text-center">접수된 활동사항이 없습니다.</td></tr>');
         }
 
         // Actions
@@ -451,14 +451,14 @@
         style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
         <div class="card" style="width: 600px; max-width:90%;">
             <div class="card-header">
-                <h3 class="card-title">문의 답변하기</h3>
+                <h3 class="card-title">활동사항 답변하기</h3>
                 <button class="btn btn-danger" onclick="$('#reply-form-modal').hide()">닫기</button>
             </div>
             <div class="card-body">
                 <div class="form-group" style="background:#f9f9f9; padding:10px; border-radius:5px;">
-                    <label>문의 제목</label>
+                    <label>활동사항 제목</label>
                     <p id="reply-inq-title" style="font-weight:bold;"></p>
-                    <label style="margin-top:10px;">문의 내용</label>
+                    <label style="margin-top:10px;">활동사항 내용</label>
                     <p id="reply-inq-content" style="white-space:pre-wrap; color:#666;"></p>
                 </div>
                 <div class="form-group">
