@@ -259,7 +259,7 @@
         style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
         <div class="card" style="width: 600px; max-width:90%;">
             <div class="card-header">
-                <h3 class="card-title">공지사항 작성</h3>
+                <h3 class="card-title" id="notice-modal-title">공지사항 작성</h3>
                 <button class="btn btn-danger" onclick="$('#notice-form-modal').hide()">닫기</button>
             </div>
             <div class="card-body">
@@ -270,6 +270,11 @@
                 <div class="form-group">
                     <label>내용</label>
                     <textarea id="notice-content" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>첨부파일 (이미지)</label>
+                    <input type="file" id="notice-file" class="form-control" accept="image/*">
+                    <div id="notice-file-preview" style="margin-top:10px;"></div>
                 </div>
                 <button class="btn btn-success" onclick="saveNotice()">저장</button>
             </div>
@@ -297,10 +302,18 @@
         };
 
         function saveDB() {
-            localStorage.setItem('kkuzy_orders', JSON.stringify(DB.orders));
-            localStorage.setItem('kkuzy_notices', JSON.stringify(DB.notices));
-            localStorage.setItem('kkuzy_inquiries', JSON.stringify(DB.inquiries));
-            renderAll();
+            try {
+                localStorage.setItem('kkuzy_orders', JSON.stringify(DB.orders));
+                localStorage.setItem('kkuzy_notices', JSON.stringify(DB.notices));
+                localStorage.setItem('kkuzy_inquiries', JSON.stringify(DB.inquiries));
+                renderAll();
+            } catch (e) {
+                if (e.name === 'QuotaExceededError') {
+                    alert('저장 용량이 초과되었습니다. 이미지를 줄이거나 오래된 데이터를 삭제해주세요.');
+                } else {
+                    alert('저장 중 오류가 발생했습니다.');
+                }
+            }
         }
 
         function renderAll() {
@@ -325,11 +338,15 @@
             // Notices
             let noticeHtml = '';
             DB.notices.forEach((n, i) => {
+                const fileIcon = n.file ? ' <span style="font-size:12px; color:#666;">(📎)</span>' : '';
                 noticeHtml += `<tr>
                 <td>${i + 1}</td>
-                <td>${n.title}</td>
+                <td><a href="#" onclick="showNoticeForm(${i})" style="text-decoration:none; color:#333;">${n.title}${fileIcon}</a></td>
                 <td>${n.date}</td>
-                <td><button class="btn btn-danger btn-sm" onclick="deleteItem('notices', ${i})">삭제</button></td>
+                <td>
+                    <button class="btn btn-primary btn-sm" onclick="showNoticeForm(${i})">수정</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteItem('notices', ${i})">삭제</button>
+                </td>
             </tr>`;
             });
             $('#notice-list').html(noticeHtml || '<tr><td colspan="4" class="text-center">등록된 공지사항이 없습니다.</td></tr>');
@@ -364,26 +381,75 @@
             saveDB();
         }
 
-        function showNoticeForm() {
-            $('#notice-title').val('');
-            $('#notice-content').val('');
+        // Notice Functions
+        let currentNoticeIndex = -1;
+
+        function showNoticeForm(index = -1) {
+            currentNoticeIndex = index;
+            if (index > -1) {
+                // Edit Mode
+                const n = DB.notices[index];
+                $('#notice-modal-title').text('공지사항 수정');
+                $('#notice-title').val(n.title);
+                $('#notice-content').val(n.content);
+                // File preview logic
+                if (n.file) {
+                    $('#notice-file-preview').html(`<img src="${n.file}" style="max-height:100px; display:block; margin-top:5px;"><p style="font-size:12px; color:#999;">기존 파일 있음 (새 파일을 선택하면 교체됩니다)</p>`);
+                } else {
+                    $('#notice-file-preview').html('');
+                }
+            } else {
+                // Create Mode
+                $('#notice-modal-title').text('공지사항 작성');
+                $('#notice-title').val('');
+                $('#notice-content').val('');
+                $('#notice-file-preview').html('');
+            }
+            $('#notice-file').val(''); // Clear file input
             $('#notice-form-modal').css('display', 'flex');
         }
 
         function saveNotice() {
             const title = $('#notice-title').val();
             const content = $('#notice-content').val();
+            const fileInput = document.getElementById('notice-file');
+
             if (!title) return alert('제목을 입력하세요.');
 
-            DB.notices.unshift({
-                id: Date.now(),
-                title: title,
-                content: content,
-                date: new Date().toLocaleDateString(),
-                author: '관리자'
-            });
-            saveDB();
-            $('#notice-form-modal').hide();
+            const processSave = (fileData) => {
+                const noticeData = {
+                    id: currentNoticeIndex > -1 ? DB.notices[currentNoticeIndex].id : Date.now(),
+                    title: title,
+                    content: content,
+                    date: currentNoticeIndex > -1 ? DB.notices[currentNoticeIndex].date : new Date().toLocaleDateString(),
+                    author: '관리자',
+                    file: fileData || (currentNoticeIndex > -1 ? DB.notices[currentNoticeIndex].file : null)
+                };
+
+                if (currentNoticeIndex > -1) {
+                    DB.notices[currentNoticeIndex] = noticeData;
+                } else {
+                    DB.notices.unshift(noticeData);
+                }
+                saveDB();
+                $('#notice-form-modal').hide();
+                alert('저장되었습니다.');
+            };
+
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                if (file.size > 2 * 1024 * 1024) { // 2MB limit check for localStorage safety
+                    if (!confirm('첨부 파일이 2MB를 초과합니다.\n저장이 안 될 수도 있습니다.\n계속 진행하시겠습니까?')) return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    processSave(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                processSave(null);
+            }
         }
 
         // Inquiry Reply

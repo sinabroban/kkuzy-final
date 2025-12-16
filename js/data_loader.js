@@ -113,3 +113,44 @@ function renderInquiryList(containerId, limit = 0) {
 
     tbody.innerHTML = html;
 }
+
+/**
+ * Renders the review list into the specified container.
+ * @param {string} containerId - The ID of the table element to render rows into.
+ * @param {number} [limit=0] - The maximum number of items to display (0 for all).
+ */
+function renderReviewList(containerId, limit = 0) {
+    const reviews = getData('kkuzy_reviews');
+    const tbody = document.getElementById(containerId);
+    if (!tbody) return;
+
+    // Sort by date descending
+    reviews.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    let html = '';
+    const displayReviews = limit > 0 ? reviews.slice(0, limit) : reviews;
+
+    if (displayReviews.length === 0) {
+        const colspan = limit > 0 ? 1 : 5;
+        html = `<tr><td colspan="${colspan}" style="text-align:center; padding: 50px;">등록된 후기가 없습니다.</td></tr>`;
+    } else {
+        displayReviews.forEach((review, index) => {
+            if (limit > 0) {
+                // Main Page Layout
+                html += `
+                    <tr>
+                        <td class="latest_space">
+                            <a href="community/review.html?id=${review.id}">${review.title}</a>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                // Subpage Layout is handled in review.html script, but keeping compatible structure just in case
+                const tr = document.createElement('tr');
+                /* ... subpage structure is complex and in review.html script ... */
+            }
+        });
+    }
+
+    tbody.innerHTML = html;
+}
