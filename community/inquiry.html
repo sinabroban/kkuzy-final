@@ -236,22 +236,19 @@
 
 					<!-- Search -->
 					<div id="search_box_container">
-						<table width="460" cellspacing="0" cellpadding="0" style="float:right; margin:20px 0;">
-							<form name="fsearch" method="get">
-								<input type="hidden" name="sfl" value="wr_subject||wr_content">
-								<input type="hidden" name="sop" value="and">
+						<form name="fsearch" method="get" onsubmit="return false;" style="margin:0;">
+							<table width="460" cellspacing="0" cellpadding="0" style="float:right; margin:20px 0;">
 								<tr>
 									<td width="200">
-										<form name="fsearch" method="get">
-											<input type="hidden" name="bo_table" value="sub05_5">
-											<input type="hidden" name="sca" value="">
-											<select name="sfl" id="head_gr_id">
-												<option value="wr_subject||wr_content||wr_name">전체</option>
-												<option value="wr_subject">제목</option>
-												<option value="wr_content">내용</option>
-												<option value="wr_subject||wr_content">제목+내용</option>
-												<option value="wr_name">작성자</option>
-											</select>
+										<input type="hidden" name="bo_table" value="sub05_5">
+										<input type="hidden" name="sca" value="">
+										<select name="sfl" id="head_gr_id">
+											<option value="wr_subject||wr_content||wr_name">전체</option>
+											<option value="wr_subject">제목</option>
+											<option value="wr_content">내용</option>
+											<option value="wr_subject||wr_content">제목+내용</option>
+											<option value="wr_name">작성자</option>
+										</select>
 									</td>
 									<td width="120" align="right" style="border-bottom:1px solid #000000;">
 										<INPUT name=stx class='search_box' value='검색' onfocus="this.value=''"
@@ -261,8 +258,8 @@
 										<button type="submit" class="btn_search">검색</button>
 									</td>
 								</tr>
-							</form>
-						</table>
+							</table>
+						</form>
 					</div>
 
 					<style>
@@ -325,12 +322,7 @@
 						</tbody>
 					</table>
 
-					<script src="../js/data_loader.js"></script>
-					<script>
-						document.addEventListener('DOMContentLoaded', () => {
-							renderInquiryTable('inquiry-list-container');
-						});
-					</script>
+
 
 					<div id="pagingNew"></div>
 
@@ -407,9 +399,15 @@
 
 					<script src="../js/community_common.js"></script>
 					<script>
-						const BOARD_KEY = COMM_KEYS.INQUIRY;
+						<script>
+							const BOARD_KEY = COMM_KEYS.INQUIRY;
 
-						function toggleWriteForm() {
+						// Init List on Load
+						document.addEventListener('DOMContentLoaded', () => {
+								renderInquiryTable('inquiry-list-container');
+						});
+
+							function toggleWriteForm() {
 							var form = document.getElementById('write_form_container');
 							var list = document.querySelector('.tbl_type');
 							var btnBox = document.querySelector('.btn_box');
@@ -419,19 +417,19 @@
 
 							if (form.style.display === 'none') {
 								form.style.display = 'block';
-								if (list) list.style.display = 'none';
-								if (btnBox) btnBox.style.display = 'none';
-								if (view) view.style.display = 'none';
-								if (paging) paging.style.display = 'none';
-								if (search) search.style.display = 'none';
-								form.scrollIntoView({ behavior: "smooth" });
+							if (list) list.style.display = 'none';
+							if (btnBox) btnBox.style.display = 'none';
+							if (view) view.style.display = 'none';
+							if (paging) paging.style.display = 'none';
+							if (search) search.style.display = 'none';
+							form.scrollIntoView({behavior: "smooth" });
 							} else {
 								showList();
 							}
 						}
 
-						function showList() {
-							document.getElementById('write_form_container').style.display = 'none';
+							function showList() {
+								document.getElementById('write_form_container').style.display = 'none';
 							document.getElementById('view_container').style.display = 'none';
 							if (document.querySelector('.tbl_type')) document.querySelector('.tbl_type').style.display = 'table';
 							if (document.querySelector('.btn_box')) document.querySelector('.btn_box').style.display = 'block';
@@ -443,8 +441,8 @@
 							history.pushState(null, null, location.pathname);
 						}
 
-						async function submitInquiry(e) {
-							e.preventDefault();
+							async function submitInquiry(e) {
+								e.preventDefault();
 							var title = document.getElementById('inq_title').value;
 							var author = document.getElementById('inq_author').value;
 							var content = document.getElementById('inq_content').value;
@@ -456,11 +454,11 @@
 
 							var newInquiry = {
 								title: title,
-								author: author,
-								content: content,
-								date: date,
-								status: '답변대기',
-								file: fileData
+							author: author,
+							content: content,
+							date: date,
+							status: '답변대기',
+							file: fileData
 							};
 
 							savePost(BOARD_KEY, newInquiry);
@@ -470,8 +468,8 @@
 							showList();
 						}
 
-						// Renamed to avoid conflict with data_loader.js
-						function renderInquiryTable(containerId, limit = 0) {
+							// Renamed to avoid conflict with data_loader.js
+							function renderInquiryTable(containerId, limit = 0) {
 							const inquiries = getPosts(BOARD_KEY);
 							const tbody = document.getElementById(containerId);
 							if (!tbody) return;
@@ -483,7 +481,7 @@
 
 							if (displayInquiries.length === 0) {
 								const colspan = limit > 0 ? 1 : 5;
-								html = `<tr><td colspan="${colspan}" style="text-align:center; padding: 50px;">등록된 활동사항이 없습니다.</td></tr>`;
+							html = `<tr><td colspan="${colspan}" style="text-align:center; padding: 50px;">등록된 활동사항이 없습니다.</td></tr>`;
 							} else {
 								displayInquiries.forEach((inq, index) => {
 									if (limit > 0) {
@@ -518,13 +516,13 @@
 							tbody.innerHTML = html;
 						}
 
-						function viewPost(e, id) {
+							function viewPost(e, id) {
 							if (e) e.preventDefault();
 
 							const post = getPost(BOARD_KEY, id);
 							if (!post) {
 								alert('존재하지 않는 게시물입니다.');
-								return;
+							return;
 							}
 
 							document.getElementById('view_title').innerText = post.title;
@@ -537,11 +535,11 @@
 							fileArea.innerHTML = '';
 							if (post.file) {
 								if (post.file.data) {
-									// Image
-									fileArea.innerHTML = `<img src="${post.file.data}" style="max-width:100%; margin-top:10px;">`;
+								// Image
+								fileArea.innerHTML = `<img src="${post.file.data}" style="max-width:100%; margin-top:10px;">`;
 								} else {
-									// Just name (Large file or non-image)
-									fileArea.innerHTML = `<div style="background:#eee; padding:10px; margin-top:10px;">첨부파일: ${post.file.name} (${Math.round(post.file.size / 1024)}KB)</div>`;
+								// Just name (Large file or non-image)
+								fileArea.innerHTML = `<div style="background:#eee; padding:10px; margin-top:10px;">첨부파일: ${post.file.name} (${Math.round(post.file.size / 1024)}KB)</div>`;
 								}
 							}
 
@@ -549,13 +547,14 @@
 							document.querySelector('.tbl_type').style.display = 'none';
 							document.querySelector('.btn_box').style.display = 'none';
 							document.getElementById('pagingNew').style.display = 'none';
-							document.querySelector('form[name="fsearch"]').parentNode.parentNode.parentNode.style.display = 'none';
+							// Replace safe toggle
+							if (document.getElementById('search_box_container')) document.getElementById('search_box_container').style.display = 'none';
 
 							// Render Comments
 							renderCommentSection('comment-section', BOARD_KEY, post.id);
 
 							// Update URL
-							history.pushState({ id: id }, null, `?id=${id}`);
+							history.pushState({id: id }, null, `?id=${id}`);
 						}
 
 						// Check URL for direct link
