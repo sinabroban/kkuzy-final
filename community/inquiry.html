@@ -231,8 +231,6 @@
 
 				<!-- Board Section -->
 				<div class="subject1" style="width:1200px; margin: 0 auto; padding-top: 50px;">
-					<script type="text/javascript" src="../js/sideview.js"></script>
-					<link href="../skin/board/basic2018/b_style.css" rel="stylesheet" type="text/css" />
 
 					<!-- Search -->
 					<div id="search_box_container">
@@ -399,15 +397,10 @@
 
 					<script src="../js/community_common.js"></script>
 					<script>
-						<script>
-							const BOARD_KEY = COMM_KEYS.INQUIRY;
 
-						// Init List on Load
-						document.addEventListener('DOMContentLoaded', () => {
-								renderInquiryTable('inquiry-list-container');
-						});
+						const BOARD_KEY = COMM_KEYS.INQUIRY;
 
-							function toggleWriteForm() {
+						function toggleWriteForm() {
 							var form = document.getElementById('write_form_container');
 							var list = document.querySelector('.tbl_type');
 							var btnBox = document.querySelector('.btn_box');
@@ -417,19 +410,19 @@
 
 							if (form.style.display === 'none') {
 								form.style.display = 'block';
-							if (list) list.style.display = 'none';
-							if (btnBox) btnBox.style.display = 'none';
-							if (view) view.style.display = 'none';
-							if (paging) paging.style.display = 'none';
-							if (search) search.style.display = 'none';
-							form.scrollIntoView({behavior: "smooth" });
+								if (list) list.style.display = 'none';
+								if (btnBox) btnBox.style.display = 'none';
+								if (view) view.style.display = 'none';
+								if (paging) paging.style.display = 'none';
+								if (search) search.style.display = 'none';
+								form.scrollIntoView({ behavior: "smooth" });
 							} else {
 								showList();
 							}
 						}
 
-							function showList() {
-								document.getElementById('write_form_container').style.display = 'none';
+						function showList() {
+							document.getElementById('write_form_container').style.display = 'none';
 							document.getElementById('view_container').style.display = 'none';
 							if (document.querySelector('.tbl_type')) document.querySelector('.tbl_type').style.display = 'table';
 							if (document.querySelector('.btn_box')) document.querySelector('.btn_box').style.display = 'block';
@@ -441,8 +434,8 @@
 							history.pushState(null, null, location.pathname);
 						}
 
-							async function submitInquiry(e) {
-								e.preventDefault();
+						async function submitInquiry(e) {
+							e.preventDefault();
 							var title = document.getElementById('inq_title').value;
 							var author = document.getElementById('inq_author').value;
 							var content = document.getElementById('inq_content').value;
@@ -454,11 +447,11 @@
 
 							var newInquiry = {
 								title: title,
-							author: author,
-							content: content,
-							date: date,
-							status: '답변대기',
-							file: fileData
+								author: author,
+								content: content,
+								date: date,
+								status: '답변대기',
+								file: fileData
 							};
 
 							savePost(BOARD_KEY, newInquiry);
@@ -468,8 +461,7 @@
 							showList();
 						}
 
-							// Renamed to avoid conflict with data_loader.js
-							function renderInquiryTable(containerId, limit = 0) {
+						function renderInquiryTable(containerId, limit = 0) {
 							const inquiries = getPosts(BOARD_KEY);
 							const tbody = document.getElementById(containerId);
 							if (!tbody) return;
@@ -477,11 +469,12 @@
 							inquiries.sort((a, b) => new Date(b.date) - new Date(a.date));
 
 							let html = '';
+							// Limit is used for main page short list
 							const displayInquiries = limit > 0 ? inquiries.slice(0, limit) : inquiries;
 
 							if (displayInquiries.length === 0) {
 								const colspan = limit > 0 ? 1 : 5;
-							html = `<tr><td colspan="${colspan}" style="text-align:center; padding: 50px;">등록된 활동사항이 없습니다.</td></tr>`;
+								html = `<tr><td colspan="${colspan}" style="text-align:center; padding: 50px;">등록된 활동사항이 없습니다.</td></tr>`;
 							} else {
 								displayInquiries.forEach((inq, index) => {
 									if (limit > 0) {
@@ -503,26 +496,26 @@
 					<tr onmouseover="this.style.backgroundColor='#fcfcfc'" onmouseout="this.style.backgroundColor=''">
 						<td class="num">${inquiries.length - index}</td>
 						<td class="title" style="text-align:left; padding-left:10px;">
-							<a href="#" onclick="viewPost(event, ${inq.id})">${inq.title}</a> <img src="../skin/board/basic2018/img/icon_secret.gif" align="absmiddle">
+							<a href="#" onclick="viewInquiryPost(event, ${inq.id})">${inq.title}</a>
 						</td>
 						<td class="name"><span class="guest">${inq.author}</span></td>
 						<td class="date">${inq.date}</td>
 						<td class="status">${statusBadge}</td>
 					</tr>
-				`;
+											`;
 									}
 								});
 							}
 							tbody.innerHTML = html;
 						}
 
-							function viewPost(e, id) {
+						function viewInquiryPost(e, id) {
 							if (e) e.preventDefault();
 
 							const post = getPost(BOARD_KEY, id);
 							if (!post) {
 								alert('존재하지 않는 게시물입니다.');
-							return;
+								return;
 							}
 
 							document.getElementById('view_title').innerText = post.title;
@@ -535,26 +528,28 @@
 							fileArea.innerHTML = '';
 							if (post.file) {
 								if (post.file.data) {
-								// Image
-								fileArea.innerHTML = `<img src="${post.file.data}" style="max-width:100%; margin-top:10px;">`;
+									// Image
+									fileArea.innerHTML = `<img src="${post.file.data}" style="max-width:100%; margin-top:10px;">`;
 								} else {
-								// Just name (Large file or non-image)
-								fileArea.innerHTML = `<div style="background:#eee; padding:10px; margin-top:10px;">첨부파일: ${post.file.name} (${Math.round(post.file.size / 1024)}KB)</div>`;
+									// Just name (Large file or non-image)
+									fileArea.innerHTML = `<div style="background:#eee; padding:10px; margin-top:10px;">첨부파일: ${post.file.name} (${Math.round(post.file.size / 1024)}KB)</div>`;
 								}
 							}
 
-							document.getElementById('view_container').style.display = 'block';
-							document.querySelector('.tbl_type').style.display = 'none';
-							document.querySelector('.btn_box').style.display = 'none';
-							document.getElementById('pagingNew').style.display = 'none';
-							// Replace safe toggle
+							const viewContainer = document.getElementById('view_container');
+							viewContainer.style.display = 'block';
+
+							// Hide other elements
+							if (document.querySelector('.tbl_type')) document.querySelector('.tbl_type').style.display = 'none';
+							if (document.querySelector('.btn_box')) document.querySelector('.btn_box').style.display = 'none';
+							if (document.getElementById('pagingNew')) document.getElementById('pagingNew').style.display = 'none';
 							if (document.getElementById('search_box_container')) document.getElementById('search_box_container').style.display = 'none';
 
 							// Render Comments
 							renderCommentSection('comment-section', BOARD_KEY, post.id);
 
 							// Update URL
-							history.pushState({id: id }, null, `?id=${id}`);
+							history.pushState({ id: id }, null, `?id=${id}`);
 						}
 
 						// Check URL for direct link
@@ -562,7 +557,7 @@
 							const urlParams = new URLSearchParams(window.location.search);
 							const id = urlParams.get('id');
 							if (id) {
-								viewPost(null, id);
+								viewInquiryPost(null, id);
 							} else {
 								// Init List
 								renderInquiryTable('inquiry-list-container');
@@ -572,7 +567,7 @@
 						// Handle Back Button
 						window.onpopstate = function (event) {
 							if (event.state && event.state.id) {
-								viewPost(null, event.state.id);
+								viewInquiryPost(null, event.state.id);
 							} else {
 								showList();
 							}
