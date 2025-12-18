@@ -126,7 +126,7 @@
                         <li class="menu4_"><a href="../community/testimonials.html">체험인터뷰</a></li>
                         <li class="menu7_"><a href="../gallery/farm.html">농장갤러리</a></li>
                         <li class="menu5_">
-                            <a href="../community/notice.html" class="on_menu_active">커뮤니티</a>
+                            <a href="javascript:void(0);" class="on_menu_active">커뮤니티</a>
                             <ul>
                                 <li><a href="../community/notice.html">공지사항</a></li>
                                 <li><a href="../community/inquiry.html">활동사항</a></li>
@@ -141,16 +141,34 @@
         <!-- Hero Section -->
         <div class="subvisual">
             <div class="subvisual_text01">
-                <h2><span>사용후기</span></h2>
+                <h2>
+                    <p class="title_text01">
+                        <span>사용후기</span>
+                    </p>
+                </h2>
                 <p class="title_text02">
-                    고객님들의 소중한 구매 후기를<br>
-                    확인하실 수 있습니다.
+                    농업회사법인 꾸지뽕 사업단의<br>
+                    주요 활동 소식을 전해드립니다.
                 </p>
             </div>
         </div>
 
         <div class="subcontent" style="width: 1200px; margin: 0 auto; padding: 50px 0;">
             <div class="subject1">
+
+                <div style="text-align:right; margin-bottom:10px;">
+                    <select id="search_key" style="padding:5px; height:30px; border:1px solid #ccc;">
+                        <option value="all">전체</option>
+                        <option value="title">제목</option>
+                        <option value="content">내용</option>
+                    </select>
+                    <input type="text" id="search_keyword"
+                        style="padding:5px; height:20px; border:1px solid #ccc; width:150px;">
+                    <button onclick="searchReviews()"
+                        style="padding:5px 10px; background:#333; color:#fff; border:none; cursor:pointer;">검색</button>
+                    <button onclick="location.reload()"
+                        style="padding:5px 10px; background:#666; color:#fff; border:none; cursor:pointer; margin-left:5px;">취소</button>
+                </div>
 
                 <!-- Review List Table -->
                 <table class="tbl_type">
@@ -401,6 +419,54 @@
                         } else {
                             alert('후기가 등록되었습니다.');
                             showList();
+                        }
+                    }
+
+                    function searchReviews() {
+                        const key = document.getElementById('search_key').value;
+                        const keyword = document.getElementById('search_keyword').value.toLowerCase();
+                        if (!keyword) {
+                            alert('검색어를 입력해주세요.');
+                            return;
+                        }
+
+                        const allPosts = getPosts(BOARD_KEY);
+                        const filtered = allPosts.filter(post => {
+                            if (key === 'all') {
+                                return post.title.toLowerCase().includes(keyword) || post.content.toLowerCase().includes(keyword);
+                            } else if (key === 'title') {
+                                return post.title.toLowerCase().includes(keyword);
+                            } else if (key === 'content') {
+                                return post.content.toLowerCase().includes(keyword);
+                            }
+                            return false;
+                        });
+
+                        // Render filtered list manually
+                        const tbody = document.getElementById('review-list-container');
+                        tbody.innerHTML = '';
+                        if (filtered.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 50px;">검색 결과가 없습니다.</td></tr>';
+                        } else {
+                            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+                            let html = '';
+                            filtered.forEach((review, index) => {
+                                const starMap = { '5': '★★★★★', '4': '★★★★☆', '3': '★★★☆☆', '2': '★★☆☆☆', '1': '★☆☆☆☆' };
+                                const stars = starMap[review.rating] || '★★★★★';
+                                html += `
+                                    <tr onmouseover="this.style.backgroundColor='#fcfcfc'" onmouseout="this.style.backgroundColor=''">
+                                        <td class="num">${filtered.length - index}</td>
+                                        <td class="title" style="text-align:left; padding-left:10px;">
+                                            <a href="#" onclick="viewPost(event, ${review.id})">${review.title}</a>
+                                            ${review.file ? '<img src="../images/icon_file.gif" style="vertical-align:middle; margin-left:5px;">' : ''}
+                                        </td>
+                                        <td class="name"><span class="guest">${review.author}</span></td>
+                                        <td class="date">${review.date}</td>
+                                        <td class="status" style="color:#fabb00;">${stars}</td>
+                                    </tr>
+                                `;
+                            });
+                            tbody.innerHTML = html;
                         }
                     }
 
