@@ -148,6 +148,7 @@
                 <a href="#" class="nav-link" data-target="orders">주문 관리</a>
                 <a href="#" class="nav-link" data-target="notices">공지사항 관리</a>
                 <a href="#" class="nav-link" data-target="inquiries">활동사항 관리</a>
+                <a href="#" class="nav-link" data-target="reviews">사용후기 관리</a>
                 <a href="../index.html" class="nav-link" style="margin-top: 20px; background: #c31d22;">홈페이지로 이동</a>
             </nav>
         </div>
@@ -168,6 +169,13 @@
                         <div class="card-body">
                             <h3>접수된 활동사항</h3>
                             <p style="font-size: 2rem; font-weight: bold; color: #17a2b8;" id="dash-inquiry-count">0
+                            </p>
+                        </div>
+                    </div>
+                    <div class="card" style="flex: 1;">
+                        <div class="card-body">
+                            <h3>등록된 사용후기</h3>
+                            <p style="font-size: 2rem; font-weight: bold; color: #ffc107;" id="dash-review-count">0
                             </p>
                         </div>
                     </div>
@@ -251,6 +259,32 @@
                 </div>
             </div>
 
+            <!-- Reviews -->
+            <div id="reviews" class="page-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">사용후기 관리</h3>
+                    </div>
+                    <div class="card-body">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>번호</th>
+                                    <th>제목</th>
+                                    <th>작성자</th>
+                                    <th>날짜</th>
+                                    <th>평점</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="review-list">
+                                <!-- JS populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -298,7 +332,8 @@
         const DB = {
             orders: JSON.parse(localStorage.getItem('kkuzy_orders')) || [],
             notices: JSON.parse(localStorage.getItem('kkuzy_notices')) || [],
-            inquiries: JSON.parse(localStorage.getItem('kkuzy_inquiries')) || []
+            inquiries: JSON.parse(localStorage.getItem('kkuzy_inquiries')) || [],
+            reviews: JSON.parse(localStorage.getItem('kkuzy_reviews')) || []
         };
 
         function saveDB() {
@@ -306,6 +341,7 @@
                 localStorage.setItem('kkuzy_orders', JSON.stringify(DB.orders));
                 localStorage.setItem('kkuzy_notices', JSON.stringify(DB.notices));
                 localStorage.setItem('kkuzy_inquiries', JSON.stringify(DB.inquiries));
+                localStorage.setItem('kkuzy_reviews', JSON.stringify(DB.reviews));
                 renderAll();
             } catch (e) {
                 if (e.name === 'QuotaExceededError') {
@@ -320,6 +356,7 @@
             // Dashboard Counts
             $('#dash-order-count').text(DB.orders.length);
             $('#dash-inquiry-count').text(DB.inquiries.length);
+            $('#dash-review-count').text(DB.reviews.length);
 
             // Orders
             let orderHtml = '';
@@ -367,6 +404,26 @@
             </tr>`;
             });
             $('#inquiry-list').html(inquiryHtml || '<tr><td colspan="5" class="text-center">접수된 활동사항이 없습니다.</td></tr>');
+
+            // Reviews
+            let reviewHtml = '';
+            DB.reviews.forEach((r, i) => {
+                const starMap = { '5': '5점', '4': '4점', '3': '3점', '2': '2점', '1': '1점' };
+                const rating = starMap[r.rating] || r.rating;
+                const fileIcon = r.file ? ' <span style="font-size:12px; color:#666;">(📎)</span>' : '';
+
+                reviewHtml += `<tr>
+                <td>${i + 1}</td>
+                <td>${r.title}${fileIcon}</td>
+                <td>${r.author}</td>
+                <td>${r.date}</td>
+                <td>${rating}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="deleteItem('reviews', ${i})">삭제</button>
+                </td>
+            </tr>`;
+            });
+            $('#review-list').html(reviewHtml || '<tr><td colspan="6" class="text-center">등록된 사용후기가 없습니다.</td></tr>');
         }
 
         // Actions
@@ -494,10 +551,19 @@
             alert('답변이 등록되었습니다.');
         }
 
+        let deleteTarget = { type: null, index: -1 };
+
         function deleteItem(type, index) {
-            if (confirm('정말 삭제하시겠습니까?')) {
-                DB[type].splice(index, 1);
+            deleteTarget = { type: type, index: index };
+            $('#delete-confirm-modal').css('display', 'flex');
+        }
+
+        function confirmDelete() {
+            if (deleteTarget.type && deleteTarget.index > -1) {
+                DB[deleteTarget.type].splice(deleteTarget.index, 1);
                 saveDB();
+                $('#delete-confirm-modal').hide();
+                deleteTarget = { type: null, index: -1 };
             }
         }
 
@@ -532,6 +598,20 @@
                     <textarea id="reply-content" class="form-control" style="height:100px;"></textarea>
                 </div>
                 <button class="btn btn-success" onclick="saveReply()">등록</button>
+            </div>
+        </div>
+    </div>
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-confirm-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
+        <div class="card" style="width: 300px; text-align:center;">
+            <div class="card-body">
+                <h3 style="font-size:18px; margin-bottom:20px;">정말 삭제하시겠습니까?</h3>
+                <div style="display:flex; justify-content:center; gap:10px;">
+                    <button class="btn btn-danger" onclick="confirmDelete()">삭제</button>
+                    <button class="btn" style="background:#6c757d; color:#fff;"
+                        onclick="$('#delete-confirm-modal').hide()">취소</button>
+                </div>
             </div>
         </div>
     </div>

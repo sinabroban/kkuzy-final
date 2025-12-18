@@ -22,9 +22,9 @@ function readFile(file) {
             return;
         }
 
-        // Limit size to avoid localStorage quota issues (e.g., 2MB)
-        if (file.size > 2 * 1024 * 1024) {
-            alert("첨부 파일 용량이 2MB를 초과하여 파일명만 저장됩니다.");
+        // Limit size to avoid localStorage quota issues (e.g., 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert("첨부 파일 용량이 5MB를 초과하여 파일명만 저장됩니다.");
             resolve({
                 name: file.name,
                 size: file.size,
@@ -101,6 +101,32 @@ function deletePost(boardKey, id) {
     let posts = getPosts(boardKey);
     posts = posts.filter(p => p.id != id);
     localStorage.setItem(boardKey, JSON.stringify(posts));
+}
+
+function verifyPassword(boardKey, id, password) {
+    const post = getPost(boardKey, id);
+    if (!post) return false;
+    // Direct comparison (in a real app, use hashing)
+    return post.password === password;
+}
+
+function enableContentProtection() {
+    // Disable context menu
+    document.addEventListener('contextmenu', function (e) {
+        if (e.target.tagName === 'IMG') {
+            e.preventDefault();
+        }
+    });
+
+    // Disable drag
+    document.addEventListener('dragstart', function (e) {
+        if (e.target.tagName === 'IMG') {
+            e.preventDefault();
+        }
+    });
+
+    // Add Warning Text Utility (Optional usage)
+    console.log("Content protection enabled.");
 }
 
 // --- Comments ---

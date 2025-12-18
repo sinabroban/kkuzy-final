@@ -198,12 +198,19 @@
                         <div id="view_file_area" style="margin-bottom: 20px;"></div>
 
                         <div id="view_content" style="min-height: 200px; line-height: 1.6; font-size: 16px;"></div>
+
+                        <!-- Content Protection Warning -->
+                        <div
+                            style="margin-top: 30px; font-size: 12px; color: #999; border-top: 1px dashed #ddd; padding-top: 10px;">
+                            ※ 게재된 내용과 사진을 무단으로 복제 및 복사할 경우에는 법적조치를 취할 수 있습니다.
+                        </div>
                     </div>
 
                     <!-- Comment Section -->
                     <div id="comment-section"></div>
 
-                    <div style="text-align: center; margin-top: 30px;">
+                    <div class="view_btn_area" style="text-align: center; margin-top: 30px;">
+                        <!-- Buttons injected by JS -->
                         <button onclick="showList()"
                             style="padding: 10px 30px; background: #666; color: #fff; border: none; cursor: pointer; border-radius: 5px;">목록으로</button>
                     </div>
@@ -212,17 +219,26 @@
                 <!-- Write Form (Hidden by default) -->
                 <div id="write_form_container"
                     style="display:none; border: 1px solid #ddd; padding: 30px; background: #f9f9f9; border-radius: 10px;">
-                    <h3
+                    <h3 id="form_title"
                         style="font-size: 20px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px;">
                         사용후기 작성하기</h3>
                     <form onsubmit="submitReview(event)">
+                        <input type="hidden" id="review_id" value="">
                         <div style="margin-bottom: 15px;">
                             <label style="display: block; font-weight: bold; margin-bottom: 5px;">제목</label>
                             <input type="text" id="review_title" required style="width: 100%;">
                         </div>
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; font-weight: bold; margin-bottom: 5px;">작성자</label>
-                            <input type="text" id="review_author" required style="width: 100%;">
+                        <div style="margin-bottom: 15px; display: flex; gap: 10px;">
+                            <div style="flex: 1;">
+                                <label style="display: block; font-weight: bold; margin-bottom: 5px;">작성자</label>
+                                <input type="text" id="review_author" required style="width: 100%;">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="display: block; font-weight: bold; margin-bottom: 5px;">비밀번호</label>
+                                <input type="password" id="review_pw" required
+                                    style="width: 100%; border: 1px solid #ddd; padding: 10px; border-radius: 5px;"
+                                    placeholder="수정 시 필요합니다.">
+                            </div>
                         </div>
                         <div style="margin-bottom: 15px;">
                             <label style="display: block; font-weight: bold; margin-bottom: 5px;">평점</label>
@@ -244,7 +260,12 @@
                             <input type="file" id="review_file" style="background: #fff; width: 100%;">
                             <p style="font-size: 12px; color: #888; margin-top: 5px;">이미지(jpg, png, gif) 또는 동영상 파일.</p>
                         </div>
-                        <div style="text-align: center;">
+
+                        <div style="margin-top: 10px; font-size: 12px; color: #e74c3c;">
+                            ※ 게재된 내용과 사진을 무단으로 복제 및 복사할 경우에는 법적조치를 취할 수 있습니다.
+                        </div>
+
+                        <div style="text-align: center; margin-top: 20px;">
                             <button type="submit"
                                 style="padding: 10px 30px; background: #c31d22; color: #fff; border: none; font-size: 16px; cursor: pointer; border-radius: 5px;">등록하기</button>
                             <button type="button" onclick="toggleWriteForm()"
@@ -253,9 +274,29 @@
                     </form>
                 </div>
 
+                <!-- Password Modal -->
+                <div id="password_modal"
+                    style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+                    <div style="background:#fff; padding:20px; border-radius:10px; width:300px; text-align:center;">
+                        <h4 style="margin-bottom:15px; font-weight:bold;">비밀번호 확인</h4>
+                        <input type="password" id="modal_pw_input" placeholder="비밀번호를 입력하세요"
+                            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px; margin-bottom:15px;">
+                        <input type="hidden" id="modal_target_id">
+                        <div style="display:flex; justify-content:center; gap:10px;">
+                            <button onclick="confirmPasswordModal()"
+                                style="padding:8px 20px; background:#333; color:#fff; border:none; border-radius:5px; cursor:pointer;">확인</button>
+                            <button onclick="closePasswordModal()"
+                                style="padding:8px 20px; background:#666; color:#fff; border:none; border-radius:5px; cursor:pointer;">취소</button>
+                        </div>
+                    </div>
+                </div>
+
                 <script src="../js/community_common.js"></script>
                 <script>
                     const BOARD_KEY = COMM_KEYS.REVIEW;
+
+                    // Enable Content Protection
+                    enableContentProtection();
 
                     function toggleWriteForm() {
                         var form = document.getElementById('write_form_container');
@@ -264,7 +305,19 @@
                         var view = document.getElementById('view_container');
                         var paging = document.getElementById('pagingNew');
 
+                        // Reset form if opening fresh (not edit)
                         if (form.style.display === 'none') {
+                            // If hidden ID is present but we just clicked "Write" (not Modify logic handled elsewhere), reset it?
+                            // Actually, "Write" button calls toggleWriteForm(), which should clear form.
+                            // But here we might just toggle. Let's separate "Show Write Form" vs "Toggle".
+                            // For simplicity, we just toggle visibility here. Logic for clearing is below.
+                        }
+
+                        if (form.style.display === 'none') {
+                            // Showing form - clear if it was an edit form before?
+                            // Default to clear if no ID hidden input set, but we haven't set it yet.
+                            // We'll leave it as simple toggle. resetForm() called on submit/cancel.
+
                             form.style.display = 'block';
                             list.style.display = 'none';
                             btnBox.style.display = 'none';
@@ -276,30 +329,64 @@
                         }
                     }
 
+                    // Helper to clear form
+                    function resetWriteForm() {
+                        document.getElementById('review_id').value = '';
+                        document.getElementById('review_title').value = '';
+                        document.getElementById('review_author').value = '';
+                        document.getElementById('review_pw').value = '';
+                        document.getElementById('review_content').value = '';
+                        document.getElementById('review_rating').value = '5';
+                        document.getElementById('review_file').value = '';
+                        document.getElementById('form_title').innerText = '사용후기 작성하기';
+                    }
+
                     function showList() {
                         document.getElementById('write_form_container').style.display = 'none';
                         document.getElementById('view_container').style.display = 'none';
                         document.querySelector('.tbl_type').style.display = 'table';
                         document.querySelector('.btn_box').style.display = 'block';
                         document.getElementById('pagingNew').style.display = 'block';
+
+                        resetWriteForm(); // Clear form when going back to list
+
                         renderReviewList('review-list-container');
                         history.pushState(null, null, location.pathname);
                     }
 
                     async function submitReview(e) {
                         e.preventDefault();
+                        var id = document.getElementById('review_id').value;
                         var title = document.getElementById('review_title').value;
                         var author = document.getElementById('review_author').value;
+                        var pw = document.getElementById('review_pw').value;
                         var content = document.getElementById('review_content').value;
                         var rating = document.getElementById('review_rating').value;
                         var fileInput = document.getElementById('review_file');
                         var date = new Date().toISOString().split('T')[0];
 
-                        const fileData = await readFile(fileInput.files[0]);
+                        // Validation
+                        if (!pw) {
+                            alert('비밀번호를 입력해주세요 (수정 시 필요).');
+                            return;
+                        }
+
+                        // Handle File
+                        let fileData = null;
+                        if (fileInput.files.length > 0) {
+                            fileData = await readFile(fileInput.files[0]);
+                        } else if (id) {
+                            // If editing and no new file, keep existing?
+                            // Simpler: fetch existing post and keep file if not replaced.
+                            const existing = getPost(BOARD_KEY, id);
+                            if (existing) fileData = existing.file;
+                        }
 
                         var newReview = {
+                            id: id ? parseInt(id) : null, // ID present = Update
                             title: title,
                             author: author,
+                            password: pw,
                             content: content,
                             rating: rating,
                             date: date,
@@ -308,9 +395,14 @@
 
                         savePost(BOARD_KEY, newReview);
 
-                        alert('후기가 등록되었습니다.');
-                        document.querySelector('form').reset();
-                        showList();
+                        if (id) {
+                            alert('후기가 수정되었습니다.');
+                            // Go back to view
+                            viewPost(null, id);
+                        } else {
+                            alert('후기가 등록되었습니다.');
+                            showList();
+                        }
                     }
 
                     function renderReviewList(containerId, limit = 0) {
@@ -387,13 +479,85 @@
                             }
                         }
 
+                        // Buttons
+                        // Inject Modify button dynamically to attach ID
+                        const btnDiv = document.querySelector('.view_btn_area');
+                        if (btnDiv) {
+                            btnDiv.innerHTML = `
+                             <button onclick="checkPasswordAndEdit(${post.id})" style="padding: 10px 20px; background: #333; color: #fff; border: none; cursor: pointer; border-radius: 5px; margin-right:5px;">수정</button>
+                             <button onclick="showList()" style="padding: 10px 30px; background: #666; color: #fff; border: none; cursor: pointer; border-radius: 5px;">목록으로</button>
+                            `;
+                        }
+
+
                         document.getElementById('view_container').style.display = 'block';
+                        document.getElementById('write_form_container').style.display = 'none'; // Ensure write form is hidden
                         document.querySelector('.tbl_type').style.display = 'none';
                         document.querySelector('.btn_box').style.display = 'none';
                         document.getElementById('pagingNew').style.display = 'none';
 
                         renderCommentSection('comment-section', BOARD_KEY, post.id);
                         history.pushState({ id: id }, null, `?id=${id}`);
+                    }
+
+                    // --- Password Modal Logic ---
+                    function checkPasswordAndEdit(id) {
+                        const post = getPost(BOARD_KEY, id);
+                        if (!post) {
+                            alert('게시물을 찾을 수 없습니다.');
+                            return;
+                        }
+
+                        // Case 1: No password set (Legacy posts)
+                        if (!post.password) {
+                            if (confirm('비밀번호가 설정되지 않은 게시물입니다. 수정하시겠습니까?')) {
+                                loadEditForm(post);
+                            }
+                            return;
+                        }
+
+                        // Case 2: Open Modal
+                        document.getElementById('modal_target_id').value = id;
+                        document.getElementById('modal_pw_input').value = '';
+                        document.getElementById('password_modal').style.display = 'flex';
+                        document.getElementById('modal_pw_input').focus();
+                    }
+
+                    function closePasswordModal() {
+                        document.getElementById('password_modal').style.display = 'none';
+                    }
+
+                    function confirmPasswordModal() {
+                        const id = document.getElementById('modal_target_id').value;
+                        const input = document.getElementById('modal_pw_input').value;
+                        const post = getPost(BOARD_KEY, id);
+
+                        if (post && input.trim() === post.password.trim()) {
+                            closePasswordModal();
+                            loadEditForm(post);
+                        } else {
+                            alert('비밀번호가 일치하지 않습니다.');
+                            document.getElementById('modal_pw_input').value = '';
+                            document.getElementById('modal_pw_input').focus();
+                        }
+                    }
+
+                    // Allow Enter key in modal
+                    document.getElementById('modal_pw_input').addEventListener('keypress', function (e) {
+                        if (e.key === 'Enter') confirmPasswordModal();
+                    });
+
+                    function loadEditForm(post) {
+                        document.getElementById('review_id').value = post.id;
+                        document.getElementById('review_title').value = post.title;
+                        document.getElementById('review_author').value = post.author;
+                        document.getElementById('review_pw').value = post.password || '';
+                        document.getElementById('review_content').value = post.content;
+                        document.getElementById('review_rating').value = post.rating;
+                        document.getElementById('form_title').innerText = '사용후기 수정하기';
+
+                        // Show Form
+                        toggleWriteForm();
                     }
 
                     window.onload = function () {
