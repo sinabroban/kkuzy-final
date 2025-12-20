@@ -1,4 +1,4 @@
-import { getPosts, COMM_KEYS } from "./community_firebase.js?v=phase3_final";
+import { getPosts, COMM_KEYS } from "./community_firebase.js?v=20251220_alert_fix";
 
 async function renderMainPageSection(boardKey, containerId, limit = 5, pageUrl) {
     const container = document.getElementById(containerId);

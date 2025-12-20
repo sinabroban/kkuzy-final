@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=1280">
     <link rel="stylesheet" href="../css/style.css">
     <script src="../js/jquery-2.1.4.min.js"></script>
-    <script type="module" src="../js/community_firebase.js"></script>
+    <script type="module" src="../js/community_firebase.js?v=20251220_alert_fix"></script>
     <style>
         body {
             background: #f4f6f9;
@@ -417,7 +417,7 @@
     </script>
 
     <script type="module">
-        import { COMM_KEYS, getPosts, savePost, deletePost, readFile, addComment, adminLogin, adminLogout, monitorAuth, getPost, isFirebaseInitialized } from '../js/community_firebase.js';
+        import { COMM_KEYS, getPosts, savePost, deletePost, readFile, addComment, adminLogin, adminLogout, monitorAuth, getPost, isFirebaseInitialized } from '../js/community_firebase.js?v=20251220_alert_fix';
 
         // State
         let currentAuthUser = null;
@@ -439,17 +439,7 @@
         // monitorAuth((user) => { ... });
 
 
-        if (pw === '4321') {
-            // Success
-            document.getElementById('login-overlay').style.display = 'none';
-            document.getElementById('admin-main').style.filter = 'none';
-            renderAll(); // Load data on success
-        } else {
-            alert('비밀번호가 일치하지 않습니다.');
-            input.value = '';
-            input.focus();
-        }
-        }
+
 
         window.tryLogout = function () {
             if (confirm('관리자 로그아웃 하시겠습니까?')) {

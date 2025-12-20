@@ -147,7 +147,7 @@ export async function getPosts(collectionName) {
         querySnapshot.forEach((doc) => {
             posts.push({ id: doc.id, ...doc.data() });
         });
-        alert(`DEBUG: Fetched ${posts.length} posts from ${collectionName}`); // UNCOMMENTED
+        // alert(`DEBUG: Fetched ${posts.length} posts from ${collectionName}`); // UNCOMMENTED
         if (posts.length === 0) console.warn(`No posts found in ${collectionName}`);
         return posts;
     } catch (e) {
@@ -314,7 +314,7 @@ export function enableContentProtection() {
 export async function uploadFile(file) {
     if (!file) return null;
 
-    alert(`DEBUG: uploadFile 진입. 파일명: ${file.name}`);
+    // alert(`DEBUG: uploadFile 진입. 파일명: ${file.name}`);
 
     try {
         const timestamp = Date.now();
@@ -325,7 +325,7 @@ export async function uploadFile(file) {
 
         const storageRef = ref(storage, storagePath);
 
-        alert(`DEBUG: 업로드 시작... \n경로: ${storagePath} \n크기: ${file.size}`);
+        // alert(`DEBUG: 업로드 시작... \n경로: ${storagePath} \n크기: ${file.size}`);
 
         // Create a timeout promise
         const timeout = new Promise((_, reject) => {
@@ -338,7 +338,7 @@ export async function uploadFile(file) {
             timeout
         ]);
 
-        alert("DEBUG: 업로드 성공! URL 가져오는 중...");
+        // alert("DEBUG: 업로드 성공! URL 가져오는 중...");
         const url = await getDownloadURL(snapshot.ref);
 
         return {

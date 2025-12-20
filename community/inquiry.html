@@ -363,6 +363,11 @@
 							활동사항 등록</h3>
 						<!-- Changed Form to Div to effectively kill any submit behavior -->
 						<div id="inquiryFormContainer">
+							<!-- Persistent Log Box -->
+							<div id="error_log_box"
+								style="display:none; padding:15px; margin-bottom:20px; border:2px solid #333; background:#fff; color:#333; font-weight:bold; white-space:pre-wrap; max-height:300px; overflow-y:auto;">
+							</div>
+
 							<input type="hidden" id="inquiry_id" value="">
 							<div style="margin-bottom: 15px;">
 								<label style="display: block; font-weight: bold; margin-bottom: 5px;">제목</label>
@@ -502,15 +507,30 @@
 
 					<!-- Same fix as review.html -->
 					<!-- Use Firebase Module -->
-					<script type="module" src="../js/community_firebase.js?v=debug_2"></script>
+					<script type="module" src="../js/community_firebase.js?v=20251220_alert_fix"></script>
 
 					<script type="module">
-						import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment, ensureAuth } from '../js/community_firebase.js?v=debug_2';
+						import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment, ensureAuth } from '../js/community_firebase.js?v=20251220_alert_fix';
 
 						console.log("Inquiry Module Script Started");
 
-
 						const BOARD_KEY = COMM_KEYS.INQUIRY;
+
+						// Persistent Logger
+						function logToScreen(msg, isError = false) {
+							const box = document.getElementById('error_log_box');
+							if (box) {
+								box.style.display = 'block';
+								box.style.borderColor = isError ? 'red' : '#333';
+								box.style.color = isError ? 'red' : '#333';
+								const timestamp = new Date().toLocaleTimeString();
+								box.innerHTML += `[${timestamp}] ${msg}\n`;
+								box.scrollTop = box.scrollHeight;
+							}
+							console.log(msg);
+							// Also alert if it's an error so user notices
+							if (isError) alert(msg);
+						}
 
 						// EXPOSE TO WINDOW (Critical for onclick attributes)
 						window.submitInquiry = submitInquiry;
@@ -530,14 +550,18 @@
 
 						async function submitInquiry(e) {
 							if (e) e.preventDefault();
-							alert("[1/5] 등록 프로세스 시작. (페이지 새로고침 방지됨)");
+
+							// Reset Log
+							const logBox = document.getElementById('error_log_box');
+							if (logBox) { logBox.innerHTML = ''; logBox.style.display = 'block'; }
+
+							logToScreen("프로세스 시작...");
 
 							try {
 								try {
 									await ensureAuth();
-									alert("[2/5] 인증 성공. 파일 확인 중...");
 								} catch (authErr) {
-									alert("인증 오류: " + authErr);
+									logToScreen("인증 오류: " + authErr, true);
 									return;
 								}
 
@@ -554,10 +578,10 @@
 								if (!author) throw new Error("작성자를 입력해주세요.");
 								if (!content) throw new Error("내용을 입력해주세요.");
 
-								// Handle File
+								// File Upload
 								let fileData = null;
 								if (fileInput.files.length > 0) {
-									alert(`[3/5] 파일 감지됨: ${fileInput.files[0].name}. 업로드 시도...`);
+									logToScreen(`파일 감지: ${fileInput.files[0].name}. 업로드 시도...`);
 									try {
 										const file = fileInput.files[0];
 										if (file.size > 50 * 1024 * 1024) throw new Error("파일 용량이 너무 큽니다 (50MB 제한).");
@@ -567,12 +591,13 @@
 										let originalText = "등록하기";
 										if (submitBtn) {
 											originalText = submitBtn.innerText;
-											submitBtn.innerText = "파일 업로드 중... (기다려주세요)";
+											submitBtn.innerText = "업로드 중...";
 											submitBtn.disabled = true;
 										}
 
 										try {
 											fileData = await uploadFile(file);
+											logToScreen("파일 처리 완료.");
 										} finally {
 											if (submitBtn) {
 												submitBtn.innerText = originalText;
@@ -580,7 +605,7 @@
 											}
 										}
 									} catch (uploadError) {
-										alert("파일 업로드 오류: " + uploadError);
+										logToScreen("파일 업로드 실패: " + uploadError.message, true);
 										return;
 									}
 								} else if (id) {
@@ -601,22 +626,23 @@
 
 								/* alert("[4/5] 서버에 저장을 시도합니다..."); // REMOVE DEBUG */
 								const saved = await savePost(BOARD_KEY, newInquiry);
-								if (!saved) return;
-
-								if (id) {
-									alert('활동사항이 수정되었습니다.');
-									viewInquiryPost(null, id);
-								} else {
-									alert('활동사항이 등록되었습니다.');
-									// Manually clear inputs since <form> tag was removed
-									document.getElementById('inq_title').value = '';
-									document.getElementById('inq_author').value = '';
-									if (document.getElementById('inquiry_pw')) document.getElementById('inquiry_pw').value = '';
-									document.getElementById('inq_content').value = '';
-									document.getElementById('inq_file').value = '';
-
-									showList();
+								if (!saved) {
+									logToScreen("데이터베이스 저장 실패", true);
+									return;
 								}
+
+								logToScreen("저장 성공! 잠시 후 목록으로 이동합니다...");
+
+								// Delay check
+								setTimeout(() => {
+									if (id) {
+										alert('활동사항이 수정되었습니다.');
+									} else {
+										alert('활동사항이 등록되었습니다.');
+									}
+									// RELOAD safe logic
+									window.location.reload();
+								}, 1000);
 
 							} catch (topLevelError) {
 								console.error(topLevelError);
