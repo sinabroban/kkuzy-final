@@ -51,6 +51,29 @@ export function isFirebaseInitialized() {
     return !!app && !!auth;
 }
 
+export function ensureAuth() {
+    return new Promise((resolve, reject) => {
+        if (!auth) {
+            reject("Firebase Auth not initialized");
+            return;
+        }
+        if (auth.currentUser) {
+            resolve(auth.currentUser);
+            return;
+        }
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubscribe();
+            if (user) {
+                resolve(user);
+            } else {
+                // If not signed in, try anonymous again or reject?
+                // For robustness, try logging in if not.
+                signInAnonymously(auth).then(resolve).catch(reject);
+            }
+        });
+    });
+}
+
 export const COMM_KEYS = {
     NOTICE: 'notices',      // Changed from kkuzy_notices for cleaner specific collections
     INQUIRY: 'inquiries',

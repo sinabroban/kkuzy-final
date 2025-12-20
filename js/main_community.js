@@ -1,4 +1,4 @@
-import { getPosts, COMM_KEYS } from "./community_firebase.js?v=storage_update";
+import { getPosts, COMM_KEYS } from "./community_firebase.js?v=debug_fix";
 
 async function renderMainPageSection(boardKey, containerId, limit = 5, pageUrl) {
     const container = document.getElementById(containerId);

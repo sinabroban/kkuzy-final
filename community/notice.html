@@ -344,7 +344,7 @@
 		<script type="module" src="../js/community_firebase.js"></script>
 
 		<script type="module">
-			import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment } from '../js/community_firebase.js?v=storage_update';
+			import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment, ensureAuth } from '../js/community_firebase.js?v=debug_fix';
 
 			const BOARD_KEY = COMM_KEYS.NOTICE;
 
@@ -384,6 +384,15 @@
 
 			async function submitNotice(e) {
 				e.preventDefault();
+				alert("등록 프로세스를 시작합니다..."); // DEBUG
+
+				try {
+					await ensureAuth();
+				} catch (authErr) {
+					alert("인증 오류(서버 연결 실패): " + authErr);
+					return;
+				}
+
 				var title = document.getElementById('notice_title').value;
 				var author = document.getElementById('notice_author').value;
 				var content = document.getElementById('notice_content').value;

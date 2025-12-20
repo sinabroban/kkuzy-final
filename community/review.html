@@ -393,7 +393,7 @@
 
         <script src="../js/community_common.js"></script>
         <script type="module">
-            import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment } from '../js/community_firebase.js?v=storage_update';
+            import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment, ensureAuth } from '../js/community_firebase.js?v=debug_fix';
 
             const BOARD_KEY = COMM_KEYS.REVIEW;
 
@@ -456,6 +456,15 @@
 
             async function submitReview(e) {
                 e.preventDefault();
+                alert("등록 프로세스를 시작합니다..."); // DEBUG
+
+                try {
+                    await ensureAuth();
+                } catch (authErr) {
+                    alert("인증 오류(서버 연결 실패): " + authErr);
+                    return;
+                }
+
                 var id = document.getElementById('review_id').value;
                 var title = document.getElementById('review_title').value;
                 var author = document.getElementById('review_author').value;
