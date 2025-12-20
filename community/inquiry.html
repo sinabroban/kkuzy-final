@@ -504,6 +504,13 @@
 
 						console.log("Inquiry Module Script Started");
 
+						// EXPOSE TO WINDOW (Critical for onclick attributes)
+						window.submitInquiry = submitInquiry;
+						window.searchInquiries = searchInquiries;
+						// window.viewInquiryPost = viewInquiryPost; // Defined later or imported?
+						// viewInquiryPost logic seems to be missing in this block? I'll check.
+
+
 						// Bind Event Listener safely (Optional now since we use onclick)
 						const form = document.getElementById('inquiryForm');
 						if (form) {
@@ -610,6 +617,171 @@
 								alert('검색어를 입력해주세요.');
 								return;
 							}
+
+							const allPosts = await getPosts(BOARD_KEY);
+							const filtered = allPosts.filter(post => {
+								if (key === 'all') {
+									return post.title.toLowerCase().includes(keyword) || post.content.toLowerCase().includes(keyword);
+								} else if (key === 'title') {
+									return post.title.toLowerCase().includes(keyword);
+								} else if (key === 'content') {
+									return post.content.toLowerCase().includes(keyword);
+								}
+								return false;
+							});
+
+							const tbody = document.getElementById('inquiry-list-container');
+							tbody.innerHTML = '';
+							if (filtered.length === 0) {
+								tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 50px;">검색 결과가 없습니다.</td></tr>';
+							} else {
+								filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+								let html = '';
+								filtered.forEach((post, index) => {
+									html += `
+                                <tr onmouseover="this.style.backgroundColor='#fcfcfc'" onmouseout="this.style.backgroundColor=''">
+                                    <td class="num">${filtered.length - index}</td>
+                                    <td class="title" style="text-align:left; padding-left:10px;">
+                                        <a href="#" onclick="viewInquiryPost(event, '${post.id}')">${post.title}</a>
+                                        ${post.file ? '<img src="../images/icon_file.gif" alt="File">' : ''}
+                                    </td>
+                                    <td class="name"><span class="member">${post.author}</span></td>
+                                    <td class="date">${post.date}</td>
+                                </tr>
+                                    `;
+								});
+								tbody.innerHTML = html;
+							}
+						}
+
+						async function viewInquiryPost(e, id) {
+							if (e) e.preventDefault();
+							const post = await getPost(BOARD_KEY, id);
+							if (!post) {
+								alert('존재하지 않는 게시물입니다.');
+								return;
+							}
+
+							document.getElementById('view_title').innerText = post.title;
+							document.getElementById('view_author').innerText = post.author;
+							document.getElementById('view_date').innerText = post.date;
+							document.getElementById('view_content').innerText = post.content;
+
+							// Correctly Render File
+							const fileArea = document.getElementById('view_file_area');
+							if (fileArea) {
+								fileArea.innerHTML = '';
+								if (post.file) {
+									if (post.file.url) {
+										const isImage = post.file.name.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+										if (isImage) {
+											fileArea.innerHTML = `<img src="${post.file.url}" style="max-width:100%; margin-top:10px;">`;
+										} else {
+											fileArea.innerHTML = `<div style="background:#eee; padding:10px; margin-top:10px;">첨부파일: <a href="${post.file.url}" target="_blank">${post.file.name}</a></div>`;
+										}
+									} else {
+										fileArea.innerHTML = `<div style="background:#eee; padding:10px; margin-top:10px;">첨부파일: ${post.file.name}</div>`;
+									}
+								}
+							}
+
+							document.getElementById('view_container').style.display = 'block';
+							if (document.querySelector('.tbl_type')) document.querySelector('.tbl_type').style.display = 'none';
+							if (document.querySelector('.btn_box')) document.querySelector('.btn_box').style.display = 'none';
+							if (document.getElementById('pagingNew')) document.getElementById('pagingNew').style.display = 'none';
+							if (document.getElementById('search_box_container')) document.getElementById('search_box_container').style.display = 'none';
+							document.getElementById('write_form_container').style.display = 'none';
+
+							// Buttons logic
+							let btnDiv = document.getElementById('inquiry_view_btns');
+							if (!btnDiv) {
+								btnDiv = document.createElement('div');
+								btnDiv.id = 'inquiry_view_btns';
+								btnDiv.style.marginTop = '20px';
+								btnDiv.style.textAlign = 'center';
+								document.getElementById('view_container').appendChild(btnDiv);
+							}
+							btnDiv.innerHTML = `
+								<button onclick="checkPasswordAndEdit('${post.id}')" style="padding: 10px 20px; background: #333; color: #fff; border: none; cursor: pointer; border-radius: 5px; margin-right:5px;">수정</button>
+								<button onclick="showList()" style="padding: 10px 30px; background: #666; color: #fff; border: none; cursor: pointer;">목록으로</button>
+							`;
+
+							renderCommentSectionSync('comment-section', BOARD_KEY, post.id);
+							history.pushState({ id: id }, null, `?id=${id}`);
+						}
+
+						// Password & Edit Logic
+						async function checkPasswordAndEdit(id) {
+							const post = await getPost(BOARD_KEY, id);
+							if (!post) { alert('게시물을 찾을 수 없습니다.'); return; }
+							if (!post.password) {
+								if (confirm('비밀번호가 없는 게시물입니다. 수정하시겠습니까?')) {
+									loadEditForm(post);
+								}
+								return;
+							}
+							// Use simple prompt or modal
+							const pw = prompt("비밀번호를 입력해주세요.");
+							if (pw && pw.trim() === post.password.trim()) {
+								loadEditForm(post);
+							} else if (pw) {
+								alert("비밀번호가 일치하지 않습니다.");
+							}
+						}
+
+						async function renderCommentSectionSync(containerId, boardKey, postId) {
+							const container = document.getElementById(containerId);
+							if (!container) return;
+							const comments = await getComments(boardKey, postId);
+							let html = `
+                                <div class="comment_wrap" style="margin-top: 50px; background: #f9f9f9; padding: 20px;">
+                                    <h4 style="font-size: 16px; font-weight: bold; margin-bottom: 15px;">댓글 <span>(${comments.length})</span></h4>
+                                    <ul class="comment_list" style="margin-bottom: 20px;">
+                            `;
+							if (comments.length === 0) {
+								html += `<li style="color: #888; padding: 10px 0;">등록된 댓글이 없습니다.</li>`;
+							} else {
+								comments.forEach(c => {
+									html += `
+                                        <li style="border-bottom: 1px solid #eee; padding: 10px 0;">
+                                            <div style="font-weight: bold; margin-bottom: 5px;">${c.author} <span style="font-weight: normal; font-size: 12px; color: #888;">${c.date}</span></div>
+                                            <div style="line-height: 1.5;">${c.content.replace(/\n/g, '<br>')}</div>
+                                        </li>
+                                    `;
+								});
+							}
+							window.submitComment = async function (e, bKey, pId) {
+								e.preventDefault();
+								const author = document.getElementById('cmt_author').value;
+								const content = document.getElementById('cmt_content').value;
+								const pw = document.getElementById('cmt_pw').value;
+								await addComment(bKey, pId, { author, content, pw });
+								renderCommentSectionSync('comment-section', bKey, pId);
+							}
+							html += `
+                                    </ul>
+                                    <div class="comment_form">
+                                        <form onsubmit="submitComment(event, '${boardKey}', '${postId}')">
+                                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                                <input type="text" id="cmt_author" placeholder="이름" required style="padding: 5px; border: 1px solid #ddd; width: 100px;">
+                                                <input type="password" id="cmt_pw" placeholder="비밀번호" style="padding: 5px; border: 1px solid #ddd; width: 100px;">
+                                            </div>
+                                            <div style="display: flex; gap: 10px;">
+                                                <textarea id="cmt_content" placeholder="댓글을 남겨주세요." required style="flex: 1; height: 60px; padding: 10px; border: 1px solid #ddd; resize: none;"></textarea>
+                                                <button type="submit" style="width: 80px; background: #333; color: #fff; border: none; font-weight: bold;">등록</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            `;
+							container.innerHTML = html;
+						}
+
+						// Re-expose newly added functions
+						window.searchInquiries = searchInquiries;
+						window.viewInquiryPost = viewInquiryPost;
+						window.checkPasswordAndEdit = checkPasswordAndEdit;
+
 					</script>
 
 					<!-- Duplicate Script Disabled -->
