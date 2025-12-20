@@ -185,29 +185,30 @@ export async function getPost(boardKey, id) {
     }
 }
 
-export async function savePost(boardKey, post) {
+export async function savePost(collectionName, data) {
     if (!db) {
         alert("데이터베이스 연결 실패. 페이지를 새로고침 해주세요.");
-        return null; // Explicit null to indicate failure
+        return null;
     }
     try {
-        // Post object: { id (optional), title, author, ... }
-        if (post.id) {
+        if (data.id) {
             // Update
-            const docRef = doc(db, boardKey, String(post.id));
-            await setDoc(docRef, post, { merge: true });
+            const docRef = doc(db, collectionName, String(data.id));
+            await setDoc(docRef, data, { merge: true });
+            // alert(`DEBUG: Updated doc ${data.id} in ${collectionName}`);
         } else {
             // Create
             // We use Date.now() as ID to keep sorting simple and consistent with old style unique IDs
             const newId = String(Date.now());
-            post.id = newId;
-            await setDoc(doc(db, boardKey, newId), post);
+            data.id = newId;
+            await setDoc(doc(db, collectionName, newId), data);
+            // alert(`DEBUG: Created new doc ${newId} in ${collectionName}`);
         }
-        return post;
+        return data;
     } catch (e) {
         console.error("Error saving post:", e);
-        alert("저장 중 오류가 발생했습니다: " + e.message);
-        return null; // Return null so caller knows it failed
+        alert(`저장 실패 (${collectionName}): ${e.message}`);
+        return null;
     }
 }
 
