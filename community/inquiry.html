@@ -511,6 +511,14 @@
 
 						const BOARD_KEY = COMM_KEYS.INQUIRY;
 
+						// DEBUG: RELOAD TRAP
+						window.onbeforeunload = function (e) {
+							// Only trigger if we are NOT intentionally navigating (optional logic, but for now trap everything)
+							e.preventDefault();
+							e.returnValue = ''; // Standard for Chrome
+							return '페이지가 새로고침 되려고 합니다. 막으시겠습니까?';
+						};
+
 						// EXPOSE TO WINDOW (Critical for onclick attributes)
 						window.submitInquiry = submitInquiry;
 						window.searchInquiries = searchInquiries;
