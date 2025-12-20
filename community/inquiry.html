@@ -440,10 +440,15 @@
 							if (window.renderInquiryTable) {
 								window.renderInquiryTable('inquiry-list-container');
 							} else {
+								console.log("Module not ready, waiting...");
 								// Retry shortly if module hasn't loaded yet
 								setTimeout(() => {
-									if (window.renderInquiryTable) window.renderInquiryTable('inquiry-list-container');
-								}, 500);
+									if (window.renderInquiryTable) {
+										window.renderInquiryTable('inquiry-list-container');
+									} else {
+										alert("시스템 오류: 데이터 로딩 기능을 불러오지 못했습니다.\n(Module Load Timeout - 네트워크 문제이거나 코드가 차단되었습니다.)\n새로고침을 한 번 더 시도해주세요.");
+									}
+								}, 1500);
 							}
 							history.pushState(null, null, location.pathname);
 						}
