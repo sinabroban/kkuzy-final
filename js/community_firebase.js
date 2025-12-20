@@ -66,9 +66,14 @@ export function ensureAuth() {
             if (user) {
                 resolve(user);
             } else {
-                // If not signed in, try anonymous again or reject?
-                // For robustness, try logging in if not.
-                signInAnonymously(auth).then(resolve).catch(reject);
+                signInAnonymously(auth).then(resolve).catch((e) => {
+                    console.error("Anonymous Auth Failed:", e);
+                    if (e.code === 'auth/operation-not-allowed' || e.code === 'auth/configuration-not-found' || e.code === 'auth/admin-restricted-operation') {
+                        reject("관리자 설정 필요: Firebase Console -> Build -> Authentication -> Sign-in method 탭에서 '익명(Anonymous)' 로그인을 '사용 설정(Enable)' 해주세요.");
+                    } else {
+                        reject("인증 실패: " + e.message);
+                    }
+                });
             }
         });
     });
