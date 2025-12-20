@@ -513,8 +513,10 @@
 					</script>
 
 					<!-- Same fix as review.html -->
-					<!-- Use Firebase Module -->
-					<script type="module" src="../js/community_firebase.js?v=fix_click"></script>
+					<!-- Use Firebase Module with Error Handler -->
+					<script type="module" src="../js/community_firebase.js?v=fix_click"
+						onerror="writeLog('❌ SCRIPT TAG ERROR: 파일을 부를 수 없습니다. (404 Not Found)')">
+						</script>
 
 					<script type="module">
 						import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment, ensureAuth } from '../js/community_firebase.js?v=fix_click';
