@@ -395,6 +395,31 @@
                 }
                 history.pushState(null, null, location.pathname);
             }
+
+            window.onload = function () {
+                const urlParams = new URLSearchParams(window.location.search);
+                const id = urlParams.get('id');
+                if (id) {
+                    console.log("Standard Init: Checking for module...");
+                    const checkModule = setInterval(() => {
+                        if (window.viewPost) {
+                            clearInterval(checkModule);
+                            viewPost(null, id);
+                        }
+                    }, 100);
+                    setTimeout(() => { clearInterval(checkModule); if (!window.viewPost) alert("시스템 오류: 모듈 로드 실패"); }, 3000);
+                } else {
+                    showList();
+                }
+            }
+
+            window.onpopstate = function (event) {
+                if (event.state && event.state.id) {
+                    if (window.viewPost) viewPost(null, event.state.id);
+                } else {
+                    showList();
+                }
+            };
         </script>
 
         <!-- Firebase SDK is loaded in community_firebase.js -->
@@ -732,23 +757,7 @@
                 toggleWriteForm();
             }
 
-            window.onload = function () {
-                const urlParams = new URLSearchParams(window.location.search);
-                const id = urlParams.get('id');
-                if (id) {
-                    viewPost(null, id);
-                } else {
-                    renderReviewList('review-list-container');
-                }
-            }
-
-            window.onpopstate = function (event) {
-                if (event.state && event.state.id) {
-                    viewPost(null, event.state.id);
-                } else {
-                    showList();
-                }
-            };
+            // window.onload moved to standard script
 
             // --- Helper to Render Comments Async ---
             async function renderCommentSectionSync(containerId, boardKey, postId) {

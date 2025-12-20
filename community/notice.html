@@ -378,6 +378,32 @@
 				// Clear URL param
 				history.pushState(null, null, location.pathname);
 			}
+
+			window.onload = function () {
+				const urlParams = new URLSearchParams(window.location.search);
+				const id = urlParams.get('id');
+				if (id) {
+					console.log("Standard Init: Checking for module...");
+					const checkModule = setInterval(() => {
+						if (window.viewPost) {
+							clearInterval(checkModule);
+							viewPost(null, id);
+						}
+					}, 100);
+					setTimeout(() => { clearInterval(checkModule); if (!window.viewPost) alert("시스템 오류: 모듈 로드 실패"); }, 3000);
+
+				} else {
+					showList();
+				}
+			}
+
+			window.onpopstate = function (event) {
+				if (event.state && event.state.id) {
+					if (window.viewPost) viewPost(null, event.state.id);
+				} else {
+					showList();
+				}
+			};
 		</script>
 
 		<!-- Same fix as review.html -->
@@ -624,36 +650,6 @@
 				// Ah, it called renderCommentSection('comment-section', BOARD_KEY, post.id) in original code.
 				// So we should replicate it.
 				renderCommentSectionSync('comment-section', BOARD_KEY, post.id);
-
-				// Update URL
-				history.pushState({ id: id }, null, `?id=${id}`);
-			}
-
-			// Check URL for direct link
-			window.onload = function () {
-				const urlParams = new URLSearchParams(window.location.search);
-				const id = urlParams.get('id');
-				if (id) {
-					viewPost(null, id);
-				} else {
-					// Init List
-					renderNoticeList('notice-list-container');
-				}
-			}
-
-			// Handle Back Button
-			window.onpopstate = function (event) {
-				if (event.state && event.state.id) {
-					viewPost(null, event.state.id);
-				} else {
-					showList();
-				}
-			};
-
-			// Re-adding the sync comment renderer helper for Notices too
-			async function renderCommentSectionSync(containerId, boardKey, postId) {
-				const container = document.getElementById(containerId);
-				if (!container) return;
 
 				const comments = await getComments(boardKey, postId);
 
