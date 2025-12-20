@@ -859,9 +859,12 @@
 							}
 						}
 
-						document.getElementById('modal_pw_input').addEventListener('keypress', function (e) {
-							if (e.key === 'Enter') confirmPasswordModal();
-						});
+						const modalInput = document.getElementById('modal_pw_input');
+						if (modalInput) {
+							modalInput.addEventListener('keypress', function (e) {
+								if (e.key === 'Enter') confirmPasswordModal();
+							});
+						}
 
 
 						async function renderCommentSectionSync(containerId, boardKey, postId) {
