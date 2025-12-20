@@ -415,7 +415,12 @@
 							console.log(msg);
 						}
 
-						writeLog("1. 표준 스크립트 실행됨");
+						window.onerror = function (msg, url, line, col, error) {
+							writeLog(`❌ SCRIPT ERROR: ${msg}\nLocation: ${url}:${line}:${col}\nStack: ${error ? error.stack : 'N/A'}`);
+							return false;
+						};
+
+						writeLog("1. 표준 스크립트 실행됨 (에러 감지 가동)");
 
 						function toggleWriteForm() {
 							var form = document.getElementById('write_form_container');
