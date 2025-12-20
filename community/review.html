@@ -355,10 +355,7 @@
                 console.log("Review form handler attached");
             }
 
-            // Enable Content Protection
-            enableContentProtection();
-
-            // Expose specific functions to global scope for HTML inline events (onclick)
+            // Expose specific functions to global scope IMMEDIATELY
             window.toggleWriteForm = toggleWriteForm;
             window.showList = showList;
             window.submitReview = submitReview;
@@ -367,6 +364,9 @@
             window.checkPasswordAndEdit = checkPasswordAndEdit;
             window.closePasswordModal = closePasswordModal;
             window.confirmPasswordModal = confirmPasswordModal;
+
+            // Enable Content Protection
+            enableContentProtection();
 
 
             function toggleWriteForm() {

@@ -353,16 +353,16 @@
 				console.log("Notice form handler attached");
 			}
 
-			const BOARD_KEY = COMM_KEYS.NOTICE;
-
-			enableContentProtection();
-
-			// Expose for onClick
+			// Expose functions IMMEDIATELY
 			window.toggleWriteForm = toggleWriteForm;
 			window.showList = showList;
 			window.submitNotice = submitNotice;
 			window.searchNotices = searchNotices;
 			window.viewPost = viewPost;
+
+			const BOARD_KEY = COMM_KEYS.NOTICE;
+
+			enableContentProtection();
 
 			function toggleWriteForm() {
 				var form = document.getElementById('write_form_container');
