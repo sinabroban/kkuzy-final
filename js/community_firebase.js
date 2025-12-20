@@ -105,8 +105,8 @@ export function readFile(file) {
             return;
         }
 
-        if (file.size > 700 * 1024) { // 700KB Limit
-            alert("첨부 파일 용량이 700KB를 초과하여 파일명만 저장됩니다. (공유 DB 용량 제한)");
+        if (file.size > 500 * 1024) { // 500KB Limit to prevent oversize documents
+            alert("첨부 파일 용량이 500KB를 초과하여 파일명만 저장됩니다. (공유 DB 용량 제한)");
             resolve({
                 name: file.name,
                 size: file.size,
