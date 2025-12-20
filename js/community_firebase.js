@@ -380,11 +380,12 @@ export async function uploadFile(file) {
                     }
                 } catch (readErr) {
                     console.error("Fallback failed", readErr);
-                    alert("비상 저장 모드조차 실패했습니다: " + readErr);
+                    alert("비상 저장 모드(Base64) 변환 중 오류가 발생했습니다: " + readErr.message);
                 }
             }
         }
 
+        // If fallback declined/failed, throw original
         throw e;
     }
 }
