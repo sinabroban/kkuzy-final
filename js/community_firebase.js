@@ -61,7 +61,14 @@ export function ensureAuth() {
             resolve(auth.currentUser);
             return;
         }
+
+        // Timeout Safety
+        const timer = setTimeout(() => {
+            reject("인증 시간 초과 (10초). 네트워크 상태를 확인하거나 새로고침 해주세요.");
+        }, 10000);
+
         const unsubscribe = onAuthStateChanged(auth, (user) => {
+            clearTimeout(timer);
             unsubscribe();
             if (user) {
                 resolve(user);

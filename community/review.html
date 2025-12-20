@@ -456,85 +456,84 @@
 
             async function submitReview(e) {
                 e.preventDefault();
-                alert("등록 프로세스를 시작합니다..."); // DEBUG
+                alert("등록 프로세스를 시작합니다..."); // DEBUG 1
 
                 try {
-                    await ensureAuth();
-                } catch (authErr) {
-                    alert("인증 오류(서버 연결 실패): " + authErr);
-                    return;
-                }
-
-                var id = document.getElementById('review_id').value;
-                var title = document.getElementById('review_title').value;
-                var author = document.getElementById('review_author').value;
-                var pw = document.getElementById('review_pw').value;
-                var content = document.getElementById('review_content').value;
-                var rating = document.getElementById('review_rating').value;
-                var fileInput = document.getElementById('review_file');
-                var date = new Date().toISOString().split('T')[0];
-
-                if (!pw) {
-                    alert('비밀번호를 입력해주세요 (수정 시 필요).');
-                    return;
-                }
-
-                let fileData = null;
-                if (fileInput.files.length > 0) {
                     try {
-                        const file = fileInput.files[0];
-                        if (file.size > 50 * 1024 * 1024) {
-                            alert("파일 용량이 너무 큽니다 (50MB 제한).");
-                            return;
-                        }
-
-                        // Disable button
-                        const submitBtn = document.querySelector('.btn_confirm');
-                        if (submitBtn) {
-                            submitBtn.innerText = "파일 업로드 중... (잠시만 기다려주세요)";
-                            submitBtn.disabled = true;
-                        } else {
-                            alert("파일 업로드 중입니다... 잠시만 기다려주세요.");
-                        }
-
-                        try {
-                            fileData = await uploadFile(file);
-                        } finally {
-                            if (submitBtn) {
-                                submitBtn.innerText = "확인";
-                                submitBtn.disabled = false;
-                            }
-                        }
-                    } catch (uploadError) {
-                        console.error(uploadError);
+                        await ensureAuth();
+                        alert("인증 확인 완료. 데이터 준비 중..."); // DEBUG 2
+                    } catch (authErr) {
+                        alert("인증 오류(서버 연결 실패): " + authErr);
                         return;
                     }
-                } else if (id) {
-                    const existing = await getPost(BOARD_KEY, id);
-                    if (existing) fileData = existing.file;
+
+                    var id = document.getElementById('review_id').value;
+                    var title = document.getElementById('review_title').value;
+                    var author = document.getElementById('review_author').value;
+                    var pw = document.getElementById('review_pw').value;
+                    var content = document.getElementById('review_content').value;
+                    var rating = document.getElementById('review_rating').value;
+                    var fileInput = document.getElementById('review_file');
+                    var date = new Date().toISOString().split('T')[0];
+
+                    if (!pw) throw new Error("비밀번호를 입력해주세요.");
+
+                    let fileData = null;
+                    if (fileInput.files.length > 0) {
+                        try {
+                            const file = fileInput.files[0];
+                            if (file.size > 50 * 1024 * 1024) throw new Error("파일 용량이 너무 큽니다 (50MB 제한).");
+
+                            const submitBtn = document.querySelector('.btn_confirm');
+                            if (submitBtn) {
+                                submitBtn.innerText = "파일 업로드 중...";
+                                submitBtn.disabled = true;
+                            }
+
+                            try {
+                                fileData = await uploadFile(file);
+                            } finally {
+                                if (submitBtn) {
+                                    submitBtn.innerText = "확인";
+                                    submitBtn.disabled = false;
+                                }
+                            }
+                        } catch (uploadError) {
+                            alert("파일 업로드 오류: " + uploadError);
+                            return;
+                        }
+                    } else if (id) {
+                        const existing = await getPost(BOARD_KEY, id);
+                        if (existing) fileData = existing.file;
+                    }
+
+                    var newReview = {
+                        id: id ? id : null,
+                        title: title,
+                        author: author,
+                        password: pw,
+                        content: content,
+                        rating: rating,
+                        date: date,
+                        file: fileData
+                    };
+
+                    alert("서버에 저장을 시도합니다..."); // DEBUG 3
+                    const saved = await savePost(BOARD_KEY, newReview);
+                    if (!saved) return;
+
+                    if (id) {
+                        alert('후기가 수정되었습니다.');
+                        viewPost(null, id);
+                    } else {
+                        alert('후기가 등록되었습니다.');
+                        showList();
+                    }
+                } catch (topLevelError) {
+                    console.error(topLevelError);
+                    alert("알 수 없는 오류 발생: " + topLevelError.message);
                 }
-
-                var newReview = {
-                    id: id ? id : null, // ID is string now
-                    title: title,
-                    author: author,
-                    password: pw,
-                    content: content,
-                    rating: rating,
-                    date: date,
-                    file: fileData
-                };
-
-                const saved = await savePost(BOARD_KEY, newReview);
-                if (!saved) return;
-
-                if (id) {
-                    alert('후기가 수정되었습니다.');
-                    viewPost(null, id);
-                } else {
-                    alert('후기가 등록되었습니다.');
-                    showList();
-                }
+            }
             }
 
             async function searchReviews() {

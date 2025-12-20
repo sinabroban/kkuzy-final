@@ -472,88 +472,89 @@
 
 						async function submitInquiry(e) {
 							e.preventDefault();
-							alert("등록 프로세스를 시작합니다..."); // DEBUG
+							alert("등록 프로세스를 시작합니다..."); // DEBUG 1
 
 							try {
-								await ensureAuth();
-							} catch (authErr) {
-								alert("인증 오류(서버 연결 실패): " + authErr);
-								return;
-							}
-
-							var id = document.getElementById('inquiry_id').value;
-							var title = document.getElementById('inq_title').value;
-							var author = document.getElementById('inq_author').value;
-							var content = document.getElementById('inq_content').value;
-							var fileInput = document.getElementById('inq_file');
-							var date = new Date().toISOString().split('T')[0];
-
-							// Password check if adding password field? 
-							// Keeping it simple as planned:
-							var pw = document.getElementById('inquiry_pw').value;
-							// Note: inquiry_pw needs to exist in HTML. 
-							// If it doesn't, we can't get it. 
-							// Original code didn't have it.
-							// But my new JS expects it for edits?
-
-							// Let's assume for now we don't save password if not present, and edits are open? 
-							// Or we just save without password.
-
-							// Handle File
-							let fileData = null;
-							if (fileInput.files.length > 0) {
 								try {
-									const file = fileInput.files[0];
-									if (file.size > 50 * 1024 * 1024) {
-										alert("파일 용량이 너무 큽니다 (50MB 제한).");
+									await ensureAuth();
+									alert("인증 확인 완료. 데이터 준비 중..."); // DEBUG 2
+								} catch (authErr) {
+									alert("인증 오류(서버 연결 실패): " + authErr);
+									return;
+								}
+
+								// Data Gathering
+								var id = document.getElementById('inquiry_id').value;
+								var title = document.getElementById('inq_title').value;
+								var author = document.getElementById('inq_author').value;
+								var pw = document.getElementById('inquiry_pw') ? document.getElementById('inquiry_pw').value : "";
+								var content = document.getElementById('inq_content').value;
+								var fileInput = document.getElementById('inq_file');
+								var date = new Date().toISOString().split('T')[0];
+
+								// Validate
+								if (!title) throw new Error("제목을 입력해주세요.");
+								if (!author) throw new Error("작성자를 입력해주세요.");
+								if (!content) throw new Error("내용을 입력해주세요.");
+
+								// Handle File
+								let fileData = null;
+								if (fileInput.files.length > 0) {
+									try {
+										const file = fileInput.files[0];
+										if (file.size > 50 * 1024 * 1024) throw new Error("파일 용량이 너무 큽니다 (50MB 제한).");
+
+										// Disable button during upload
+										const submitBtn = document.querySelector('.btn_confirm');
+										const originalText = submitBtn.innerText;
+										submitBtn.innerText = "파일 업로드 중... (잠시만 기다려주세요)";
+										submitBtn.disabled = true;
+
+										try {
+											fileData = await uploadFile(file);
+										} finally {
+											submitBtn.innerText = originalText;
+											submitBtn.disabled = false;
+										}
+									} catch (uploadError) {
+										alert("파일 업로드 오류: " + uploadError);
 										return;
 									}
-
-									// Disable button during upload
-									const submitBtn = document.querySelector('.btn_confirm');
-									const originalText = submitBtn.innerText;
-									submitBtn.innerText = "파일 업로드 중... (잠시만 기다려주세요)";
-									submitBtn.disabled = true;
-
-									try {
-										fileData = await uploadFile(file);
-									} finally {
-										submitBtn.innerText = originalText;
-										submitBtn.disabled = false;
-									}
-								} catch (uploadError) {
-									console.error(uploadError);
-									return; // Stop submission on upload fail
+								} else if (id) {
+									const existing = await getPost(BOARD_KEY, id);
+									if (existing) fileData = existing.file;
 								}
-							} else if (id) {
-								const existing = await getPost(BOARD_KEY, id);
-								if (existing) fileData = existing.file;
-							}
 
-							var newInquiry = {
-								id: id ? id : null,
-								title: title,
-								author: author,
-								password: pw || '',
-								content: content,
-								date: date,
-								status: '답변대기',
-								file: fileData
-							};
+								var newInquiry = {
+									id: id ? id : null,
+									title: title,
+									author: author,
+									password: pw,
+									content: content,
+									date: date,
+									status: '답변대기',
+									file: fileData
+								};
 
-							const saved = await savePost(BOARD_KEY, newInquiry);
-							if (!saved) {
-								// savePost already alerted error
-								return;
-							}
+								alert("서버에 저장을 시도합니다..."); // DEBUG 3
+								const saved = await savePost(BOARD_KEY, newInquiry);
+								if (!saved) {
+									// savePost checked alert
+									return;
+								}
 
-							if (id) {
-								alert('활동사항이 수정되었습니다.');
-								viewInquiryPost(null, id);
-							} else {
-								alert('활동사항이 등록되었습니다.');
-								document.querySelector('form').reset();
-								showList();
+								if (id) {
+									alert('활동사항이 수정되었습니다.');
+									viewInquiryPost(null, id);
+								} else {
+									alert('활동사항이 등록되었습니다.');
+									document.querySelector('form').reset();
+									showList();
+								}
+
+							} catch (topLevelError) {
+								console.error(topLevelError);
+								alert("알 수 없는 오류 발생: " + topLevelError.message);
 							}
 						}
 
