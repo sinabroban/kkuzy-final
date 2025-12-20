@@ -67,10 +67,10 @@
 	<link rel="stylesheet" href="../css/style.css" type="text/css">
 
 	<div id="wrap">
-		<h1
-			style="color:red; font-size:30px; text-align:center; z-index:9999; position:fixed; top:0; left:0; width:100%; background:yellow; border-bottom: 5px solid red;">
-			⚠️ 진단 모드 작동중 (화면이 보이면 배포 성공) ⚠️
-		</h1>
+		<div id="debug_log"
+			style="color:red; font-size:16px; font-weight:bold; z-index:9999; position:fixed; top:0; left:0; width:100%; background:yellow; border-bottom: 5px solid red; padding:10px; text-align:left; white-space: pre-wrap;">
+			[진단 로그 시작]
+		</div>
 		<!--오른쪽 퀵메뉴-->
 		<div id="right_quick">
 
@@ -409,8 +409,14 @@
 
 					<!-- Standard Script for UI Logic (Independent of Module/Firebase) -->
 					<script>
-						console.log("Standard Script Loaded");
-						alert("진단 모드 1단계: 기본 스크립트 실행 확인");
+						function writeLog(msg) {
+							const log = document.getElementById('debug_log');
+							if (log) log.innerHTML += "<br>" + msg;
+							console.log(msg);
+						}
+
+						writeLog("1. 표준 스크립트 실행됨");
+
 						function toggleWriteForm() {
 							var form = document.getElementById('write_form_container');
 							var list = document.querySelector('.tbl_type');
@@ -433,6 +439,7 @@
 						}
 
 						function showList() {
+							writeLog("4. showList 호출됨");
 							document.getElementById('write_form_container').style.display = 'none';
 							document.getElementById('view_container').style.display = 'none';
 							if (document.querySelector('.tbl_type')) document.querySelector('.tbl_type').style.display = 'table';
@@ -444,15 +451,18 @@
 
 							// Call the global render function if it exists, otherwise just show UI
 							if (window.renderInquiryTable) {
+								writeLog("5. 모듈 함수 발견됨 -> renderInquiryTable 실행");
 								window.renderInquiryTable('inquiry-list-container');
 							} else {
-								console.log("Module not ready, waiting...");
+								writeLog("5-Warning. 모듈 함수 없음. 대기 중...");
 								// Retry shortly if module hasn't loaded yet
 								setTimeout(() => {
 									if (window.renderInquiryTable) {
+										writeLog("6. 모듈 로드 성공 (지연) -> 실행");
 										window.renderInquiryTable('inquiry-list-container');
 									} else {
-										alert("시스템 오류: 데이터 로딩 기능을 불러오지 못했습니다.\n(Module Load Timeout - 네트워크 문제이거나 코드가 차단되었습니다.)\n새로고침을 한 번 더 시도해주세요.");
+										writeLog("❌ 치명적 오류: 모듈 로드 타임아웃 (네트워크/방화벽 문제)");
+										// alert("시스템 오류: 데이터 로딩 기능을 불러오지 못했습니다.\n(Module Load Timeout - 네트워크 문제이거나 코드가 차단되었습니다.)\n새로고침을 한 번 더 시도해주세요.");
 									}
 								}, 1500);
 							}
@@ -470,6 +480,7 @@
 						}
 
 						window.onload = function () {
+							writeLog("2. Window Onload 발생");
 							const urlParams = new URLSearchParams(window.location.search);
 							const id = urlParams.get('id');
 							if (id) {
@@ -484,9 +495,10 @@
 									}
 								}, 100);
 								// Timeout after 3 seconds
-								setTimeout(() => { clearInterval(checkModule); if (!window.viewInquiryPost) alert("시스템 오류: 모듈 로드 실패"); }, 3000);
+								setTimeout(() => { clearInterval(checkModule); if (!window.viewInquiryPost) writeLog("❌ viewInquiryPost 모듈 로드 실패"); }, 3000);
 
 							} else {
+								writeLog("3. 목록 초기화 진입");
 								showList(); // This already has the built-in timeout check
 							}
 						}
