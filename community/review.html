@@ -393,7 +393,7 @@
 
         <script src="../js/community_common.js"></script>
         <script type="module">
-            import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, getComments, addComment } from '../js/community_firebase.js';
+            import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment } from '../js/community_firebase.js';
 
             const BOARD_KEY = COMM_KEYS.REVIEW;
 
@@ -472,7 +472,18 @@
 
                 let fileData = null;
                 if (fileInput.files.length > 0) {
-                    fileData = await readFile(fileInput.files[0]);
+                    try {
+                        const file = fileInput.files[0];
+                        if (file.size > 50 * 1024 * 1024) {
+                            alert("파일 용량이 너무 큽니다 (50MB 제한).");
+                            return;
+                        }
+                        alert("파일 업로드 중입니다... 잠시만 기다려주세요.");
+                        fileData = await uploadFile(file);
+                    } catch (uploadError) {
+                        console.error(uploadError);
+                        return;
+                    }
                 } else if (id) {
                     const existing = await getPost(BOARD_KEY, id);
                     if (existing) fileData = existing.file;
@@ -620,9 +631,19 @@
                 const fileArea = document.getElementById('view_file_area');
                 fileArea.innerHTML = '';
                 if (post.file) {
-                    if (post.file.data) {
+                    if (post.file.url) {
+                        // Firebase Storage URL
+                        const isImage = post.file.name.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                        if (isImage) {
+                            fileArea.innerHTML = `<img src="${post.file.url}" style="max-width:100%; margin-top:10px;">`;
+                        } else {
+                            fileArea.innerHTML = `<div style="background:#eee; padding:10px; margin-top:10px;">첨부파일: <a href="${post.file.url}" target="_blank">${post.file.name}</a></div>`;
+                        }
+                    } else if (post.file.data) {
+                        // Image (Legacy)
                         fileArea.innerHTML = `<img src="${post.file.data}" style="max-width:100%; margin-top:10px;">`;
                     } else {
+                        // Text Placeholder (Legacy)
                         fileArea.innerHTML = `<div style="background:#eee; padding:10px; margin-top:10px;">첨부파일: ${post.file.name} (${Math.round(post.file.size / 1024)}KB)</div>`;
                     }
                 }

@@ -344,7 +344,7 @@
 		<script type="module" src="../js/community_firebase.js"></script>
 
 		<script type="module">
-			import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, getComments, addComment } from '../js/community_firebase.js';
+			import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment } from '../js/community_firebase.js';
 
 			const BOARD_KEY = COMM_KEYS.NOTICE;
 
@@ -391,7 +391,22 @@
 				var date = new Date().toISOString().split('T')[0];
 
 				// Handle File
-				const fileData = await readFile(fileInput.files[0]);
+				let fileData = null;
+				if (fileInput.files.length > 0) {
+					try {
+						const file = fileInput.files[0];
+						// Check size sane limit
+						if (file.size > 50 * 1024 * 1024) {
+							alert("파일 용량이 너무 큽니다 (50MB 제한).");
+							return;
+						}
+						alert("파일 업로드 중입니다... 잠시만 기다려주세요.");
+						fileData = await uploadFile(file);
+					} catch (uploadError) {
+						console.error(uploadError);
+						return; // Stop
+					}
+				}
 
 				var newNotice = {
 					title: title,

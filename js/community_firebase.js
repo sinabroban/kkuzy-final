@@ -7,6 +7,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, query, orderBy, limit, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 // --- CONFIGURATION ---
 // TODO: USER MUST REPLACE THIS WITH THEIR OWN CONFIG
@@ -21,11 +22,12 @@ const firebaseConfig = {
 };
 
 // Initialize only if not already done (though module scope prevents double init usually)
-let app, db, auth;
+let app, db, auth, storage;
 try {
     app = initializeApp(firebaseConfig);
     db = getFirestore(app);
     auth = getAuth(app);
+    storage = getStorage(app);
     console.log("Firebase Initialized");
 } catch (e) {
     console.error("Firebase Init Error (Did you set the keys?):", e);
@@ -240,4 +242,34 @@ export function enableContentProtection() {
     document.addEventListener('dragstart', function (e) {
         if (e.target.tagName === 'IMG') e.preventDefault();
     });
+}
+
+/**
+ * Upload a file to Firebase Storage
+ * @param {File} file - The file object to upload
+ * @returns {Promise<{name: string, url: string, size: number}>}
+ */
+export async function uploadFile(file) {
+    if (!file) return null;
+
+    try {
+        const timestamp = Date.now();
+        const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const storagePath = `uploads/${timestamp}_${safeName}`;
+        const storageRef = ref(storage, storagePath);
+
+        const snapshot = await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(snapshot.ref);
+
+        return {
+            name: file.name,
+            url: url,
+            size: file.size,
+            storagePath: storagePath
+        };
+    } catch (e) {
+        console.error("Upload failed:", e);
+        alert("파일 업로드에 실패했습니다 (권한 혹은 네트워크 문제): " + e.message);
+        throw e;
+    }
 }
