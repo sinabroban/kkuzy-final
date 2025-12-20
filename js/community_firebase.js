@@ -320,7 +320,10 @@ export async function uploadFile(file) {
         const storagePath = `uploads/${timestamp}_${safeName}`;
         const storageRef = ref(storage, storagePath);
 
+        alert(`DEBUG: 업로드 시작... \n경로: ${storagePath} \n크기: ${file.size}`);
+
         const snapshot = await uploadBytes(storageRef, file);
+        alert("DEBUG: 업로드 성공! URL 가져오는 중...");
         const url = await getDownloadURL(snapshot.ref);
 
         return {
