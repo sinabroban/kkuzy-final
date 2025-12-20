@@ -423,7 +423,10 @@
         </script>
 
         <!-- Firebase SDK is loaded in community_firebase.js -->
-        <script type="module" src="../js/community_firebase.js?v=fix_click"></script>
+        <!-- Error Handler Added -->
+        <script type="module" src="../js/community_firebase.js?v=fix_click"
+            onerror="alert('❌ 시스템 파일 로드 실패 (404/Network Error) - review.html')">
+            </script>
 
         <script type="module">
             import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment, ensureAuth } from '../js/community_firebase.js?v=fix_click';
