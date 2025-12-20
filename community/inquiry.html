@@ -366,7 +366,7 @@
 						<h3
 							style="font-size: 20px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px;">
 							활동사항 등록</h3>
-						<form id="inquiryForm">
+						<form id="inquiryForm" onsubmit="return false;">
 							<input type="hidden" id="inquiry_id" value="">
 							<div style="margin-bottom: 15px;">
 								<label style="display: block; font-weight: bold; margin-bottom: 5px;">제목</label>
@@ -623,8 +623,8 @@
 							// Bind Event Listener safely
 							const form = document.getElementById('inquiryForm');
 							if (form) {
-								form.addEventListener('submit', submitInquiry);
-								console.log("Form submit handler attached");
+								// form.addEventListener('submit', submitInquiry);
+								console.log("Form submit handler attached (Disabled)");
 							} else {
 								console.error("Form not found for binding");
 							}
