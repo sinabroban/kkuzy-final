@@ -366,7 +366,8 @@
 						<h3
 							style="font-size: 20px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px;">
 							활동사항 등록</h3>
-						<form id="inquiryForm" onsubmit="return false;">
+						<!-- Changed Form to Div to effectively kill any submit behavior -->
+						<div id="inquiryFormContainer">
 							<input type="hidden" id="inquiry_id" value="">
 							<div style="margin-bottom: 15px;">
 								<label style="display: block; font-weight: bold; margin-bottom: 5px;">제목</label>
@@ -401,270 +402,127 @@
 								<button type="button" onclick="toggleWriteForm()"
 									style="padding: 10px 30px; background: #666; color: #fff; border: none; font-size: 16px; cursor: pointer; margin-left: 10px;">취소</button>
 							</div>
-						</form>
-					</div>
+							</form>
+						</div>
 
-					<!-- Standard Script for UI Logic (Independent of Module/Firebase) -->
-					<script>
-						function toggleWriteForm() {
-							var form = document.getElementById('write_form_container');
-							var list = document.querySelector('.tbl_type');
-							var btnBox = document.querySelector('.btn_box');
-							var view = document.getElementById('view_container');
-							var paging = document.getElementById('pagingNew');
-							var search = document.getElementById('search_box_container');
+						<!-- Standard Script for UI Logic (Independent of Module/Firebase) -->
+						<script>
+							function toggleWriteForm() {
+								var form = document.getElementById('write_form_container');
+								var list = document.querySelector('.tbl_type');
+								var btnBox = document.querySelector('.btn_box');
+								var view = document.getElementById('view_container');
+								var paging = document.getElementById('pagingNew');
+								var search = document.getElementById('search_box_container');
 
-							if (form.style.display === 'none') {
-								form.style.display = 'block';
-								if (list) list.style.display = 'none';
-								if (btnBox) btnBox.style.display = 'none';
-								if (view) view.style.display = 'none';
-								if (paging) paging.style.display = 'none';
-								if (search) search.style.display = 'none';
-								form.scrollIntoView({ behavior: "smooth" });
-							} else {
-								showList();
-							}
-						}
-
-						function showList() {
-							document.getElementById('write_form_container').style.display = 'none';
-							document.getElementById('view_container').style.display = 'none';
-							if (document.querySelector('.tbl_type')) document.querySelector('.tbl_type').style.display = 'table';
-							if (document.querySelector('.btn_box')) document.querySelector('.btn_box').style.display = 'block';
-							if (document.getElementById('pagingNew')) document.getElementById('pagingNew').style.display = 'block';
-							if (document.getElementById('search_box_container')) document.getElementById('search_box_container').style.display = 'block';
-
-							resetWriteForm();
-
-							// Call the global render function if it exists, otherwise just show UI
-							if (window.renderInquiryTable) {
-								window.renderInquiryTable('inquiry-list-container');
-							} else {
-								// Retry shortly if module hasn't loaded yet
-								setTimeout(() => {
-									if (window.renderInquiryTable) {
-										window.renderInquiryTable('inquiry-list-container');
-									} else {
-										// Silent fail or simple console log in production
-										console.error("Module load timeout");
-									}
-								}, 1500);
-							}
-							history.pushState(null, null, location.pathname);
-						}
-
-						function resetWriteForm() {
-							if (document.getElementById('inquiry_id')) document.getElementById('inquiry_id').value = '';
-							if (document.getElementById('inq_title')) document.getElementById('inq_title').value = '';
-							if (document.getElementById('inq_author')) document.getElementById('inq_author').value = '';
-							if (document.getElementById('inquiry_pw')) document.getElementById('inquiry_pw').value = '';
-							if (document.getElementById('inq_content')) document.getElementById('inq_content').value = '';
-							if (document.getElementById('inq_file')) document.getElementById('inq_file').value = '';
-							if (document.getElementById('inq_file')) document.getElementById('inq_file').value = '';
-						}
-
-						window.onload = function () {
-							const urlParams = new URLSearchParams(window.location.search);
-							const id = urlParams.get('id');
-							if (id) {
-								// We need to wait for viewInquiryPost to be available
-								// But viewInquiryPost is in module.
-								// So we use a Polling check similar to showList
-								const checkModule = setInterval(() => {
-									if (window.viewInquiryPost) {
-										clearInterval(checkModule);
-										viewInquiryPost(null, id);
-									}
-								}, 100);
-								// Timeout after 3 seconds
-								setTimeout(() => { clearInterval(checkModule); }, 3000);
-
-							} else {
-								showList(); // This already has the built-in timeout check
-							}
-						}
-
-						window.onpopstate = function (event) {
-							if (event.state && event.state.id) {
-								if (window.viewInquiryPost) viewInquiryPost(null, event.state.id);
-							} else {
-								showList();
-							}
-						};
-					</script>
-
-					<!-- Same fix as review.html -->
-					<!-- Use Firebase Module -->
-					<script type="module" src="../js/community_firebase.js?v=debug_2"></script>
-
-					<script type="module">
-						import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment, ensureAuth } from '../js/community_firebase.js?v=debug_2';
-
-						console.log("Inquiry Module Script Started");
-
-						// Bind Event Listener safely (Optional now since we use onclick)
-						const form = document.getElementById('inquiryForm');
-						if (form) {
-							// form.addEventListener('submit', submitInquiry); // Disabled to prevent double-fire
-							console.log("Form submit handler attached (Disabled favoring button onclick)");
-						}
-
-						// ...
-
-						async function submitInquiry(e) {
-							if (e) e.preventDefault();
-							alert("[1/5] 등록 프로세스 시작. (페이지 새로고침 방지됨)");
-
-							try {
-								try {
-									await ensureAuth();
-									alert("[2/5] 인증 성공. 파일 확인 중...");
-								} catch (authErr) {
-									alert("인증 오류: " + authErr);
-									return;
-								}
-
-								// Data Gathering
-								var id = document.getElementById('inquiry_id').value;
-								var title = document.getElementById('inq_title').value;
-								var author = document.getElementById('inq_author').value;
-								var pw = document.getElementById('inquiry_pw') ? document.getElementById('inquiry_pw').value : "";
-								var content = document.getElementById('inq_content').value;
-								var fileInput = document.getElementById('inq_file');
-								var date = new Date().toISOString().split('T')[0];
-
-								if (!title) throw new Error("제목을 입력해주세요.");
-								if (!author) throw new Error("작성자를 입력해주세요.");
-								if (!content) throw new Error("내용을 입력해주세요.");
-
-								// Handle File
-								let fileData = null;
-								if (fileInput.files.length > 0) {
-									alert(`[3/5] 파일 감지됨: ${fileInput.files[0].name}. 업로드 시도...`);
-									try {
-										const file = fileInput.files[0];
-										if (file.size > 50 * 1024 * 1024) throw new Error("파일 용량이 너무 큽니다 (50MB 제한).");
-
-										// FIX: Select correct button
-										const submitBtn = document.querySelector('button[onclick*="submitInquiry"]');
-										let originalText = "등록하기";
-										if (submitBtn) {
-											originalText = submitBtn.innerText;
-											submitBtn.innerText = "파일 업로드 중... (기다려주세요)";
-											submitBtn.disabled = true;
-										}
-
-										try {
-											fileData = await uploadFile(file);
-										} finally {
-											if (submitBtn) {
-												submitBtn.innerText = originalText;
-												submitBtn.disabled = false;
-											}
-										}
-									} catch (uploadError) {
-										alert("파일 업로드 오류: " + uploadError);
-										return;
-									}
-								} else if (id) {
-									const existing = await getPost(BOARD_KEY, id);
-									if (existing) fileData = existing.file;
-								}
-
-								var newInquiry = {
-									id: id ? id : null,
-									title: title,
-									author: author,
-									password: pw,
-									content: content,
-									date: date,
-									status: '답변대기',
-									file: fileData
-								};
-
-								alert("[4/5] 서버에 저장을 시도합니다..."); // REMOVE DEBUG
-								const saved = await savePost(BOARD_KEY, newInquiry);
-								if (!saved) return;
-
-								if (id) {
-									alert('활동사항이 수정되었습니다.');
-									viewInquiryPost(null, id);
+								if (form.style.display === 'none') {
+									form.style.display = 'block';
+									if (list) list.style.display = 'none';
+									if (btnBox) btnBox.style.display = 'none';
+									if (view) view.style.display = 'none';
+									if (paging) paging.style.display = 'none';
+									if (search) search.style.display = 'none';
+									form.scrollIntoView({ behavior: "smooth" });
 								} else {
-									alert('활동사항이 등록되었습니다.');
-									document.querySelector('form').reset();
 									showList();
 								}
-
-							} catch (topLevelError) {
-								console.error(topLevelError);
-								alert("오류 발생: " + topLevelError.message);
 							}
-						}
 
-						async function searchInquiries() {
-							const key = document.getElementById('search_key').value;
-							const keyword = document.getElementById('search_keyword').value.toLowerCase();
-							if (!keyword) {
-								alert('검색어를 입력해주세요.');
-								return;
+							function showList() {
+								document.getElementById('write_form_container').style.display = 'none';
+								document.getElementById('view_container').style.display = 'none';
+								if (document.querySelector('.tbl_type')) document.querySelector('.tbl_type').style.display = 'table';
+								if (document.querySelector('.btn_box')) document.querySelector('.btn_box').style.display = 'block';
+								if (document.getElementById('pagingNew')) document.getElementById('pagingNew').style.display = 'block';
+								if (document.getElementById('search_box_container')) document.getElementById('search_box_container').style.display = 'block';
+
+								resetWriteForm();
+
+								// Call the global render function if it exists, otherwise just show UI
+								if (window.renderInquiryTable) {
+									window.renderInquiryTable('inquiry-list-container');
+								} else {
+									// Retry shortly if module hasn't loaded yet
+									setTimeout(() => {
+										if (window.renderInquiryTable) {
+											window.renderInquiryTable('inquiry-list-container');
+										} else {
+											// Silent fail or simple console log in production
+											console.error("Module load timeout");
+										}
+									}, 1500);
+								}
+								history.pushState(null, null, location.pathname);
 							}
-					</script>
 
-					<!-- Same fix as review.html -->
-					<!-- Use Firebase Module -->
-					<script type="module" src="../js/community_firebase.js?v=debug_1"></script>
+							function resetWriteForm() {
+								if (document.getElementById('inquiry_id')) document.getElementById('inquiry_id').value = '';
+								if (document.getElementById('inq_title')) document.getElementById('inq_title').value = '';
+								if (document.getElementById('inq_author')) document.getElementById('inq_author').value = '';
+								if (document.getElementById('inquiry_pw')) document.getElementById('inquiry_pw').value = '';
+								if (document.getElementById('inq_content')) document.getElementById('inq_content').value = '';
+								if (document.getElementById('inq_file')) document.getElementById('inq_file').value = '';
+								if (document.getElementById('inq_file')) document.getElementById('inq_file').value = '';
+							}
 
-					<script type="module">
-							import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment, ensureAuth } from '../js/community_firebase.js?v=debug_1';
+							window.onload = function () {
+								const urlParams = new URLSearchParams(window.location.search);
+								const id = urlParams.get('id');
+								if (id) {
+									// We need to wait for viewInquiryPost to be available
+									// But viewInquiryPost is in module.
+									// So we use a Polling check similar to showList
+									const checkModule = setInterval(() => {
+										if (window.viewInquiryPost) {
+											clearInterval(checkModule);
+											viewInquiryPost(null, id);
+										}
+									}, 100);
+									// Timeout after 3 seconds
+									setTimeout(() => { clearInterval(checkModule); }, 3000);
+
+								} else {
+									showList(); // This already has the built-in timeout check
+								}
+							}
+
+							window.onpopstate = function (event) {
+								if (event.state && event.state.id) {
+									if (window.viewInquiryPost) viewInquiryPost(null, event.state.id);
+								} else {
+									showList();
+								}
+							};
+						</script>
+
+						<!-- Same fix as review.html -->
+						<!-- Use Firebase Module -->
+						<script type="module" src="../js/community_firebase.js?v=debug_2"></script>
+
+						<script type="module">
+							import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment, ensureAuth } from '../js/community_firebase.js?v=debug_2';
 
 							console.log("Inquiry Module Script Started");
 
-							// Bind Event Listener safely
+							// Bind Event Listener safely (Optional now since we use onclick)
 							const form = document.getElementById('inquiryForm');
 							if (form) {
-								// form.addEventListener('submit', submitInquiry);
-								console.log("Form submit handler attached (Disabled)");
-							} else {
-								console.error("Form not found for binding");
+								// form.addEventListener('submit', submitInquiry); // Disabled to prevent double-fire
+								console.log("Form submit handler attached (Disabled favoring button onclick)");
 							}
 
-							// Expose functions IMMEDIATELY to ensure they are available even if later code fails
-							window.submitInquiry = submitInquiry;
-							window.searchInquiries = searchInquiries;
-							window.viewInquiryPost = viewInquiryPost;
-							window.checkPasswordAndEdit = checkPasswordAndEdit;
-							window.closePasswordModal = closePasswordModal;
-							window.confirmPasswordModal = confirmPasswordModal;
-
-							console.log("Inquiry functions exposed to window");
-
-							const BOARD_KEY = COMM_KEYS.INQUIRY;
-
-							enableContentProtection();
-
-							// UI functions are now defined in independent script tag above
-
-							function loadEditForm(post) {
-								document.getElementById('inquiry_id').value = post.id;
-								document.getElementById('inq_title').value = post.title;
-								document.getElementById('inq_author').value = post.author;
-								if (document.getElementById('inquiry_pw')) document.getElementById('inquiry_pw').value = post.password || '';
-								document.getElementById('inq_content').value = post.content;
-
-								toggleWriteForm();
-							}
+							// ...
 
 							async function submitInquiry(e) {
-								e.preventDefault();
-								alert("등록 프로세스를 시작합니다...");
+								if (e) e.preventDefault();
+								alert("[1/5] 등록 프로세스 시작. (페이지 새로고침 방지됨)");
 
 								try {
 									try {
 										await ensureAuth();
-										alert("인증 확인 완료. 데이터 준비 중...");
+										alert("[2/5] 인증 성공. 파일 확인 중...");
 									} catch (authErr) {
-										alert("인증 오류(서버 연결 실패): " + authErr);
+										alert("인증 오류: " + authErr);
 										return;
 									}
 
@@ -684,13 +542,13 @@
 									// Handle File
 									let fileData = null;
 									if (fileInput.files.length > 0) {
-										alert(`파일이 감지되었습니다! (${fileInput.files[0].name})`);
+										alert(`[3/5] 파일 감지됨: ${fileInput.files[0].name}. 업로드 시도...`);
 										try {
 											const file = fileInput.files[0];
 											if (file.size > 50 * 1024 * 1024) throw new Error("파일 용량이 너무 큽니다 (50MB 제한).");
 
 											// FIX: Select correct button
-											const submitBtn = document.querySelector('form button[type="submit"]');
+											const submitBtn = document.querySelector('button[onclick*="submitInquiry"]');
 											let originalText = "등록하기";
 											if (submitBtn) {
 												originalText = submitBtn.innerText;
@@ -726,7 +584,7 @@
 										file: fileData
 									};
 
-									// alert("서버에 저장을 시도합니다..."); // REMOVE DEBUG
+									alert("[4/5] 서버에 저장을 시도합니다..."); // REMOVE DEBUG
 									const saved = await savePost(BOARD_KEY, newInquiry);
 									if (!saved) return;
 
@@ -746,35 +604,178 @@
 							}
 
 							async function searchInquiries() {
-								// ... (existing code omitted for brevity in prompt, but full function body in file)
 								const key = document.getElementById('search_key').value;
 								const keyword = document.getElementById('search_keyword').value.toLowerCase();
 								if (!keyword) {
 									alert('검색어를 입력해주세요.');
 									return;
 								}
+						</script>
 
-								const allPosts = await getPosts(BOARD_KEY);
-								const filtered = allPosts.filter(post => {
-									if (key === 'all') {
-										return post.title.toLowerCase().includes(keyword) || post.content.toLowerCase().includes(keyword);
-									} else if (key === 'title') {
-										return post.title.toLowerCase().includes(keyword);
-									} else if (key === 'content') {
-										return post.content.toLowerCase().includes(keyword);
-									}
-									return false;
-								});
+						<!-- Same fix as review.html -->
+						<!-- Use Firebase Module -->
+						<script type="module" src="../js/community_firebase.js?v=debug_1"></script>
 
-								const tbody = document.getElementById('inquiry-list-container');
-								tbody.innerHTML = '';
-								if (filtered.length === 0) {
-									tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 50px;">검색 결과가 없습니다.</td></tr>';
+						<script type="module">
+								import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment, ensureAuth } from '../js/community_firebase.js?v=debug_1';
+
+								console.log("Inquiry Module Script Started");
+
+								// Bind Event Listener safely
+								const form = document.getElementById('inquiryForm');
+								if (form) {
+									// form.addEventListener('submit', submitInquiry);
+									console.log("Form submit handler attached (Disabled)");
 								} else {
-									filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-									let html = '';
-									filtered.forEach((post, index) => {
-										html += `
+									console.error("Form not found for binding");
+								}
+
+								// Expose functions IMMEDIATELY to ensure they are available even if later code fails
+								window.submitInquiry = submitInquiry;
+								window.searchInquiries = searchInquiries;
+								window.viewInquiryPost = viewInquiryPost;
+								window.checkPasswordAndEdit = checkPasswordAndEdit;
+								window.closePasswordModal = closePasswordModal;
+								window.confirmPasswordModal = confirmPasswordModal;
+
+								console.log("Inquiry functions exposed to window");
+
+								const BOARD_KEY = COMM_KEYS.INQUIRY;
+
+								enableContentProtection();
+
+								// UI functions are now defined in independent script tag above
+
+								function loadEditForm(post) {
+									document.getElementById('inquiry_id').value = post.id;
+									document.getElementById('inq_title').value = post.title;
+									document.getElementById('inq_author').value = post.author;
+									if (document.getElementById('inquiry_pw')) document.getElementById('inquiry_pw').value = post.password || '';
+									document.getElementById('inq_content').value = post.content;
+
+									toggleWriteForm();
+								}
+
+								async function submitInquiry(e) {
+									e.preventDefault();
+									alert("등록 프로세스를 시작합니다...");
+
+									try {
+										try {
+											await ensureAuth();
+											alert("인증 확인 완료. 데이터 준비 중...");
+										} catch (authErr) {
+											alert("인증 오류(서버 연결 실패): " + authErr);
+											return;
+										}
+
+										// Data Gathering
+										var id = document.getElementById('inquiry_id').value;
+										var title = document.getElementById('inq_title').value;
+										var author = document.getElementById('inq_author').value;
+										var pw = document.getElementById('inquiry_pw') ? document.getElementById('inquiry_pw').value : "";
+										var content = document.getElementById('inq_content').value;
+										var fileInput = document.getElementById('inq_file');
+										var date = new Date().toISOString().split('T')[0];
+
+										if (!title) throw new Error("제목을 입력해주세요.");
+										if (!author) throw new Error("작성자를 입력해주세요.");
+										if (!content) throw new Error("내용을 입력해주세요.");
+
+										// Handle File
+										let fileData = null;
+										if (fileInput.files.length > 0) {
+											alert(`파일이 감지되었습니다! (${fileInput.files[0].name})`);
+											try {
+												const file = fileInput.files[0];
+												if (file.size > 50 * 1024 * 1024) throw new Error("파일 용량이 너무 큽니다 (50MB 제한).");
+
+												// FIX: Select correct button
+												const submitBtn = document.querySelector('form button[type="submit"]');
+												let originalText = "등록하기";
+												if (submitBtn) {
+													originalText = submitBtn.innerText;
+													submitBtn.innerText = "파일 업로드 중... (기다려주세요)";
+													submitBtn.disabled = true;
+												}
+
+												try {
+													fileData = await uploadFile(file);
+												} finally {
+													if (submitBtn) {
+														submitBtn.innerText = originalText;
+														submitBtn.disabled = false;
+													}
+												}
+											} catch (uploadError) {
+												alert("파일 업로드 오류: " + uploadError);
+												return;
+											}
+										} else if (id) {
+											const existing = await getPost(BOARD_KEY, id);
+											if (existing) fileData = existing.file;
+										}
+
+										var newInquiry = {
+											id: id ? id : null,
+											title: title,
+											author: author,
+											password: pw,
+											content: content,
+											date: date,
+											status: '답변대기',
+											file: fileData
+										};
+
+										// alert("서버에 저장을 시도합니다..."); // REMOVE DEBUG
+										const saved = await savePost(BOARD_KEY, newInquiry);
+										if (!saved) return;
+
+										if (id) {
+											alert('활동사항이 수정되었습니다.');
+											viewInquiryPost(null, id);
+										} else {
+											alert('활동사항이 등록되었습니다.');
+											document.querySelector('form').reset();
+											showList();
+										}
+
+									} catch (topLevelError) {
+										console.error(topLevelError);
+										alert("오류 발생: " + topLevelError.message);
+									}
+								}
+
+								async function searchInquiries() {
+									// ... (existing code omitted for brevity in prompt, but full function body in file)
+									const key = document.getElementById('search_key').value;
+									const keyword = document.getElementById('search_keyword').value.toLowerCase();
+									if (!keyword) {
+										alert('검색어를 입력해주세요.');
+										return;
+									}
+
+									const allPosts = await getPosts(BOARD_KEY);
+									const filtered = allPosts.filter(post => {
+										if (key === 'all') {
+											return post.title.toLowerCase().includes(keyword) || post.content.toLowerCase().includes(keyword);
+										} else if (key === 'title') {
+											return post.title.toLowerCase().includes(keyword);
+										} else if (key === 'content') {
+											return post.content.toLowerCase().includes(keyword);
+										}
+										return false;
+									});
+
+									const tbody = document.getElementById('inquiry-list-container');
+									tbody.innerHTML = '';
+									if (filtered.length === 0) {
+										tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 50px;">검색 결과가 없습니다.</td></tr>';
+									} else {
+										filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+										let html = '';
+										filtered.forEach((post, index) => {
+											html += `
                                 <tr onmouseover="this.style.backgroundColor='#fcfcfc'" onmouseout="this.style.backgroundColor=''">
                                     <td class="num">${filtered.length - index}</td>
                                     <td class="title" style="text-align:left; padding-left:10px;">
@@ -784,49 +785,49 @@
                                     <td class="date">${post.date}</td>
                                 </tr>
                                     `;
-									});
-									tbody.innerHTML = html;
+										});
+										tbody.innerHTML = html;
+									}
 								}
-							}
 
-							// Expose functions to window
-							window.submitInquiry = submitInquiry;
-							window.searchInquiries = searchInquiries;
-							window.viewInquiryPost = viewInquiryPost;
-							window.renderInquiryTable = renderInquiryTable;
+								// Expose functions to window
+								window.submitInquiry = submitInquiry;
+								window.searchInquiries = searchInquiries;
+								window.viewInquiryPost = viewInquiryPost;
+								window.renderInquiryTable = renderInquiryTable;
 
-							async function renderInquiryTable(containerId, limit = 0) {
-								const tbody = document.getElementById(containerId);
-								if (!tbody) return;
+								async function renderInquiryTable(containerId, limit = 0) {
+									const tbody = document.getElementById(containerId);
+									if (!tbody) return;
 
-								tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 50px;">로딩중...</td></tr>';
+									tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 50px;">로딩중...</td></tr>';
 
-								try {
-									const posts = await getPosts(BOARD_KEY);
-									posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+									try {
+										const posts = await getPosts(BOARD_KEY);
+										posts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-									let html = '';
-									const displayPosts = limit > 0 ? posts.slice(0, limit) : posts;
+										let html = '';
+										const displayPosts = limit > 0 ? posts.slice(0, limit) : posts;
 
-									if (displayPosts.length === 0) {
-										const colspan = limit > 0 ? 1 : 5;
-										html = `<tr><td colspan="${colspan}" style="text-align:center; padding: 50px;">등록된 활동사항이 없습니다.</td></tr>`;
-									} else {
-										displayPosts.forEach((post, index) => {
-											if (limit > 0) {
-												html += `
+										if (displayPosts.length === 0) {
+											const colspan = limit > 0 ? 1 : 5;
+											html = `<tr><td colspan="${colspan}" style="text-align:center; padding: 50px;">등록된 활동사항이 없습니다.</td></tr>`;
+										} else {
+											displayPosts.forEach((post, index) => {
+												if (limit > 0) {
+													html += `
 								<tr>
 									<td class="latest_space">
 										<a href="community/inquiry.html?id=${post.id}">${post.title}</a>
 									</td>
 								</tr>
 							`;
-											} else {
-												const statusBadge = post.status === '답변완료'
-													? '<span style="color:blue;">[답변완료]</span>'
-													: '<span style="color:gray;">[대기]</span>';
+												} else {
+													const statusBadge = post.status === '답변완료'
+														? '<span style="color:blue;">[답변완료]</span>'
+														: '<span style="color:gray;">[대기]</span>';
 
-												html += `
+													html += `
 								<tr onmouseover="this.style.backgroundColor='#fcfcfc'" onmouseout="this.style.backgroundColor=''">
 									<td class="num">${posts.length - index}</td>
 									<td class="title" style="text-align:left; padding-left:10px;">
@@ -837,163 +838,163 @@
 									<td class="status">${statusBadge}</td>
 								</tr>
 							`;
-											}
-										});
-									}
-									tbody.innerHTML = html;
-								} catch (e) {
-									console.error("Render Error:", e);
-									tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 50px; color:red;">목록을 불러오는 중 오류가 발생했습니다.<br>${e.message}</td></tr>`;
-								}
-							}
-
-							async function viewInquiryPost(e, id) {
-								if (e) e.preventDefault();
-
-								const post = await getPost(BOARD_KEY, id);
-								if (!post) {
-									alert('존재하지 않는 게시물입니다.');
-									return;
-								}
-
-								document.getElementById('view_title').innerText = post.title;
-								document.getElementById('view_author').innerText = post.author;
-								document.getElementById('view_date').innerText = post.date;
-								document.getElementById('view_content').innerText = post.content;
-
-								const fileArea = document.getElementById('view_file_area');
-								fileArea.innerHTML = '';
-								if (post.file) {
-									if (post.file.url) {
-										// Firebase Storage URL
-										const isImage = post.file.name.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-										if (isImage) {
-											fileArea.innerHTML = `<img src="${post.file.url}" style="max-width:100%; margin-top:10px;">`;
-										} else {
-											fileArea.innerHTML = `<div style="background:#eee; padding:10px; margin-top:10px;">첨부파일: <a href="${post.file.url}" target="_blank">${post.file.name}</a></div>`;
+												}
+											});
 										}
-									} else if (post.file.data) {
-										// Legacy Base64
-										fileArea.innerHTML = `<img src="${post.file.data}" style="max-width:100%; margin-top:10px;">`;
-									} else {
-										// Just name (legacy large file placeholder)
-										fileArea.innerHTML = `<div style="background:#eee; padding:10px; margin-top:10px;">첨부파일: ${post.file.name}</div>`;
+										tbody.innerHTML = html;
+									} catch (e) {
+										console.error("Render Error:", e);
+										tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 50px; color:red;">목록을 불러오는 중 오류가 발생했습니다.<br>${e.message}</td></tr>`;
 									}
 								}
 
-								// Inject Edit Buttons if container exists
-								// Attempt to find a place to put buttons
-								const viewContainer = document.getElementById('view_container');
-								// We append to viewContainer logic if needed, but original probably has button area?
-								// Original didn't show button area in my view.
-								// I will append it manually if not exist.
+								async function viewInquiryPost(e, id) {
+									if (e) e.preventDefault();
 
-								let btnDiv = document.getElementById('inquiry_view_btns');
-								if (!btnDiv) {
-									btnDiv = document.createElement('div');
-									btnDiv.id = 'inquiry_view_btns';
-									btnDiv.style.textAlign = 'center';
-									btnDiv.style.marginTop = '30px';
-									viewContainer.appendChild(btnDiv);
-								}
+									const post = await getPost(BOARD_KEY, id);
+									if (!post) {
+										alert('존재하지 않는 게시물입니다.');
+										return;
+									}
 
-								btnDiv.innerHTML = `
+									document.getElementById('view_title').innerText = post.title;
+									document.getElementById('view_author').innerText = post.author;
+									document.getElementById('view_date').innerText = post.date;
+									document.getElementById('view_content').innerText = post.content;
+
+									const fileArea = document.getElementById('view_file_area');
+									fileArea.innerHTML = '';
+									if (post.file) {
+										if (post.file.url) {
+											// Firebase Storage URL
+											const isImage = post.file.name.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+											if (isImage) {
+												fileArea.innerHTML = `<img src="${post.file.url}" style="max-width:100%; margin-top:10px;">`;
+											} else {
+												fileArea.innerHTML = `<div style="background:#eee; padding:10px; margin-top:10px;">첨부파일: <a href="${post.file.url}" target="_blank">${post.file.name}</a></div>`;
+											}
+										} else if (post.file.data) {
+											// Legacy Base64
+											fileArea.innerHTML = `<img src="${post.file.data}" style="max-width:100%; margin-top:10px;">`;
+										} else {
+											// Just name (legacy large file placeholder)
+											fileArea.innerHTML = `<div style="background:#eee; padding:10px; margin-top:10px;">첨부파일: ${post.file.name}</div>`;
+										}
+									}
+
+									// Inject Edit Buttons if container exists
+									// Attempt to find a place to put buttons
+									const viewContainer = document.getElementById('view_container');
+									// We append to viewContainer logic if needed, but original probably has button area?
+									// Original didn't show button area in my view.
+									// I will append it manually if not exist.
+
+									let btnDiv = document.getElementById('inquiry_view_btns');
+									if (!btnDiv) {
+										btnDiv = document.createElement('div');
+										btnDiv.id = 'inquiry_view_btns';
+										btnDiv.style.textAlign = 'center';
+										btnDiv.style.marginTop = '30px';
+										viewContainer.appendChild(btnDiv);
+									}
+
+									btnDiv.innerHTML = `
                                 <button onclick="checkPasswordAndEdit('${post.id}')" style="padding: 10px 20px; background: #333; color: #fff; border: none; cursor: pointer; border-radius: 5px; margin-right:5px;">수정</button>
  				                <button onclick="showList()" style="padding: 10px 30px; background: #666; color: #fff; border: none; cursor: pointer;">목록으로</button>
                              `;
 
 
-								viewContainer.style.display = 'block';
+									viewContainer.style.display = 'block';
 
-								if (document.querySelector('.tbl_type')) document.querySelector('.tbl_type').style.display = 'none';
-								if (document.querySelector('.btn_box')) document.querySelector('.btn_box').style.display = 'none';
-								if (document.getElementById('pagingNew')) document.getElementById('pagingNew').style.display = 'none';
-								if (document.getElementById('search_box_container')) document.getElementById('search_box_container').style.display = 'none';
+									if (document.querySelector('.tbl_type')) document.querySelector('.tbl_type').style.display = 'none';
+									if (document.querySelector('.btn_box')) document.querySelector('.btn_box').style.display = 'none';
+									if (document.getElementById('pagingNew')) document.getElementById('pagingNew').style.display = 'none';
+									if (document.getElementById('search_box_container')) document.getElementById('search_box_container').style.display = 'none';
 
-								renderCommentSectionSync('comment-section', BOARD_KEY, post.id);
+									renderCommentSectionSync('comment-section', BOARD_KEY, post.id);
 
-								history.pushState({ id: id }, null, `?id=${id}`);
-							}
+									history.pushState({ id: id }, null, `?id=${id}`);
+								}
 
-							// Password & Edit Logic
-							async function checkPasswordAndEdit(id) {
-								const post = await getPost(BOARD_KEY, id);
-								if (!post) { alert('게시물을 찾을 수 없습니다.'); return; }
+								// Password & Edit Logic
+								async function checkPasswordAndEdit(id) {
+									const post = await getPost(BOARD_KEY, id);
+									if (!post) { alert('게시물을 찾을 수 없습니다.'); return; }
 
-								// If no password (old posts or inquiry without pw), just allow?
-								if (!post.password) {
-									if (confirm('비밀번호가 없는 게시물입니다. 수정하시겠습니까?')) {
-										loadEditForm(post);
+									// If no password (old posts or inquiry without pw), just allow?
+									if (!post.password) {
+										if (confirm('비밀번호가 없는 게시물입니다. 수정하시겠습니까?')) {
+											loadEditForm(post);
+										}
+										return;
 									}
-									return;
+
+									document.getElementById('modal_target_id').value = id;
+									document.getElementById('modal_pw_input').value = '';
+									document.getElementById('password_modal').style.display = 'flex';
+									document.getElementById('modal_pw_input').focus();
 								}
 
-								document.getElementById('modal_target_id').value = id;
-								document.getElementById('modal_pw_input').value = '';
-								document.getElementById('password_modal').style.display = 'flex';
-								document.getElementById('modal_pw_input').focus();
-							}
-
-							function closePasswordModal() {
-								document.getElementById('password_modal').style.display = 'none';
-							}
-
-							async function confirmPasswordModal() {
-								const id = document.getElementById('modal_target_id').value;
-								const input = document.getElementById('modal_pw_input').value;
-								const post = await getPost(BOARD_KEY, id);
-
-								if (post && input.trim() === post.password.trim()) {
-									closePasswordModal();
-									loadEditForm(post);
-								} else {
-									alert('비밀번호가 일치하지 않습니다.');
+								function closePasswordModal() {
+									document.getElementById('password_modal').style.display = 'none';
 								}
-							}
 
-							const modalInput = document.getElementById('modal_pw_input');
-							if (modalInput) {
-								modalInput.addEventListener('keypress', function (e) {
-									if (e.key === 'Enter') confirmPasswordModal();
-								});
-							}
+								async function confirmPasswordModal() {
+									const id = document.getElementById('modal_target_id').value;
+									const input = document.getElementById('modal_pw_input').value;
+									const post = await getPost(BOARD_KEY, id);
+
+									if (post && input.trim() === post.password.trim()) {
+										closePasswordModal();
+										loadEditForm(post);
+									} else {
+										alert('비밀번호가 일치하지 않습니다.');
+									}
+								}
+
+								const modalInput = document.getElementById('modal_pw_input');
+								if (modalInput) {
+									modalInput.addEventListener('keypress', function (e) {
+										if (e.key === 'Enter') confirmPasswordModal();
+									});
+								}
 
 
-							async function renderCommentSectionSync(containerId, boardKey, postId) {
-								const container = document.getElementById(containerId);
-								if (!container) return;
+								async function renderCommentSectionSync(containerId, boardKey, postId) {
+									const container = document.getElementById(containerId);
+									if (!container) return;
 
-								const comments = await getComments(boardKey, postId);
+									const comments = await getComments(boardKey, postId);
 
-								let html = `
+									let html = `
                                 <div class="comment_wrap" style="margin-top: 50px; background: #f9f9f9; padding: 20px;">
                                     <h4 style="font-size: 16px; font-weight: bold; margin-bottom: 15px;">댓글 <span>(${comments.length})</span></h4>
                                     <ul class="comment_list" style="margin-bottom: 20px;">
                             `;
 
-								if (comments.length === 0) {
-									html += `<li style="color: #888; padding: 10px 0;">등록된 댓글이 없습니다.</li>`;
-								} else {
-									comments.forEach(c => {
-										html += `
+									if (comments.length === 0) {
+										html += `<li style="color: #888; padding: 10px 0;">등록된 댓글이 없습니다.</li>`;
+									} else {
+										comments.forEach(c => {
+											html += `
                                         <li style="border-bottom: 1px solid #eee; padding: 10px 0;">
                                             <div style="font-weight: bold; margin-bottom: 5px;">${c.author} <span style="font-weight: normal; font-size: 12px; color: #888;">${c.date}</span></div>
                                             <div style="line-height: 1.5;">${c.content.replace(/\n/g, '<br>')}</div>
                                         </li>
                                     `;
-									});
-								}
+										});
+									}
 
-								window.submitComment = async function (e, bKey, pId) {
-									e.preventDefault();
-									const author = document.getElementById('cmt_author').value;
-									const content = document.getElementById('cmt_content').value;
-									const pw = document.getElementById('cmt_pw').value;
-									await addComment(bKey, pId, { author, content, pw });
-									renderCommentSectionSync('comment-section', bKey, pId);
-								}
+									window.submitComment = async function (e, bKey, pId) {
+										e.preventDefault();
+										const author = document.getElementById('cmt_author').value;
+										const content = document.getElementById('cmt_content').value;
+										const pw = document.getElementById('cmt_pw').value;
+										await addComment(bKey, pId, { author, content, pw });
+										renderCommentSectionSync('comment-section', bKey, pId);
+									}
 
-								html += `
+									html += `
                                     </ul>
                                     <div class="comment_form">
                                         <form onsubmit="submitComment(event, '${boardKey}', '${postId}')">
@@ -1009,89 +1010,89 @@
                                     </div>
                                 </div>
                             `;
-								container.innerHTML = html;
-							}
+									container.innerHTML = html;
+								}
 
 
-						// Removed window.onload from here to ensure it runs even if module fails
-						// window.onload moved to standard script
-					</script>
-					<br><br>
+							// Removed window.onload from here to ensure it runs even if module fails
+							// window.onload moved to standard script
+						</script>
+						<br><br>
 
-					<div style="width:100%; height:50px; visibility:hidden;">copy_space</div>
+						<div style="width:100%; height:50px; visibility:hidden;">copy_space</div>
 
-				</div>
-			</div>
-
-			<!-- Floating Talk Button -->
-			<div class="floating_talk">
-				<a href="https://open.kakao.com/o/s02JZeUh" target="_blank">
-					<img src="../images/quick_kakao_new.png" alt="톡상담/주문"
-						style="width: 100px; height: 100px; display: block;">
-				</a>
-			</div>
-
-			<div id="copy_bt">
-				<div class="copy_bt_fix">
-					<ul class="u_left">
-						<li><a href="../shop/list.html" target="_self">꾸지뽕 상품안내</a></li>
-						<li>|</li>
-						<li><a href="../pages/sub02_2.html" target="_self">회사소개</a></li>
-						<li>|</li>
-						<li><a href="../story/story.html" target="_self">꾸지뽕이야기</a></li>
-						<li>|</li>
-						<li><a href="javascript:alert('준비중입니다.');" target="_self">개인정보처리지침</a></li>
-						<li>|</li>
-						<li><a href="../admin/admin.html" target="_self">관리자화면</a></li>
-
-					</ul>
-					<ul class="u_right">
-						<li><a href="#" target="_blank"><img src="../images/sns_icon01.png" /></a></li>
-						<li><a href="#" target="_blank"><img src="../images/sns_icon02.png" /></a></li>
-						<li><a href="#" target="_blank"><img src="../images/sns_icon03.png" /></a></li>
-						<li><a href="#" target="_blank"><img src="../images/sns_icon04.png" /></a></li>
-					</ul>
-				</div>
-			</div>
-			<div id="copy">
-				<div class="copy_fix">
-					<div class="copy01" style="padding-top: 60px;">
-						상호명 : 농업회사법인 꾸지뽕 사업단&nbsp;&nbsp;|&nbsp;&nbsp;대표자 : 김선몽<br>
-						주 소 : 대전광역시 서구 괴곡동 28&nbsp;&nbsp;|&nbsp;&nbsp;사업자등록번호 : 768-45-01182<br>
-						통신판매신고번호 : 제 2025-대전서구-00061 호&nbsp;&nbsp;|&nbsp;&nbsp;TEL : 010-5403-4778<br>
-						개인정보관리책임자 : 김선몽&nbsp;&nbsp;|&nbsp;&nbsp;특판,대량문의 : told7890@naver.com<br><br>
-						<p class="copy01_2">
-							COPYRIGHT 2025(C)&nbsp;&nbsp;&nbsp;<span>농업회사법인 꾸지뽕 사업단</span>&nbsp;&nbsp;&nbsp;ALL
-							RIGHTS RESERVED.
-						</p>
-						<br>
-						농업회사법인 꾸지뽕사업단은 정직한 상품만을 취급합니다.
 					</div>
-					<div class="copy02">
-						<p class="copy02_title"><span>CS</span> Center</p>
-						<p class="copy02_p01">010-5403-4778</p>
-						<p class="copy02_p02">
-							운영시간 : 평일 08:00 ~ 17:00 / 토요일 08:00 ~ 12:00<br>
-							점심시간 : PM 12:00 ~ PM 13:00<br>
-							고객센터 (토요일 오후, 휴일 휴무)
-						</p>
+				</div>
+
+				<!-- Floating Talk Button -->
+				<div class="floating_talk">
+					<a href="https://open.kakao.com/o/s02JZeUh" target="_blank">
+						<img src="../images/quick_kakao_new.png" alt="톡상담/주문"
+							style="width: 100px; height: 100px; display: block;">
+					</a>
+				</div>
+
+				<div id="copy_bt">
+					<div class="copy_bt_fix">
+						<ul class="u_left">
+							<li><a href="../shop/list.html" target="_self">꾸지뽕 상품안내</a></li>
+							<li>|</li>
+							<li><a href="../pages/sub02_2.html" target="_self">회사소개</a></li>
+							<li>|</li>
+							<li><a href="../story/story.html" target="_self">꾸지뽕이야기</a></li>
+							<li>|</li>
+							<li><a href="javascript:alert('준비중입니다.');" target="_self">개인정보처리지침</a></li>
+							<li>|</li>
+							<li><a href="../admin/admin.html" target="_self">관리자화면</a></li>
+
+						</ul>
+						<ul class="u_right">
+							<li><a href="#" target="_blank"><img src="../images/sns_icon01.png" /></a></li>
+							<li><a href="#" target="_blank"><img src="../images/sns_icon02.png" /></a></li>
+							<li><a href="#" target="_blank"><img src="../images/sns_icon03.png" /></a></li>
+							<li><a href="#" target="_blank"><img src="../images/sns_icon04.png" /></a></li>
+						</ul>
 					</div>
-					<div class="copy03">
-						<p class="copy03_title"><span>Bank info</span></p>
-						<p class="copy03_p01"><img src="../images/bank_icon.png" />농협 : 301-0376-1153-21</p>
-						<p class="copy03_p02">예금주 : 김선몽(꾸지봉사업단대표)</p>
-						<div style="margin-top: 20px;">
-							<p style="font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #fff;">오시는길</p>
-							<p style="font-size: 12px; color: #888; margin-bottom: 10px;">주소: 대전광역시 서구 괴곡동 28</p>
-							<img src="../images/map_location.png" alt="오시는길 지도"
-								style="max-width: 100%; height: auto; border-radius: 5px;">
+				</div>
+				<div id="copy">
+					<div class="copy_fix">
+						<div class="copy01" style="padding-top: 60px;">
+							상호명 : 농업회사법인 꾸지뽕 사업단&nbsp;&nbsp;|&nbsp;&nbsp;대표자 : 김선몽<br>
+							주 소 : 대전광역시 서구 괴곡동 28&nbsp;&nbsp;|&nbsp;&nbsp;사업자등록번호 : 768-45-01182<br>
+							통신판매신고번호 : 제 2025-대전서구-00061 호&nbsp;&nbsp;|&nbsp;&nbsp;TEL : 010-5403-4778<br>
+							개인정보관리책임자 : 김선몽&nbsp;&nbsp;|&nbsp;&nbsp;특판,대량문의 : told7890@naver.com<br><br>
+							<p class="copy01_2">
+								COPYRIGHT 2025(C)&nbsp;&nbsp;&nbsp;<span>농업회사법인 꾸지뽕 사업단</span>&nbsp;&nbsp;&nbsp;ALL
+								RIGHTS RESERVED.
+							</p>
+							<br>
+							농업회사법인 꾸지뽕사업단은 정직한 상품만을 취급합니다.
+						</div>
+						<div class="copy02">
+							<p class="copy02_title"><span>CS</span> Center</p>
+							<p class="copy02_p01">010-5403-4778</p>
+							<p class="copy02_p02">
+								운영시간 : 평일 08:00 ~ 17:00 / 토요일 08:00 ~ 12:00<br>
+								점심시간 : PM 12:00 ~ PM 13:00<br>
+								고객센터 (토요일 오후, 휴일 휴무)
+							</p>
+						</div>
+						<div class="copy03">
+							<p class="copy03_title"><span>Bank info</span></p>
+							<p class="copy03_p01"><img src="../images/bank_icon.png" />농협 : 301-0376-1153-21</p>
+							<p class="copy03_p02">예금주 : 김선몽(꾸지봉사업단대표)</p>
+							<div style="margin-top: 20px;">
+								<p style="font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #fff;">오시는길</p>
+								<p style="font-size: 12px; color: #888; margin-bottom: 10px;">주소: 대전광역시 서구 괴곡동 28</p>
+								<img src="../images/map_location.png" alt="오시는길 지도"
+									style="max-width: 100%; height: auto; border-radius: 5px;">
+							</div>
 						</div>
 					</div>
 				</div>
+
+
 			</div>
-
-
-		</div>
 
 </body>
 
