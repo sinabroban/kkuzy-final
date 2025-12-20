@@ -275,11 +275,6 @@
 							color: #2d2d2d;
 						}
 
-						td.title a.hover {
-							text-decoration: underline;
-							color: #2d2d2d;
-						}
-
 						.btn_search {
 							background-color: #4a4a4a;
 							color: #fff;
@@ -429,30 +424,40 @@
 						}
 
 						function showList() {
-							document.getElementById('write_form_container').style.display = 'none';
-							document.getElementById('view_container').style.display = 'none';
-							if (document.querySelector('.tbl_type')) document.querySelector('.tbl_type').style.display = 'table';
-							if (document.querySelector('.btn_box')) document.querySelector('.btn_box').style.display = 'block';
-							if (document.getElementById('pagingNew')) document.getElementById('pagingNew').style.display = 'block';
-							if (document.getElementById('search_box_container')) document.getElementById('search_box_container').style.display = 'block';
+							// alert("DEBUG: 목록으로 이동 시도"); // Confirm function entry
+							try {
+								const formContainer = document.getElementById('write_form_container');
+								const viewContainer = document.getElementById('view_container');
+								const listTable = document.querySelector('.tbl_type');
 
-							resetWriteForm();
+								if (formContainer) formContainer.style.display = 'none';
+								if (viewContainer) viewContainer.style.display = 'none';
 
-							// Call the global render function if it exists, otherwise just show UI
-							if (window.renderInquiryTable) {
-								window.renderInquiryTable('inquiry-list-container');
-							} else {
-								// Retry shortly if module hasn't loaded yet
-								setTimeout(() => {
-									if (window.renderInquiryTable) {
-										window.renderInquiryTable('inquiry-list-container');
-									} else {
-										// Silent fail or simple console log in production
-										console.error("Module load timeout");
-									}
-								}, 1500);
+								if (listTable) listTable.style.display = 'table';
+								if (document.querySelector('.btn_box')) document.querySelector('.btn_box').style.display = 'block';
+								if (document.getElementById('pagingNew')) document.getElementById('pagingNew').style.display = 'block';
+								if (document.getElementById('search_box_container')) document.getElementById('search_box_container').style.display = 'block';
+
+								resetWriteForm();
+
+								// Call the global render function if it exists, otherwise just show UI
+								if (window.renderInquiryTable) {
+									window.renderInquiryTable('inquiry-list-container');
+								} else {
+									// Retry shortly if module hasn't loaded yet
+									setTimeout(() => {
+										if (window.renderInquiryTable) {
+											window.renderInquiryTable('inquiry-list-container');
+										} else {
+											console.error("Module load timeout");
+										}
+									}, 1500);
+								}
+								history.pushState(null, null, location.pathname);
+								window.scrollTo(0, 0); // Ensure top visibility
+							} catch (err) {
+								alert("화면 전환 중 오류: " + err.message);
 							}
-							history.pushState(null, null, location.pathname);
 						}
 
 						function resetWriteForm() {
