@@ -560,6 +560,7 @@
 						}
 
 						async function searchInquiries() {
+							// ... (existing code omitted for brevity in prompt, but full function body in file)
 							const key = document.getElementById('search_key').value;
 							const keyword = document.getElementById('search_keyword').value.toLowerCase();
 							if (!keyword) {
@@ -588,19 +589,24 @@
 								let html = '';
 								filtered.forEach((post, index) => {
 									html += `
-								<tr onmouseover="this.style.backgroundColor='#fcfcfc'" onmouseout="this.style.backgroundColor=''">
-									<td class="num">${filtered.length - index}</td>
-									<td class="title" style="text-align:left; padding-left:10px;">
-										<a href="#" onclick="viewInquiryPost(event, '${post.id}')">${post.title}</a>
-									</td>
-									<td class="name"><span class="member">${post.author}</span></td>
-									<td class="date">${post.date}</td>
-								</tr>
-									`;
+                                <tr onmouseover="this.style.backgroundColor='#fcfcfc'" onmouseout="this.style.backgroundColor=''">
+                                    <td class="num">${filtered.length - index}</td>
+                                    <td class="title" style="text-align:left; padding-left:10px;">
+                                        <a href="#" onclick="viewInquiryPost(event, '${post.id}')">${post.title}</a>
+                                    </td>
+                                    <td class="name"><span class="member">${post.author}</span></td>
+                                    <td class="date">${post.date}</td>
+                                </tr>
+                                    `;
 								});
 								tbody.innerHTML = html;
 							}
 						}
+
+						// Expose functions to window
+						window.submitInquiry = submitInquiry;
+						window.searchInquiries = searchInquiries;
+						window.viewInquiryPost = viewInquiryPost;
 
 						async function renderInquiryTable(containerId, limit = 0) {
 							const tbody = document.getElementById(containerId);

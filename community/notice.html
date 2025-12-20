@@ -495,15 +495,24 @@
 						<td class="num">${filtered.length - index}</td>
 						<td class="title" style="text-align:left; padding-left:10px;">
 							<a href="#" onclick="viewPost(event, '${notice.id}')">${notice.title}</a>
+							${notice.file ? '<img src="../images/icon_file.gif" style="vertical-align:middle; margin-left:5px;">' : ''}
 						</td>
-						<td class="name"><span class="member">${notice.author}</span></td>
+						<td class="name"><span class="notice">${notice.author}</span></td>
 						<td class="date">${notice.date}</td>
 					</tr>
 						`;
 					});
 					tbody.innerHTML = html;
 				}
-			}
+			} // end searchNotices
+
+			// Expose functions to window
+			window.submitNotice = submitNotice;
+			window.searchNotices = searchNotices;
+			window.viewPost = viewPost;
+			window.toggleWriteForm = toggleWriteForm;
+			window.showList = showList;
+			window.showWriteForm = toggleWriteForm; // Assuming showWriteForm is an alias for toggleWriteForm to show the form
 
 			// Overwrite renderNoticeList to add click handler
 			async function renderNoticeList(containerId, limit = 0) {

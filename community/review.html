@@ -587,6 +587,13 @@
                 }
             }
 
+            // Expose functions to window
+            window.submitReview = submitReview;
+            window.searchReviews = searchReviews;
+            window.viewPost = viewPost;
+            window.showList = showList;
+            window.toggleWriteForm = toggleWriteForm;
+
             async function renderReviewList(containerId, limit = 0) {
                 const tbody = document.getElementById(containerId);
                 if (!tbody) return;
