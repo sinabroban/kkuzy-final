@@ -493,16 +493,26 @@
 							if (fileInput.files.length > 0) {
 								try {
 									const file = fileInput.files[0];
-									// Check size? Firebase Storage handles large files, but let's be sane (e.g. 50MB)
 									if (file.size > 50 * 1024 * 1024) {
 										alert("파일 용량이 너무 큽니다 (50MB 제한).");
 										return;
 									}
-									alert("파일 업로드 중입니다... 잠시만 기다려주세요.");
-									fileData = await uploadFile(file);
+
+									// Disable button during upload
+									const submitBtn = document.querySelector('.btn_confirm');
+									const originalText = submitBtn.innerText;
+									submitBtn.innerText = "파일 업로드 중... (잠시만 기다려주세요)";
+									submitBtn.disabled = true;
+
+									try {
+										fileData = await uploadFile(file);
+									} finally {
+										submitBtn.innerText = originalText;
+										submitBtn.disabled = false;
+									}
 								} catch (uploadError) {
 									console.error(uploadError);
-									return; // Stop submission
+									return; // Stop submission on upload fail
 								}
 							} else if (id) {
 								const existing = await getPost(BOARD_KEY, id);
@@ -513,14 +523,18 @@
 								id: id ? id : null,
 								title: title,
 								author: author,
-								password: pw || '', // Save empty if not present
+								password: pw || '',
 								content: content,
 								date: date,
 								status: '답변대기',
 								file: fileData
 							};
 
-							await savePost(BOARD_KEY, newInquiry);
+							const saved = await savePost(BOARD_KEY, newInquiry);
+							if (!saved) {
+								// savePost already alerted error
+								return;
+							}
 
 							if (id) {
 								alert('활동사항이 수정되었습니다.');

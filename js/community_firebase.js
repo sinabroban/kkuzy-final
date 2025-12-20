@@ -6,7 +6,7 @@
 // Import Firebase (ES Modules via CDN for static site)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, query, orderBy, limit, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 // --- CONFIGURATION ---
@@ -28,6 +28,20 @@ try {
     db = getFirestore(app);
     auth = getAuth(app);
     storage = getStorage(app);
+
+    // Auto-sign in anonymously for guest access (if not already signed in)
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            console.log("Firebase Auth State: Signed In", user.uid);
+        } else {
+            console.log("Firebase Auth State: Signed Out. Attempting Anonymous Sign-in...");
+            signInAnonymously(auth).catch((error) => {
+                console.error("Anonymous Sign-in Failed:", error);
+                // We don't alert here to avoid annoying popups on load, but upload might fail later.
+            });
+        }
+    });
+
     console.log("Firebase Initialized");
 } catch (e) {
     console.error("Firebase Init Error (Did you set the keys?):", e);
@@ -133,7 +147,10 @@ export async function getPost(boardKey, id) {
 }
 
 export async function savePost(boardKey, post) {
-    if (!db) return;
+    if (!db) {
+        alert("데이터베이스 연결 실패. 페이지를 새로고침 해주세요.");
+        return null; // Explicit null to indicate failure
+    }
     try {
         // Post object: { id (optional), title, author, ... }
         if (post.id) {
@@ -151,6 +168,7 @@ export async function savePost(boardKey, post) {
     } catch (e) {
         console.error("Error saving post:", e);
         alert("저장 중 오류가 발생했습니다: " + e.message);
+        return null; // Return null so caller knows it failed
     }
 }
 

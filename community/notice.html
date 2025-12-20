@@ -395,13 +395,28 @@
 				if (fileInput.files.length > 0) {
 					try {
 						const file = fileInput.files[0];
-						// Check size sane limit
 						if (file.size > 50 * 1024 * 1024) {
 							alert("파일 용량이 너무 큽니다 (50MB 제한).");
 							return;
 						}
-						alert("파일 업로드 중입니다... 잠시만 기다려주세요.");
-						fileData = await uploadFile(file);
+
+						// Disable button
+						const submitBtn = document.querySelector('.btn_confirm'); // Ensure class exists or use id? Notice might differ
+						if (submitBtn) {
+							submitBtn.innerText = "파일 업로드 중... (잠시만 기다려주세요)";
+							submitBtn.disabled = true;
+						} else {
+							alert("파일 업로드 중입니다... 잠시만 기다려주세요.");
+						}
+
+						try {
+							fileData = await uploadFile(file);
+						} finally {
+							if (submitBtn) {
+								submitBtn.innerText = "확인"; // Or original text
+								submitBtn.disabled = false;
+							}
+						}
 					} catch (uploadError) {
 						console.error(uploadError);
 						return; // Stop
@@ -416,7 +431,8 @@
 					file: fileData
 				};
 
-				await savePost(BOARD_KEY, newNotice);
+				const saved = await savePost(BOARD_KEY, newNotice);
+				if (!saved) return;
 
 				alert('공지사항이 등록되었습니다.');
 				document.querySelector('form').reset();
