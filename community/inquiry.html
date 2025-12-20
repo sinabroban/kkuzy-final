@@ -366,7 +366,7 @@
 						<h3
 							style="font-size: 20px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px;">
 							활동사항 등록</h3>
-						<form onsubmit="submitInquiry(event)">
+						<form id="inquiryForm">
 							<input type="hidden" id="inquiry_id" value="">
 							<div style="margin-bottom: 15px;">
 								<label style="display: block; font-weight: bold; margin-bottom: 5px;">제목</label>
@@ -405,10 +405,19 @@
 
 					<!-- Same fix as review.html -->
 					<!-- Use Firebase Module -->
-					<script type="module" src="../js/community_firebase.js"></script>
+					<script type="module" src="../js/community_firebase.js?v=fix_click"></script>
 
 					<script type="module">
-						import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment, ensureAuth } from '../js/community_firebase.js?v=debug_fix';
+						import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment, ensureAuth } from '../js/community_firebase.js?v=fix_click';
+
+						// Bind Event Listener safely
+						const form = document.getElementById('inquiryForm');
+						if (form) {
+							form.addEventListener('submit', submitInquiry);
+							console.log("Form submit handler attached");
+						} else {
+							console.error("Form not found for binding");
+						}
 
 						const BOARD_KEY = COMM_KEYS.INQUIRY;
 

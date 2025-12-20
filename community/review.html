@@ -323,60 +323,8 @@
             <h3 id="form_title"
                 style="font-size: 20px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px;">
                 사용후기 작성하기</h3>
-            <form onsubmit="submitReview(event)">
-                <input type="hidden" id="review_id" value="">
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">제목</label>
-                    <input type="text" id="review_title" required style="width: 100%;">
-                </div>
-                <div style="margin-bottom: 15px; display: flex; gap: 10px;">
-                    <div style="flex: 1;">
-                        <label style="display: block; font-weight: bold; margin-bottom: 5px;">작성자</label>
-                        <input type="text" id="review_author" required style="width: 100%;">
-                    </div>
-                    <div style="flex: 1;">
-                        <label style="display: block; font-weight: bold; margin-bottom: 5px;">비밀번호</label>
-                        <input type="password" id="review_pw" required
-                            style="width: 100%; border: 1px solid #ddd; padding: 10px; border-radius: 5px;"
-                            placeholder="수정 시 필요합니다.">
-                    </div>
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">평점</label>
-                    <select id="review_rating" style="width: 100%;">
-                        <option value="5">★★★★★ (5점)</option>
-                        <option value="4">★★★★☆ (4점)</option>
-                        <option value="3">★★★☆☆ (3점)</option>
-                        <option value="2">★★☆☆☆ (2점)</option>
-                        <option value="1">★☆☆☆☆ (1점)</option>
-                    </select>
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">내용</label>
-                    <textarea id="review_content" required style="width: 100%; height: 200px; resize: none;"></textarea>
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">첨부파일</label>
-                    <input type="file" id="review_file" style="background: #fff; width: 100%;">
-                    <p style="font-size: 12px; color: #888; margin-top: 5px;">이미지(jpg, png, gif) 또는 동영상 파일.</p>
-                </div>
-
-                <div style="margin-top: 10px; font-size: 12px; color: #e74c3c;">
-                    ※ 게재된 내용과 사진을 무단으로 복제 및 복사할 경우에는 법적조치를 취할 수 있습니다.
-                </div>
-
-                <div style="text-align: center; margin-top: 20px;">
-                    <button type="submit"
-                        style="padding: 10px 30px; background: #c31d22; color: #fff; border: none; font-size: 16px; cursor: pointer; border-radius: 5px;">등록하기</button>
-                    <button type="button" onclick="toggleWriteForm()"
-                        style="padding: 10px 30px; background: #666; color: #fff; border: none; font-size: 16px; cursor: pointer; margin-left: 10px; border-radius: 5px;">취소</button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Password Modal -->
-        <div id="password_modal"
-            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);
+            z-index:9999; align-items:center; justify-content:center;">
             <div style="background:#fff; padding:20px; border-radius:10px; width:300px; text-align:center;">
                 <h4 style="margin-bottom:15px; font-weight:bold;">비밀번호 확인</h4>
                 <input type="password" id="modal_pw_input" placeholder="비밀번호를 입력하세요"
@@ -392,10 +340,20 @@
         </div>
 
         <script src="../js/community_common.js"></script>
+        <!-- Firebase SDK is loaded in community_firebase.js -->
+        <script type="module" src="../js/community_firebase.js?v=fix_click"></script>
+
         <script type="module">
-            import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment, ensureAuth } from '../js/community_firebase.js?v=debug_fix';
+            import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment, ensureAuth } from '../js/community_firebase.js?v=fix_click';
 
             const BOARD_KEY = COMM_KEYS.REVIEW;
+
+            // Bind Event Listener safely
+            const form = document.getElementById('reviewForm');
+            if (form) {
+                form.addEventListener('submit', submitReview);
+                console.log("Review form handler attached");
+            }
 
             // Enable Content Protection
             enableContentProtection();
@@ -809,15 +767,10 @@
                     const pw = document.getElementById('cmt_pw').value;
                     await addComment(bKey, pId, { author, content, pw });
                     renderCommentSectionSync('comment-section', bKey, pId);
-                }
-
-                html += `
-                        </ul>
-                        <div class="comment_form">
-                            <form onsubmit="submitComment(event, '${boardKey}', '${postId}')">
-                                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                                    <input type="text" id="cmt_author" placeholder="이름" required style="padding: 5px; border: 1px solid #ddd; width: 100px;">
-                                    <input type="password" id="cmt_pw" placeholder="비밀번호" style="padding: 5px; border: 1px solid #ddd; width: 100px;">
+                    <form id="reviewForm">
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <input type="text" id="cmt_author" placeholder="이름" required style="padding: 5px; border: 1px solid #ddd; width: 100px;">
+                                <input type="password" id="cmt_pw" placeholder="비밀번호" style="padding: 5px; border: 1px solid #ddd; width: 100px;">
                                 </div>
                                 <div style="display: flex; gap: 10px;">
                                     <textarea id="cmt_content" placeholder="댓글을 남겨주세요." required style="flex: 1; height: 60px; padding: 10px; border: 1px solid #ddd; resize: none;"></textarea>
