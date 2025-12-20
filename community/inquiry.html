@@ -491,11 +491,12 @@
 								const checkModule = setInterval(() => {
 									if (window.viewInquiryPost) {
 										clearInterval(checkModule);
+										writeLog("2-1. 상세 보기 모듈 감지됨 -> 실행");
 										viewInquiryPost(null, id);
 									}
 								}, 100);
 								// Timeout after 3 seconds
-								setTimeout(() => { clearInterval(checkModule); if (!window.viewInquiryPost) writeLog("❌ viewInquiryPost 모듈 로드 실패"); }, 3000);
+								setTimeout(() => { clearInterval(checkModule); if (!window.viewInquiryPost) writeLog("❌ viewInquiryPost 모듈 로드 실패 (Detail View Timeout)"); }, 3000);
 
 							} else {
 								writeLog("3. 목록 초기화 진입");
