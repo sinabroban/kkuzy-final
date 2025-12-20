@@ -143,7 +143,7 @@ export async function getPosts(collectionName) {
         querySnapshot.forEach((doc) => {
             posts.push({ id: doc.id, ...doc.data() });
         });
-        // alert(`DEBUG: Fetched ${posts.length} posts from ${collectionName}`);
+        alert(`DEBUG: Fetched ${posts.length} posts from ${collectionName}`); // UNCOMMENTED
         if (posts.length === 0) console.warn(`No posts found in ${collectionName}`);
         return posts;
     } catch (e) {
