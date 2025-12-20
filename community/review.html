@@ -340,35 +340,9 @@
         </div>
 
         <script src="../js/community_common.js"></script>
-        <!-- Firebase SDK is loaded in community_firebase.js -->
-        <script type="module" src="../js/community_firebase.js?v=fix_click"></script>
 
-        <script type="module">
-            import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment, ensureAuth } from '../js/community_firebase.js?v=fix_click';
-
-            const BOARD_KEY = COMM_KEYS.REVIEW;
-
-            // Bind Event Listener safely
-            const form = document.getElementById('reviewForm');
-            if (form) {
-                form.addEventListener('submit', submitReview);
-                console.log("Review form handler attached");
-            }
-
-            // Expose specific functions to global scope IMMEDIATELY
-            window.toggleWriteForm = toggleWriteForm;
-            window.showList = showList;
-            window.submitReview = submitReview;
-            window.searchReviews = searchReviews;
-            window.viewPost = viewPost;
-            window.checkPasswordAndEdit = checkPasswordAndEdit;
-            window.closePasswordModal = closePasswordModal;
-            window.confirmPasswordModal = confirmPasswordModal;
-
-            // Enable Content Protection
-            enableContentProtection();
-
-
+        <!-- Standard Script for UI Logic -->
+        <script>
             function toggleWriteForm() {
                 var form = document.getElementById('write_form_container');
                 var list = document.querySelector('.tbl_type');
@@ -378,10 +352,10 @@
 
                 if (form.style.display === 'none') {
                     form.style.display = 'block';
-                    list.style.display = 'none';
-                    btnBox.style.display = 'none';
-                    view.style.display = 'none';
-                    paging.style.display = 'none';
+                    if (list) list.style.display = 'none';
+                    if (btnBox) btnBox.style.display = 'none';
+                    if (view) view.style.display = 'none';
+                    if (paging) paging.style.display = 'none';
                     form.scrollIntoView({ behavior: "smooth" });
                 } else {
                     showList();
@@ -402,15 +376,50 @@
             function showList() {
                 document.getElementById('write_form_container').style.display = 'none';
                 document.getElementById('view_container').style.display = 'none';
-                document.querySelector('.tbl_type').style.display = 'table';
-                document.querySelector('.btn_box').style.display = 'block';
-                document.getElementById('pagingNew').style.display = 'block';
+                if (document.querySelector('.tbl_type')) document.querySelector('.tbl_type').style.display = 'table';
+                if (document.querySelector('.btn_box')) document.querySelector('.btn_box').style.display = 'block';
+                if (document.getElementById('pagingNew')) document.getElementById('pagingNew').style.display = 'block';
 
                 resetWriteForm();
 
-                renderReviewList('review-list-container');
+                if (window.renderReviewList) {
+                    window.renderReviewList('review-list-container');
+                } else {
+                    setTimeout(() => { if (window.renderReviewList) window.renderReviewList('review-list-container'); }, 500);
+                }
                 history.pushState(null, null, location.pathname);
             }
+        </script>
+
+        <!-- Firebase SDK is loaded in community_firebase.js -->
+        <script type="module" src="../js/community_firebase.js?v=fix_click"></script>
+
+        <script type="module">
+            import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment, ensureAuth } from '../js/community_firebase.js?v=fix_click';
+
+            const BOARD_KEY = COMM_KEYS.REVIEW;
+
+            // Bind Event Listener safely
+            const form = document.getElementById('reviewForm');
+            if (form) {
+                form.addEventListener('submit', submitReview);
+                console.log("Review form handler attached");
+            }
+
+            // Expose specific functions to global scope
+            window.submitReview = submitReview;
+            window.searchReviews = searchReviews;
+            window.viewPost = viewPost;
+            window.checkPasswordAndEdit = checkPasswordAndEdit;
+            window.closePasswordModal = closePasswordModal;
+            window.confirmPasswordModal = confirmPasswordModal;
+
+            // Enable Content Protection
+            enableContentProtection();
+
+            // UI Functions (toggleWriteForm, showList) defined in standard script object
+
+            // ... Module continues
 
             async function submitReview(e) {
                 e.preventDefault();

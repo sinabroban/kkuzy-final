@@ -339,6 +339,41 @@
 			<a href="#" onclick="toggleWriteForm(); return false;" style="font-size:12px; color:#ccc;">관리자 글쓰기</a>
 		</div>
 
+		<!-- Standard Script for UI Logic -->
+		<script>
+			function toggleWriteForm() {
+				var form = document.getElementById('write_form_container');
+				var list = document.querySelector('.tbl_type');
+				var view = document.getElementById('view_container');
+
+				// Notice: no paging/search container used in internal logic here but function was simple
+				if (form.style.display === 'none') {
+					form.style.display = 'block';
+					if (list) list.style.display = 'none';
+					if (view) view.style.display = 'none';
+					form.scrollIntoView({ behavior: "smooth" });
+				} else {
+					showList();
+				}
+			}
+
+			function showList() {
+				document.getElementById('write_form_container').style.display = 'none';
+				document.getElementById('view_container').style.display = 'none';
+				document.querySelector('.tbl_type').style.display = 'table';
+
+				// Invoke render if available
+				if (window.renderNoticeList) {
+					window.renderNoticeList('notice-list-container');
+				} else {
+					setTimeout(() => { if (window.renderNoticeList) window.renderNoticeList('notice-list-container'); }, 500);
+				}
+
+				// Clear URL param
+				history.pushState(null, null, location.pathname);
+			}
+		</script>
+
 		<!-- Same fix as review.html -->
 		<!-- Use Firebase Module -->
 		<script type="module" src="../js/community_firebase.js?v=fix_click"></script>
@@ -353,41 +388,18 @@
 				console.log("Notice form handler attached");
 			}
 
-			// Expose functions IMMEDIATELY
-			window.toggleWriteForm = toggleWriteForm;
-			window.showList = showList;
+			// Expose functions for module interaction
 			window.submitNotice = submitNotice;
 			window.searchNotices = searchNotices;
 			window.viewPost = viewPost;
+
+			// UI functions are defined above in standard script
 
 			const BOARD_KEY = COMM_KEYS.NOTICE;
 
 			enableContentProtection();
 
-			function toggleWriteForm() {
-				var form = document.getElementById('write_form_container');
-				var list = document.querySelector('.tbl_type');
-				var view = document.getElementById('view_container');
-
-				if (form.style.display === 'none') {
-					form.style.display = 'block';
-					list.style.display = 'none';
-					view.style.display = 'none';
-					form.scrollIntoView({ behavior: "smooth" });
-				} else {
-					showList();
-				}
-			}
-
-			function showList() {
-				document.getElementById('write_form_container').style.display = 'none';
-				document.getElementById('view_container').style.display = 'none';
-				document.querySelector('.tbl_type').style.display = 'table';
-				renderNoticeList('notice-list-container');
-
-				// Clear URL param
-				history.pushState(null, null, location.pathname);
-			}
+			// Removed toggleWriteForm/showList from here
 
 			async function submitNotice(e) {
 				e.preventDefault();
