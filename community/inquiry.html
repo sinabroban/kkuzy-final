@@ -460,7 +460,38 @@
 							if (document.getElementById('inquiry_pw')) document.getElementById('inquiry_pw').value = '';
 							if (document.getElementById('inq_content')) document.getElementById('inq_content').value = '';
 							if (document.getElementById('inq_file')) document.getElementById('inq_file').value = '';
+							if (document.getElementById('inq_file')) document.getElementById('inq_file').value = '';
 						}
+
+						window.onload = function () {
+							const urlParams = new URLSearchParams(window.location.search);
+							const id = urlParams.get('id');
+							if (id) {
+								// We need to wait for viewInquiryPost to be available
+								// But viewInquiryPost is in module.
+								// So we use a Polling check similar to showList
+								console.log("Standard Init: Checking for module...");
+								const checkModule = setInterval(() => {
+									if (window.viewInquiryPost) {
+										clearInterval(checkModule);
+										viewInquiryPost(null, id);
+									}
+								}, 100);
+								// Timeout after 3 seconds
+								setTimeout(() => { clearInterval(checkModule); if (!window.viewInquiryPost) alert("시스템 오류: 모듈 로드 실패"); }, 3000);
+
+							} else {
+								showList(); // This already has the built-in timeout check
+							}
+						}
+
+						window.onpopstate = function (event) {
+							if (event.state && event.state.id) {
+								if (window.viewInquiryPost) viewInquiryPost(null, event.state.id);
+							} else {
+								showList();
+							}
+						};
 					</script>
 
 					<!-- Same fix as review.html -->
@@ -871,23 +902,8 @@
 						}
 
 
-						window.onload = function () {
-							const urlParams = new URLSearchParams(window.location.search);
-							const id = urlParams.get('id');
-							if (id) {
-								viewInquiryPost(null, id);
-							} else {
-								renderInquiryTable('inquiry-list-container');
-							}
-						}
-
-						window.onpopstate = function (event) {
-							if (event.state && event.state.id) {
-								viewInquiryPost(null, event.state.id);
-							} else {
-								showList();
-							}
-						};
+						// Removed window.onload from here to ensure it runs even if module fails
+						// window.onload moved to standard script
 					</script>
 					<br><br>
 
