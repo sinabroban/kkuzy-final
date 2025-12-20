@@ -385,7 +385,13 @@
                 if (window.renderReviewList) {
                     window.renderReviewList('review-list-container');
                 } else {
-                    setTimeout(() => { if (window.renderReviewList) window.renderReviewList('review-list-container'); }, 500);
+                    setTimeout(() => {
+                        if (window.renderReviewList) {
+                            window.renderReviewList('review-list-container');
+                        } else {
+                            console.warn("Review Module timeout");
+                        }
+                    }, 1500);
                 }
                 history.pushState(null, null, location.pathname);
             }

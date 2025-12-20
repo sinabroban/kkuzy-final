@@ -366,7 +366,13 @@
 				if (window.renderNoticeList) {
 					window.renderNoticeList('notice-list-container');
 				} else {
-					setTimeout(() => { if (window.renderNoticeList) window.renderNoticeList('notice-list-container'); }, 500);
+					setTimeout(() => {
+						if (window.renderNoticeList) {
+							window.renderNoticeList('notice-list-container');
+						} else {
+							console.warn("Notice Module timeout");
+						}
+					}, 1500);
 				}
 
 				// Clear URL param
