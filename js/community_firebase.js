@@ -360,6 +360,31 @@ export async function uploadFile(file) {
         }
 
         alert(`파일 업로드 실패:\n${msg}`);
+
+        // FALLBACK: Try to save as Base64 (Legacy Mode) to bypass CORS
+        if (msg.includes('CORS') || msg.includes('네트워크') || msg.includes('초과')) {
+            const fallbackChoice = confirm("네트워크/보안 문제로 클라우드 업로드가 차단되었습니다.\n\n이미지를 문서 안에 직접 저장하시겠습니까?\n(화질이 원본보다 낮을 수 있지만 저장은 가능합니다.)");
+            if (fallbackChoice) {
+                try {
+                    const base64Data = await readFile(file);
+                    if (base64Data) {
+                        alert("비상 저장 모드(Base64)로 변환 성공! 저장을 계속합니다.");
+                        return {
+                            name: file.name,
+                            url: null, // No URL
+                            data: base64Data.data, // Base64 String
+                            size: file.size,
+                            type: file.type,
+                            storagePath: null
+                        };
+                    }
+                } catch (readErr) {
+                    console.error("Fallback failed", readErr);
+                    alert("비상 저장 모드조차 실패했습니다: " + readErr);
+                }
+            }
+        }
+
         throw e;
     }
 }
