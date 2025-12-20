@@ -685,162 +685,166 @@
 									});
 								}
 								tbody.innerHTML = html;
+							} catch (e) {
+								console.error("Render Error:", e);
+								tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 50px; color:red;">목록을 불러오는 중 오류가 발생했습니다.<br>${e.message}</td></tr>`;
 							}
+						}
 
 						async function viewInquiryPost(e, id) {
-								if (e) e.preventDefault();
+							if (e) e.preventDefault();
 
-								const post = await getPost(BOARD_KEY, id);
-								if (!post) {
-									alert('존재하지 않는 게시물입니다.');
-									return;
-								}
+							const post = await getPost(BOARD_KEY, id);
+							if (!post) {
+								alert('존재하지 않는 게시물입니다.');
+								return;
+							}
 
-								document.getElementById('view_title').innerText = post.title;
-								document.getElementById('view_author').innerText = post.author;
-								document.getElementById('view_date').innerText = post.date;
-								document.getElementById('view_content').innerText = post.content;
+							document.getElementById('view_title').innerText = post.title;
+							document.getElementById('view_author').innerText = post.author;
+							document.getElementById('view_date').innerText = post.date;
+							document.getElementById('view_content').innerText = post.content;
 
-								const fileArea = document.getElementById('view_file_area');
-								fileArea.innerHTML = '';
-								if (post.file) {
-									if (post.file.url) {
-										// Firebase Storage URL
-										const isImage = post.file.name.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-										if (isImage) {
-											fileArea.innerHTML = `<img src="${post.file.url}" style="max-width:100%; margin-top:10px;">`;
-										} else {
-											fileArea.innerHTML = `<div style="background:#eee; padding:10px; margin-top:10px;">첨부파일: <a href="${post.file.url}" target="_blank">${post.file.name}</a></div>`;
-										}
-									} else if (post.file.data) {
-										// Legacy Base64
-										fileArea.innerHTML = `<img src="${post.file.data}" style="max-width:100%; margin-top:10px;">`;
+							const fileArea = document.getElementById('view_file_area');
+							fileArea.innerHTML = '';
+							if (post.file) {
+								if (post.file.url) {
+									// Firebase Storage URL
+									const isImage = post.file.name.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+									if (isImage) {
+										fileArea.innerHTML = `<img src="${post.file.url}" style="max-width:100%; margin-top:10px;">`;
 									} else {
-										// Just name (legacy large file placeholder)
-										fileArea.innerHTML = `<div style="background:#eee; padding:10px; margin-top:10px;">첨부파일: ${post.file.name}</div>`;
+										fileArea.innerHTML = `<div style="background:#eee; padding:10px; margin-top:10px;">첨부파일: <a href="${post.file.url}" target="_blank">${post.file.name}</a></div>`;
 									}
+								} else if (post.file.data) {
+									// Legacy Base64
+									fileArea.innerHTML = `<img src="${post.file.data}" style="max-width:100%; margin-top:10px;">`;
+								} else {
+									// Just name (legacy large file placeholder)
+									fileArea.innerHTML = `<div style="background:#eee; padding:10px; margin-top:10px;">첨부파일: ${post.file.name}</div>`;
 								}
+							}
 
-								// Inject Edit Buttons if container exists
-								// Attempt to find a place to put buttons
-								const viewContainer = document.getElementById('view_container');
-								// We append to viewContainer logic if needed, but original probably has button area?
-								// Original didn't show button area in my view.
-								// I will append it manually if not exist.
+							// Inject Edit Buttons if container exists
+							// Attempt to find a place to put buttons
+							const viewContainer = document.getElementById('view_container');
+							// We append to viewContainer logic if needed, but original probably has button area?
+							// Original didn't show button area in my view.
+							// I will append it manually if not exist.
 
-								let btnDiv = document.getElementById('inquiry_view_btns');
-								if (!btnDiv) {
-									btnDiv = document.createElement('div');
-									btnDiv.id = 'inquiry_view_btns';
-									btnDiv.style.textAlign = 'center';
-									btnDiv.style.marginTop = '30px';
-									viewContainer.appendChild(btnDiv);
-								}
+							let btnDiv = document.getElementById('inquiry_view_btns');
+							if (!btnDiv) {
+								btnDiv = document.createElement('div');
+								btnDiv.id = 'inquiry_view_btns';
+								btnDiv.style.textAlign = 'center';
+								btnDiv.style.marginTop = '30px';
+								viewContainer.appendChild(btnDiv);
+							}
 
-								btnDiv.innerHTML = `
+							btnDiv.innerHTML = `
                                 <button onclick="checkPasswordAndEdit('${post.id}')" style="padding: 10px 20px; background: #333; color: #fff; border: none; cursor: pointer; border-radius: 5px; margin-right:5px;">수정</button>
  				                <button onclick="showList()" style="padding: 10px 30px; background: #666; color: #fff; border: none; cursor: pointer;">목록으로</button>
                              `;
 
 
-								viewContainer.style.display = 'block';
+							viewContainer.style.display = 'block';
 
-								if (document.querySelector('.tbl_type')) document.querySelector('.tbl_type').style.display = 'none';
-								if (document.querySelector('.btn_box')) document.querySelector('.btn_box').style.display = 'none';
-								if (document.getElementById('pagingNew')) document.getElementById('pagingNew').style.display = 'none';
-								if (document.getElementById('search_box_container')) document.getElementById('search_box_container').style.display = 'none';
+							if (document.querySelector('.tbl_type')) document.querySelector('.tbl_type').style.display = 'none';
+							if (document.querySelector('.btn_box')) document.querySelector('.btn_box').style.display = 'none';
+							if (document.getElementById('pagingNew')) document.getElementById('pagingNew').style.display = 'none';
+							if (document.getElementById('search_box_container')) document.getElementById('search_box_container').style.display = 'none';
 
-								renderCommentSectionSync('comment-section', BOARD_KEY, post.id);
+							renderCommentSectionSync('comment-section', BOARD_KEY, post.id);
 
-								history.pushState({ id: id }, null, `?id=${id}`);
-							}
+							history.pushState({ id: id }, null, `?id=${id}`);
+						}
 
-							// Password & Edit Logic
-							async function checkPasswordAndEdit(id) {
-								const post = await getPost(BOARD_KEY, id);
-								if (!post) { alert('게시물을 찾을 수 없습니다.'); return; }
+						// Password & Edit Logic
+						async function checkPasswordAndEdit(id) {
+							const post = await getPost(BOARD_KEY, id);
+							if (!post) { alert('게시물을 찾을 수 없습니다.'); return; }
 
-								// If no password (old posts or inquiry without pw), just allow?
-								if (!post.password) {
-									if (confirm('비밀번호가 없는 게시물입니다. 수정하시겠습니까?')) {
-										loadEditForm(post);
-									}
-									return;
-								}
-
-								document.getElementById('modal_target_id').value = id;
-								document.getElementById('modal_pw_input').value = '';
-								document.getElementById('password_modal').style.display = 'flex';
-								document.getElementById('modal_pw_input').focus();
-							}
-
-							function closePasswordModal() {
-								document.getElementById('password_modal').style.display = 'none';
-							}
-
-							async function confirmPasswordModal() {
-								const id = document.getElementById('modal_target_id').value;
-								const input = document.getElementById('modal_pw_input').value;
-								const post = await getPost(BOARD_KEY, id);
-
-								if (post && input.trim() === post.password.trim()) {
-									closePasswordModal();
+							// If no password (old posts or inquiry without pw), just allow?
+							if (!post.password) {
+								if (confirm('비밀번호가 없는 게시물입니다. 수정하시겠습니까?')) {
 									loadEditForm(post);
-								} else {
-									alert('비밀번호가 일치하지 않습니다.');
 								}
+								return;
 							}
 
-							document.getElementById('modal_pw_input').addEventListener('keypress', function (e) {
-								if (e.key === 'Enter') confirmPasswordModal();
-							});
+							document.getElementById('modal_target_id').value = id;
+							document.getElementById('modal_pw_input').value = '';
+							document.getElementById('password_modal').style.display = 'flex';
+							document.getElementById('modal_pw_input').focus();
+						}
 
-							function loadEditForm(post) {
-								document.getElementById('inquiry_id').value = post.id;
-								document.getElementById('inq_title').value = post.title;
-								document.getElementById('inq_author').value = post.author;
-								if (document.getElementById('inquiry_pw')) document.getElementById('inquiry_pw').value = post.password || '';
-								document.getElementById('inq_content').value = post.content;
-								// File cannot be set programmatically
+						function closePasswordModal() {
+							document.getElementById('password_modal').style.display = 'none';
+						}
 
-								toggleWriteForm();
+						async function confirmPasswordModal() {
+							const id = document.getElementById('modal_target_id').value;
+							const input = document.getElementById('modal_pw_input').value;
+							const post = await getPost(BOARD_KEY, id);
+
+							if (post && input.trim() === post.password.trim()) {
+								closePasswordModal();
+								loadEditForm(post);
+							} else {
+								alert('비밀번호가 일치하지 않습니다.');
 							}
+						}
 
-							async function renderCommentSectionSync(containerId, boardKey, postId) {
-								const container = document.getElementById(containerId);
-								if (!container) return;
+						document.getElementById('modal_pw_input').addEventListener('keypress', function (e) {
+							if (e.key === 'Enter') confirmPasswordModal();
+						});
 
-								const comments = await getComments(boardKey, postId);
+						function loadEditForm(post) {
+							document.getElementById('inquiry_id').value = post.id;
+							document.getElementById('inq_title').value = post.title;
+							document.getElementById('inq_author').value = post.author;
+							if (document.getElementById('inquiry_pw')) document.getElementById('inquiry_pw').value = post.password || '';
+							document.getElementById('inq_content').value = post.content;
+							// File cannot be set programmatically
 
-								let html = `
+							toggleWriteForm();
+						}
+
+						async function renderCommentSectionSync(containerId, boardKey, postId) {
+							const container = document.getElementById(containerId);
+							if (!container) return;
+
+							const comments = await getComments(boardKey, postId);
+
+							let html = `
                                 <div class="comment_wrap" style="margin-top: 50px; background: #f9f9f9; padding: 20px;">
                                     <h4 style="font-size: 16px; font-weight: bold; margin-bottom: 15px;">댓글 <span>(${comments.length})</span></h4>
                                     <ul class="comment_list" style="margin-bottom: 20px;">
                             `;
 
-								if (comments.length === 0) {
-									html += `<li style="color: #888; padding: 10px 0;">등록된 댓글이 없습니다.</li>`;
-								} else {
-									comments.forEach(c => {
-										html += `
+							if (comments.length === 0) {
+								html += `<li style="color: #888; padding: 10px 0;">등록된 댓글이 없습니다.</li>`;
+							} else {
+								comments.forEach(c => {
+									html += `
                                         <li style="border-bottom: 1px solid #eee; padding: 10px 0;">
                                             <div style="font-weight: bold; margin-bottom: 5px;">${c.author} <span style="font-weight: normal; font-size: 12px; color: #888;">${c.date}</span></div>
                                             <div style="line-height: 1.5;">${c.content.replace(/\n/g, '<br>')}</div>
                                         </li>
                                     `;
-									});
-								}
+								});
+							}
 
-								window.submitComment = async function (e, bKey, pId) {
-									e.preventDefault();
-									const author = document.getElementById('cmt_author').value;
-									const content = document.getElementById('cmt_content').value;
-									const pw = document.getElementById('cmt_pw').value;
-									await addComment(bKey, pId, { author, content, pw });
-									renderCommentSectionSync('comment-section', bKey, pId);
-								}
+							window.submitComment = async function (e, bKey, pId) {
+								e.preventDefault();
+								const author = document.getElementById('cmt_author').value;
+								const content = document.getElementById('cmt_content').value;
+								const pw = document.getElementById('cmt_pw').value;
+								await addComment(bKey, pId, { author, content, pw });
+								renderCommentSectionSync('comment-section', bKey, pId);
+							}
 
-								html += `
+							html += `
                                     </ul>
                                     <div class="comment_form">
                                         <form onsubmit="submitComment(event, '${boardKey}', '${postId}')">
@@ -856,27 +860,27 @@
                                     </div>
                                 </div>
                             `;
-								container.innerHTML = html;
+							container.innerHTML = html;
+						}
+
+
+						window.onload = function () {
+							const urlParams = new URLSearchParams(window.location.search);
+							const id = urlParams.get('id');
+							if (id) {
+								viewInquiryPost(null, id);
+							} else {
+								renderInquiryTable('inquiry-list-container');
 							}
+						}
 
-
-							window.onload = function () {
-								const urlParams = new URLSearchParams(window.location.search);
-								const id = urlParams.get('id');
-								if (id) {
-									viewInquiryPost(null, id);
-								} else {
-									renderInquiryTable('inquiry-list-container');
-								}
+						window.onpopstate = function (event) {
+							if (event.state && event.state.id) {
+								viewInquiryPost(null, event.state.id);
+							} else {
+								showList();
 							}
-
-							window.onpopstate = function (event) {
-								if (event.state && event.state.id) {
-									viewInquiryPost(null, event.state.id);
-								} else {
-									showList();
-								}
-							};
+						};
 					</script>
 					<br><br>
 
