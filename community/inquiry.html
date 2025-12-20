@@ -419,13 +419,7 @@
 							console.error("Form not found for binding");
 						}
 
-						const BOARD_KEY = COMM_KEYS.INQUIRY;
-
-						enableContentProtection();
-
-						// ... (rest of window exposing code) ...
-
-						// Expose for onClick
+						// Expose functions IMMEDIATELY to ensure they are available even if later code fails
 						window.toggleWriteForm = toggleWriteForm;
 						window.showList = showList;
 						window.submitInquiry = submitInquiry;
@@ -434,6 +428,12 @@
 						window.checkPasswordAndEdit = checkPasswordAndEdit;
 						window.closePasswordModal = closePasswordModal;
 						window.confirmPasswordModal = confirmPasswordModal;
+
+						console.log("Inquiry functions exposed to window");
+
+						const BOARD_KEY = COMM_KEYS.INQUIRY;
+
+						enableContentProtection();
 
 						function toggleWriteForm() {
 							var form = document.getElementById('write_form_container');
