@@ -863,16 +863,6 @@
 							if (e.key === 'Enter') confirmPasswordModal();
 						});
 
-						function loadEditForm(post) {
-							document.getElementById('inquiry_id').value = post.id;
-							document.getElementById('inq_title').value = post.title;
-							document.getElementById('inq_author').value = post.author;
-							if (document.getElementById('inquiry_pw')) document.getElementById('inquiry_pw').value = post.password || '';
-							document.getElementById('inq_content').value = post.content;
-							// File cannot be set programmatically
-
-							toggleWriteForm();
-						}
 
 						async function renderCommentSectionSync(containerId, boardKey, postId) {
 							const container = document.getElementById(containerId);
