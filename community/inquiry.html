@@ -539,12 +539,12 @@
 
 						async function submitInquiry(e) {
 							e.preventDefault();
-							// alert("등록 프로세스를 시작합니다..."); // REMOVE DEBUG
+							alert("등록 프로세스를 시작합니다...");
 
 							try {
 								try {
 									await ensureAuth();
-									// alert("인증 확인 완료. 데이터 준비 중..."); // REMOVE DEBUG
+									alert("인증 확인 완료. 데이터 준비 중...");
 								} catch (authErr) {
 									alert("인증 오류(서버 연결 실패): " + authErr);
 									return;
