@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=1280">
     <link rel="stylesheet" href="../css/style.css">
     <script src="../js/jquery-2.1.4.min.js"></script>
+    <script type="module" src="../js/community_firebase.js"></script>
     <style>
         body {
             background: #f4f6f9;
@@ -23,6 +24,8 @@
             background: #343a40;
             color: #fff;
             flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
         }
 
         .sidebar-header {
@@ -113,6 +116,11 @@
             background: #28a745;
         }
 
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
         .form-group {
             margin-bottom: 15px;
         }
@@ -135,22 +143,59 @@
             height: 150px;
             resize: vertical;
         }
+
+        /* Login Overlay */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #343a40;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #login-box {
+            background: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            width: 400px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
     </style>
 </head>
 
 <body>
 
-    <div class="admin-wrap">
+    <!-- Login Overlay -->
+    <div id="login-overlay">
+        <div id="login-box">
+            <h2 style="margin-bottom: 30px; font-weight: bold;">관리자 로그인</h2>
+            <!-- Email Input Removed -->
+            <!-- <input type="email" id="admin-email" class="form-control" placeholder="이메일 주소" style="margin-bottom: 15px;"> -->
+            <input type="password" id="admin-password" class="form-control" placeholder="비밀번호"
+                style="margin-bottom: 20px;">
+            <button class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 16px;"
+                onclick="tryLogin()">로그인</button>
+            <p id="login-msg" style="color: red; margin-top: 15px; font-size: 14px;"></p>
+        </div>
+    </div>
+
+    <div class="admin-wrap" id="admin-main" style="filter: blur(5px);">
         <div class="sidebar">
             <div class="sidebar-header">관리자 페이지</div>
-            <nav>
+            <nav style="flex-grow: 1;">
                 <a href="#" class="nav-link active" data-target="dashboard">대시보드</a>
-                <a href="#" class="nav-link" data-target="orders">주문 관리</a>
                 <a href="#" class="nav-link" data-target="notices">공지사항 관리</a>
                 <a href="#" class="nav-link" data-target="inquiries">활동사항 관리</a>
                 <a href="#" class="nav-link" data-target="reviews">사용후기 관리</a>
-                <a href="../index.html" class="nav-link" style="margin-top: 20px; background: #c31d22;">홈페이지로 이동</a>
             </nav>
+            <a href="#" class="nav-link" onclick="tryLogout()"
+                style="background: #c31d22; text-align: center; font-weight: bold;">로그아웃</a>
         </div>
 
         <div class="content">
@@ -160,51 +205,15 @@
                 <div style="display: flex; gap: 20px;">
                     <div class="card" style="flex: 1;">
                         <div class="card-body">
-                            <h3>신규 주문</h3>
-                            <p style="font-size: 2rem; font-weight: bold; color: #28a745;" id="dash-order-count">0
-                            </p>
-                        </div>
-                    </div>
-                    <div class="card" style="flex: 1;">
-                        <div class="card-body">
                             <h3>접수된 활동사항</h3>
-                            <p style="font-size: 2rem; font-weight: bold; color: #17a2b8;" id="dash-inquiry-count">0
-                            </p>
+                            <p style="font-size: 2rem; font-weight: bold; color: #17a2b8;" id="dash-inquiry-count">0</p>
                         </div>
                     </div>
                     <div class="card" style="flex: 1;">
                         <div class="card-body">
                             <h3>등록된 사용후기</h3>
-                            <p style="font-size: 2rem; font-weight: bold; color: #ffc107;" id="dash-review-count">0
-                            </p>
+                            <p style="font-size: 2rem; font-weight: bold; color: #ffc107;" id="dash-review-count">0</p>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Orders -->
-            <div id="orders" class="page-section" style="display: none;">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">주문 관리</h3>
-                        <button class="btn btn-sm btn-primary" onclick="addMockOrder()">테스트 주문 추가</button>
-                    </div>
-                    <div class="card-body">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>주문번호</th>
-                                    <th>주문자</th>
-                                    <th>상품명</th>
-                                    <th>금액</th>
-                                    <th>상태</th>
-                                    <th>관리</th>
-                                </tr>
-                            </thead>
-                            <tbody id="order-list">
-                                <!-- JS populated -->
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>
@@ -220,7 +229,6 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>번호</th>
                                     <th>제목</th>
                                     <th>작성일</th>
                                     <th>관리</th>
@@ -269,11 +277,9 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>번호</th>
                                     <th>제목</th>
                                     <th>작성자</th>
                                     <th>날짜</th>
-                                    <th>평점</th>
                                     <th>관리</th>
                                 </tr>
                             </thead>
@@ -294,7 +300,7 @@
         <div class="card" style="width: 600px; max-width:90%;">
             <div class="card-header">
                 <h3 class="card-title" id="notice-modal-title">공지사항 작성</h3>
-                <button class="btn btn-danger" onclick="$('#notice-form-modal').hide()">닫기</button>
+                <button class="btn btn-danger" onclick="$('#notice-form-modal').hide();">닫기</button>
             </div>
             <div class="card-body">
                 <div class="form-group">
@@ -310,273 +316,10 @@
                     <input type="file" id="notice-file" class="form-control" accept="image/*">
                     <div id="notice-file-preview" style="margin-top:10px;"></div>
                 </div>
-                <button class="btn btn-success" onclick="saveNotice()">저장</button>
+                <button class="btn btn-success" onclick="saveNoticeBtn()">저장</button>
             </div>
         </div>
     </div>
-
-    <script>
-        // Navigation
-        $('.nav-link').click(function (e) {
-            if ($(this).attr('href').startsWith('#')) {
-                e.preventDefault();
-                $('.nav-link').removeClass('active');
-                $(this).addClass('active');
-                $('.page-section').hide();
-                $('#' + $(this).data('target')).show();
-                renderAll();
-            }
-        });
-
-        // Data Management
-        const DB = {
-            orders: JSON.parse(localStorage.getItem('kkuzy_orders')) || [],
-            notices: JSON.parse(localStorage.getItem('kkuzy_notices')) || [],
-            inquiries: JSON.parse(localStorage.getItem('kkuzy_inquiries')) || [],
-            reviews: JSON.parse(localStorage.getItem('kkuzy_reviews')) || []
-        };
-
-        function saveDB() {
-            try {
-                localStorage.setItem('kkuzy_orders', JSON.stringify(DB.orders));
-                localStorage.setItem('kkuzy_notices', JSON.stringify(DB.notices));
-                localStorage.setItem('kkuzy_inquiries', JSON.stringify(DB.inquiries));
-                localStorage.setItem('kkuzy_reviews', JSON.stringify(DB.reviews));
-                renderAll();
-            } catch (e) {
-                if (e.name === 'QuotaExceededError') {
-                    alert('저장 용량이 초과되었습니다. 이미지를 줄이거나 오래된 데이터를 삭제해주세요.');
-                } else {
-                    alert('저장 중 오류가 발생했습니다.');
-                }
-            }
-        }
-
-        function renderAll() {
-            // Dashboard Counts
-            $('#dash-order-count').text(DB.orders.length);
-            $('#dash-inquiry-count').text(DB.inquiries.length);
-            $('#dash-review-count').text(DB.reviews.length);
-
-            // Orders
-            let orderHtml = '';
-            DB.orders.forEach((o, i) => {
-                orderHtml += `<tr>
-                <td>${o.id || Date.now()}</td>
-                <td>${o.name}</td>
-                <td>${o.product}</td>
-                <td>${o.price}</td>
-                <td>${o.status || '접수'}</td>
-                <td><button class="btn btn-danger btn-sm" onclick="deleteItem('orders', ${i})">삭제</button></td>
-            </tr>`;
-            });
-            $('#order-list').html(orderHtml || '<tr><td colspan="6" class="text-center">주문 내역이 없습니다.</td></tr>');
-
-            // Notices
-            let noticeHtml = '';
-            DB.notices.forEach((n, i) => {
-                const fileIcon = n.file ? ' <span style="font-size:12px; color:#666;">(📎)</span>' : '';
-                noticeHtml += `<tr>
-                <td>${i + 1}</td>
-                <td><a href="#" onclick="showNoticeForm(${i})" style="text-decoration:none; color:#333;">${n.title}${fileIcon}</a></td>
-                <td>${n.date}</td>
-                <td>
-                    <button class="btn btn-primary btn-sm" onclick="showNoticeForm(${i})">수정</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteItem('notices', ${i})">삭제</button>
-                </td>
-            </tr>`;
-            });
-            $('#notice-list').html(noticeHtml || '<tr><td colspan="4" class="text-center">등록된 공지사항이 없습니다.</td></tr>');
-
-            // Inquiries
-            let inquiryHtml = '';
-            DB.inquiries.forEach((q, i) => {
-                const statusColor = q.status === '답변완료' ? 'blue' : 'red';
-                inquiryHtml += `<tr>
-                <td>${q.author || q.writer}</td>
-                <td>${q.title}</td>
-                <td><span style="color:${statusColor}">${q.status || '답변대기'}</span></td>
-                <td>${q.date}</td>
-                <td>
-                    <button class="btn btn-success btn-sm" onclick="showReplyForm(${i})">답변</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteItem('inquiries', ${i})">삭제</button>
-                </td>
-            </tr>`;
-            });
-            $('#inquiry-list').html(inquiryHtml || '<tr><td colspan="5" class="text-center">접수된 활동사항이 없습니다.</td></tr>');
-
-            // Reviews
-            let reviewHtml = '';
-            DB.reviews.forEach((r, i) => {
-                const starMap = { '5': '5점', '4': '4점', '3': '3점', '2': '2점', '1': '1점' };
-                const rating = starMap[r.rating] || r.rating;
-                const fileIcon = r.file ? ' <span style="font-size:12px; color:#666;">(📎)</span>' : '';
-
-                reviewHtml += `<tr>
-                <td>${i + 1}</td>
-                <td>${r.title}${fileIcon}</td>
-                <td>${r.author}</td>
-                <td>${r.date}</td>
-                <td>${rating}</td>
-                <td>
-                    <button class="btn btn-danger btn-sm" onclick="deleteItem('reviews', ${i})">삭제</button>
-                </td>
-            </tr>`;
-            });
-            $('#review-list').html(reviewHtml || '<tr><td colspan="6" class="text-center">등록된 사용후기가 없습니다.</td></tr>');
-        }
-
-        // Actions
-        function addMockOrder() {
-            DB.orders.push({
-                id: 'ORD-' + Date.now(),
-                name: '김철수',
-                product: '세심귀뜸봉 1세트',
-                price: '200,000원',
-                status: '결제대기'
-            });
-            saveDB();
-        }
-
-        // Notice Functions
-        let currentNoticeIndex = -1;
-
-        function showNoticeForm(index = -1) {
-            currentNoticeIndex = index;
-            if (index > -1) {
-                // Edit Mode
-                const n = DB.notices[index];
-                $('#notice-modal-title').text('공지사항 수정');
-                $('#notice-title').val(n.title);
-                $('#notice-content').val(n.content);
-                // File preview logic
-                if (n.file) {
-                    $('#notice-file-preview').html(`<img src="${n.file}" style="max-height:100px; display:block; margin-top:5px;"><p style="font-size:12px; color:#999;">기존 파일 있음 (새 파일을 선택하면 교체됩니다)</p>`);
-                } else {
-                    $('#notice-file-preview').html('');
-                }
-            } else {
-                // Create Mode
-                $('#notice-modal-title').text('공지사항 작성');
-                $('#notice-title').val('');
-                $('#notice-content').val('');
-                $('#notice-file-preview').html('');
-            }
-            $('#notice-file').val(''); // Clear file input
-            $('#notice-form-modal').css('display', 'flex');
-        }
-
-        function saveNotice() {
-            const title = $('#notice-title').val();
-            const content = $('#notice-content').val();
-            const fileInput = document.getElementById('notice-file');
-
-            if (!title) return alert('제목을 입력하세요.');
-
-            const processSave = (fileData) => {
-                const noticeData = {
-                    id: currentNoticeIndex > -1 ? DB.notices[currentNoticeIndex].id : Date.now(),
-                    title: title,
-                    content: content,
-                    date: currentNoticeIndex > -1 ? DB.notices[currentNoticeIndex].date : new Date().toLocaleDateString(),
-                    author: '관리자',
-                    file: fileData || (currentNoticeIndex > -1 ? DB.notices[currentNoticeIndex].file : null)
-                };
-
-                if (currentNoticeIndex > -1) {
-                    DB.notices[currentNoticeIndex] = noticeData;
-                } else {
-                    DB.notices.unshift(noticeData);
-                }
-                saveDB();
-                $('#notice-form-modal').hide();
-                alert('저장되었습니다.');
-            };
-
-            if (fileInput.files && fileInput.files[0]) {
-                const file = fileInput.files[0];
-                if (file.size > 2 * 1024 * 1024) { // 2MB limit check for localStorage safety
-                    if (!confirm('첨부 파일이 2MB를 초과합니다.\n저장이 안 될 수도 있습니다.\n계속 진행하시겠습니까?')) return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    processSave(e.target.result);
-                };
-                reader.readAsDataURL(file);
-            } else {
-                processSave(null);
-            }
-        }
-
-        // Inquiry Reply
-        let currentReplyIndex = -1;
-
-        function showReplyForm(index) {
-            currentReplyIndex = index;
-            const inq = DB.inquiries[index];
-            $('#reply-inq-title').text(inq.title);
-            $('#reply-inq-content').text(inq.content);
-            $('#reply-content').val('');
-            $('#reply-form-modal').css('display', 'flex');
-        }
-
-        function saveReply() {
-            if (currentReplyIndex === -1) return;
-            const content = $('#reply-content').val();
-            if (!content) return alert('답변 내용을 입력하세요.');
-
-            const inq = DB.inquiries[currentReplyIndex];
-            const comment = {
-                id: Date.now(),
-                author: '꾸지뽕사업단', // Admin Name
-                password: '', // Admin doesn't need password
-                content: content,
-                date: new Date().toISOString().split('T')[0] // YYYY-MM-DD
-            };
-
-            // Save to Comments DB
-            const commentsDB = JSON.parse(localStorage.getItem('kkuzy_comments')) || {};
-            const key = 'kkuzy_inquiries_' + inq.id;
-
-            if (!commentsDB[key]) commentsDB[key] = [];
-            commentsDB[key].push(comment);
-            localStorage.setItem('kkuzy_comments', JSON.stringify(commentsDB));
-
-            // Update Inquiry Status
-            inq.status = '답변완료';
-            saveDB();
-
-            $('#reply-form-modal').hide();
-            alert('답변이 등록되었습니다.');
-        }
-
-        let deleteTarget = { type: null, index: -1 };
-
-        function deleteItem(type, index) {
-            deleteTarget = { type: type, index: index };
-            $('#delete-confirm-modal').css('display', 'flex');
-        }
-
-        function confirmDelete() {
-            if (deleteTarget.type && deleteTarget.index > -1) {
-                DB[deleteTarget.type].splice(deleteTarget.index, 1);
-                saveDB();
-                $('#delete-confirm-modal').hide();
-                deleteTarget = { type: null, index: -1 };
-            }
-        }
-
-        // Initialize
-        $(document).ready(function () {
-            // Add sample data if empty
-            if (DB.notices.length === 0) {
-                DB.notices.push({ id: 1, title: '사이트 리뉴얼 오픈 안내', content: '새로운 사이트가 오픈되었습니다.', date: '2025.12.01', author: '관리자' });
-                saveDB();
-            }
-            renderAll();
-        });
-    </script>
 
     <!-- Reply Modal -->
     <div id="reply-form-modal"
@@ -597,11 +340,12 @@
                     <label>답변 내용</label>
                     <textarea id="reply-content" class="form-control" style="height:100px;"></textarea>
                 </div>
-                <button class="btn btn-success" onclick="saveReply()">등록</button>
+                <button class="btn btn-success" onclick="saveReplyBtn()">등록</button>
             </div>
         </div>
     </div>
-    <!-- Delete Confirmation Modal -->
+
+    <!-- Confirm Modal -->
     <div id="delete-confirm-modal"
         style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
         <div class="card" style="width: 300px; text-align:center;">
@@ -615,6 +359,306 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // FAILSAFE: Global Login Function (Standard Script)
+        // This runs regardless of Firebase module success/failure
+        // Local function to expose render to global scope
+        window.triggerRender = function () {
+            renderAll();
+        }
+
+        // If global login happened before module load, render now
+        if (window.isLoggedIn) {
+            renderAll();
+        }
+
+        // Window Functions
+        window.tryLogin = function () {
+            // alert('Debug: TryLogin Clicked'); // Debug check
+            // Simple Password Check
+            const input = document.getElementById('admin-password');
+            const pw = input.value.trim();
+
+            if (!pw) return alert('비밀번호를 입력하세요.');
+
+            if (pw === '4321') {
+                // Success
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('admin-main').style.filter = 'none';
+                window.isLoggedIn = true; // Set flag for module to check
+                if (typeof window.triggerRender === 'function') {
+                    window.triggerRender(); // Call module's render function
+                }
+            } else {
+                alert('비밀번호가 일치하지 않습니다.');
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        window.tryLogout = function () {
+            if (confirm('관리자 로그아웃 하시겠습니까?')) {
+                location.reload();
+            }
+        }
+
+        // Add Enter Key Support
+        document.addEventListener('DOMContentLoaded', function () {
+            const pwInput = document.getElementById('admin-password');
+            if (pwInput) {
+                pwInput.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        tryLogin();
+                    }
+                });
+            }
+        });
+    </script>
+
+    <script type="module">
+        import { COMM_KEYS, getPosts, savePost, deletePost, readFile, addComment, adminLogin, adminLogout, monitorAuth, getPost, isFirebaseInitialized } from '../js/community_firebase.js';
+
+        // State
+        let currentAuthUser = null;
+        let noticeList = [];
+        let inquiryList = [];
+        let reviewList = [];
+
+        let currentEditId = null; // For Notices
+        let currentReplyId = null; // For Inquiries
+        let deleteTargetId = null;
+        let deleteTargetBoard = null;
+
+        // Check Init (Disabled for simple mode)
+        // if (!isFirebaseInitialized()) { ... }
+
+        // --- AUTH LOGIC (SIMPLIFIED for 4321) ---
+
+        // Removed Firebase Monitor Auth to prevent persistence/freeze
+        // monitorAuth((user) => { ... });
+
+
+        if (pw === '4321') {
+            // Success
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('admin-main').style.filter = 'none';
+            renderAll(); // Load data on success
+        } else {
+            alert('비밀번호가 일치하지 않습니다.');
+            input.value = '';
+            input.focus();
+        }
+        }
+
+        window.tryLogout = function () {
+            if (confirm('관리자 로그아웃 하시겠습니까?')) {
+                location.reload();
+            }
+        }
+
+        // Add Enter Key Support
+        document.getElementById('admin-password').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                tryLogin();
+            }
+        });
+
+        // --- DATA LOGIC ---
+
+        async function renderAll() {
+            // Bypass auth check for simple mode
+            // if (!currentAuthUser) return;
+            // Fake user for logic compatibility
+            currentAuthUser = { email: 'admin@demo.com' };
+
+            // Fetch All
+            noticeList = await getPosts(COMM_KEYS.NOTICE);
+            inquiryList = await getPosts(COMM_KEYS.INQUIRY);
+            reviewList = await getPosts(COMM_KEYS.REVIEW);
+
+            // Dashboard
+            document.getElementById('dash-inquiry-count').innerText = inquiryList.length;
+            document.getElementById('dash-review-count').innerText = reviewList.length;
+
+            // Notice Table
+            const noticeTbody = document.getElementById('notice-list');
+            if (noticeList.length === 0) {
+                noticeTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">등록된 공지사항이 없습니다.</td></tr>';
+            } else {
+                let html = '';
+                noticeList.forEach(n => {
+                    html += `<tr>
+                        <td>${n.title}</td>
+                        <td>${n.date}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="showNoticeForm('${n.id}')">수정</button>
+                            <button class="btn btn-danger btn-sm" onclick="askDelete('${COMM_KEYS.NOTICE}', '${n.id}')">삭제</button>
+                        </td>
+                    </tr>`;
+                });
+                noticeTbody.innerHTML = html;
+            }
+
+            // Inquiry Table
+            const inquTbody = document.getElementById('inquiry-list');
+            if (inquiryList.length === 0) {
+                inquTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">접수된 활동사항이 없습니다.</td></tr>';
+            } else {
+                let html = '';
+                inquiryList.forEach(q => {
+                    const statusColor = q.status === '답변완료' ? 'blue' : 'red';
+                    html += `<tr>
+                        <td>${q.author}</td>
+                        <td>${q.title}</td>
+                        <td><span style="color:${statusColor}">${q.status || '답변대기'}</span></td>
+                        <td>${q.date}</td>
+                        <td>
+                            <button class="btn btn-success btn-sm" onclick="showReplyForm('${q.id}')">답변</button>
+                            <button class="btn btn-danger btn-sm" onclick="askDelete('${COMM_KEYS.INQUIRY}', '${q.id}')">삭제</button>
+                        </td>
+                    </tr>`;
+                });
+                inquTbody.innerHTML = html;
+            }
+
+            // Review Table
+            const reviewTbody = document.getElementById('review-list');
+            if (reviewList.length === 0) {
+                reviewTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">등록된 후기가 없습니다.</td></tr>';
+            } else {
+                let html = '';
+                reviewList.forEach(r => {
+                    html += `<tr>
+                        <td>${r.title}</td>
+                        <td>${r.author}</td>
+                        <td>${r.date}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="askDelete('${COMM_KEYS.REVIEW}', '${r.id}')">삭제</button>
+                        </td>
+                    </tr>`;
+                });
+                reviewTbody.innerHTML = html;
+            }
+        }
+
+        // Notice Actions
+        window.showNoticeForm = async function (id = null) {
+            currentEditId = id;
+            if (id) {
+                const n = noticeList.find(item => item.id == id); // string comparison safe
+                if (n) {
+                    $('#notice-modal-title').text('공지사항 수정');
+                    $('#notice-title').val(n.title);
+                    $('#notice-content').val(n.content);
+                    $('#notice-file-preview').html(n.file ? `<img src="${n.file.data || ''}" style="max-height:50px;"> 기존파일존재` : '');
+                }
+            } else {
+                $('#notice-modal-title').text('공지사항 작성');
+                $('#notice-title').val('');
+                $('#notice-content').val('');
+                $('#notice-file-preview').html('');
+            }
+            $('#notice-file').val('');
+            $('#notice-form-modal').css('display', 'flex');
+        }
+
+        window.saveNoticeBtn = async function () {
+            const title = $('#notice-title').val();
+            const content = $('#notice-content').val();
+            const fileInput = document.getElementById('notice-file');
+
+            if (!title) return alert('제목을 입력하세요.');
+
+            // File Handle
+            let fileData = null;
+            if (fileInput.files.length > 0) {
+                fileData = await readFile(fileInput.files[0]);
+            } else if (currentEditId) {
+                // Keep existing logic: fetch from DB or find in list
+                const old = noticeList.find(n => n.id == currentEditId);
+                if (old) fileData = old.file;
+            }
+
+            const notice = {
+                id: currentEditId || null,
+                title: title,
+                content: content,
+                author: '관리자',
+                date: new Date().toISOString().split('T')[0],
+                file: fileData
+            };
+
+            await savePost(COMM_KEYS.NOTICE, notice);
+            alert('저장되었습니다.');
+            $('#notice-form-modal').hide();
+            renderAll();
+        }
+
+        // Inquiry Reply
+        window.showReplyForm = function (id) {
+            currentReplyId = id;
+            const q = inquiryList.find(i => i.id == id);
+            if (q) {
+                $('#reply-inq-title').text(q.title);
+                $('#reply-inq-content').text(q.content);
+                $('#reply-content').val('');
+                $('#reply-form-modal').css('display', 'flex');
+            }
+        }
+
+        window.saveReplyBtn = async function () {
+            const content = $('#reply-content').val();
+            if (!content) return alert('내용을 입력하세요.');
+
+            // Add Comment
+            await addComment(COMM_KEYS.INQUIRY, currentReplyId, {
+                author: '관리자',
+                content: content,
+                password: '' // Admin no pw needed
+            });
+
+            // Update Status
+            // We need to fetch the post, update status, save it.
+            const post = await getPost(COMM_KEYS.INQUIRY, currentReplyId);
+            if (post) {
+                post.status = '답변완료';
+                await savePost(COMM_KEYS.INQUIRY, post);
+            }
+
+            alert('답변이 등록되었습니다.');
+            $('#reply-form-modal').hide();
+            renderAll();
+        }
+
+        // Delete
+        window.askDelete = function (boardKey, id) {
+            deleteTargetBoard = boardKey;
+            deleteTargetId = id;
+            $('#delete-confirm-modal').css('display', 'flex');
+        }
+
+        window.confirmDelete = async function () {
+            if (deleteTargetBoard && deleteTargetId) {
+                await deletePost(deleteTargetBoard, deleteTargetId);
+                $('#delete-confirm-modal').hide();
+                renderAll();
+            }
+        }
+
+        // Navigation Tab Logic (jQuery original logic adapted)
+        $('.nav-link').click(function (e) {
+            const href = $(this).attr('href');
+            if (href.startsWith('#')) {
+                e.preventDefault();
+                $('.nav-link').removeClass('active');
+                $(this).addClass('active');
+                $('.page-section').hide();
+                $('#' + $(this).data('target')).show();
+            }
+        });
+
+    </script>
 </body>
 
 </html>

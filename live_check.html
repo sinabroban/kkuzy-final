@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <!--[if lt IE 9]>
 <script src="http://ie7-js.googlecode.com/svn/version/2.1(beta4)/IE9.js"></script>
 <![endif]-->
@@ -21,10 +21,10 @@
 	<LINK REL="ShortCut ICON" href="/favicon.ico?v=2" type="image/x-icon" />
 	<LINK REL="icon" href="/favicon.ico?v=2" type="image/x-icon" />
 
-	<link rel="stylesheet" href="../css/style.css?v=20251218-2" type="text/css">
+	<link rel="stylesheet" href="../css/style.css" type="text/css">
 	<script type="text/javascript" src="../js/jquery-2.1.4.min.js"></script>
 	<script type="text/javascript" src="../js/jquery.easing.1.3.js"></script>
-	<script type="text/javascript" src="../js/common.js?v=20251218-2"></script>
+	<script type="text/javascript" src="../js/common.js"></script>
 
 	<meta property="og:type" content="website">
 	<meta property="og:title" content="꾸지뽕사업단" />
@@ -143,7 +143,8 @@
 						<li class="menu7_"><a href="../gallery/farm.html" target="_self" id="bt_menu_tab7"
 								class=" ">농장갤러리</a></li>
 						<li class="menu5_">
-							<a href="javascript:void(0);" id="bt_menu_tab5" class="on_menu_active">커뮤니티</a>
+							<a href="../community/notice.html" target="_self" id="bt_menu_tab5"
+								class="on_menu_active">커뮤니티</a>
 							<ul>
 								<li><a href="../community/notice.html" target="_self" class="">공지사항</a></li>
 								<li><a href="../community/inquiry.html" target="_self" class="on_menu_active">활동사항</a>
@@ -397,26 +398,12 @@
 						</form>
 					</div>
 
-					<!-- Same fix as review.html -->
-					<!-- Use Firebase Module -->
-					<script type="module" src="../js/community_firebase.js"></script>
-
-					<script type="module">
-						import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, getComments, addComment } from '../js/community_firebase.js';
+					<script src="../js/community_common.js"></script>
+					<script>
 
 						const BOARD_KEY = COMM_KEYS.INQUIRY;
 
 						enableContentProtection();
-
-						// Expose for onClick
-						window.toggleWriteForm = toggleWriteForm;
-						window.showList = showList;
-						window.submitInquiry = submitInquiry;
-						window.searchInquiries = searchInquiries;
-						window.viewInquiryPost = viewInquiryPost;
-						window.checkPasswordAndEdit = checkPasswordAndEdit;
-						window.closePasswordModal = closePasswordModal;
-						window.confirmPasswordModal = confirmPasswordModal;
 
 						function toggleWriteForm() {
 							var form = document.getElementById('write_form_container');
@@ -439,15 +426,6 @@
 							}
 						}
 
-						function resetWriteForm() {
-							document.getElementById('inquiry_id').value = '';
-							document.getElementById('inquiry_title').value = '';
-							document.getElementById('inquiry_author').value = '';
-							document.getElementById('inquiry_pw').value = '';
-							document.getElementById('inquiry_content').value = '';
-							document.getElementById('inquiry_file').value = '';
-						}
-
 						function showList() {
 							document.getElementById('write_form_container').style.display = 'none';
 							document.getElementById('view_container').style.display = 'none';
@@ -455,159 +433,91 @@
 							if (document.querySelector('.btn_box')) document.querySelector('.btn_box').style.display = 'block';
 							if (document.getElementById('pagingNew')) document.getElementById('pagingNew').style.display = 'block';
 							if (document.getElementById('search_box_container')) document.getElementById('search_box_container').style.display = 'block';
-
-							resetWriteForm();
-
 							renderInquiryTable('inquiry-list-container');
+
+							// Clear URL param
 							history.pushState(null, null, location.pathname);
 						}
 
 						async function submitInquiry(e) {
 							e.preventDefault();
-							var id = document.getElementById('inquiry_id').value;
 							var title = document.getElementById('inq_title').value;
 							var author = document.getElementById('inq_author').value;
 							var content = document.getElementById('inq_content').value;
 							var fileInput = document.getElementById('inq_file');
 							var date = new Date().toISOString().split('T')[0];
 
-							// Password check if adding password field? 
-							// Keeping it simple as planned:
-							var pw = document.getElementById('inquiry_pw').value;
-							// Note: inquiry_pw needs to exist in HTML. 
-							// If it doesn't, we can't get it. 
-							// Original code didn't have it.
-							// But my new JS expects it for edits?
-
-							// Let's assume for now we don't save password if not present, and edits are open? 
-							// Or we just save without password.
-
 							// Handle File
-							let fileData = null;
-							if (fileInput.files.length > 0) {
-								fileData = await readFile(fileInput.files[0]);
-							} else if (id) {
-								const existing = await getPost(BOARD_KEY, id);
-								if (existing) fileData = existing.file;
-							}
+							const fileData = await readFile(fileInput.files[0]);
 
 							var newInquiry = {
-								id: id ? id : null,
 								title: title,
 								author: author,
-								password: pw || '', // Save empty if not present
 								content: content,
 								date: date,
 								status: '답변대기',
 								file: fileData
 							};
 
-							await savePost(BOARD_KEY, newInquiry);
+							savePost(BOARD_KEY, newInquiry);
 
-							if (id) {
-								alert('활동사항이 수정되었습니다.');
-								viewInquiryPost(null, id);
-							} else {
-								alert('활동사항이 등록되었습니다.');
-								document.querySelector('form').reset();
-								showList();
-							}
+							alert('활동사항이 등록되었습니다.');
+							document.querySelector('form').reset();
+							showList();
 						}
 
-						async function searchInquiries() {
-							const key = document.getElementById('search_key').value;
-							const keyword = document.getElementById('search_keyword').value.toLowerCase();
-							if (!keyword) {
-								alert('검색어를 입력해주세요.');
-								return;
-							}
-
-							const allPosts = await getPosts(BOARD_KEY);
-							const filtered = allPosts.filter(post => {
-								if (key === 'all') {
-									return post.title.toLowerCase().includes(keyword) || post.content.toLowerCase().includes(keyword);
-								} else if (key === 'title') {
-									return post.title.toLowerCase().includes(keyword);
-								} else if (key === 'content') {
-									return post.content.toLowerCase().includes(keyword);
-								}
-								return false;
-							});
-
-							const tbody = document.getElementById('inquiry-list-container');
-							tbody.innerHTML = '';
-							if (filtered.length === 0) {
-								tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 50px;">검색 결과가 없습니다.</td></tr>';
-							} else {
-								filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-								let html = '';
-								filtered.forEach((post, index) => {
-									html += `
-								<tr onmouseover="this.style.backgroundColor='#fcfcfc'" onmouseout="this.style.backgroundColor=''">
-									<td class="num">${filtered.length - index}</td>
-									<td class="title" style="text-align:left; padding-left:10px;">
-										<a href="#" onclick="viewInquiryPost(event, '${post.id}')">${post.title}</a>
-									</td>
-									<td class="name"><span class="member">${post.author}</span></td>
-									<td class="date">${post.date}</td>
-								</tr>
-									`;
-								});
-								tbody.innerHTML = html;
-							}
-						}
-
-						async function renderInquiryTable(containerId, limit = 0) {
+						function renderInquiryTable(containerId, limit = 0) {
+							const inquiries = getPosts(BOARD_KEY);
 							const tbody = document.getElementById(containerId);
 							if (!tbody) return;
 
-							tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 50px;">로딩중...</td></tr>';
-
-							const posts = await getPosts(BOARD_KEY);
-							posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+							inquiries.sort((a, b) => new Date(b.date) - new Date(a.date));
 
 							let html = '';
-							const displayPosts = limit > 0 ? posts.slice(0, limit) : posts;
+							// Limit is used for main page short list
+							const displayInquiries = limit > 0 ? inquiries.slice(0, limit) : inquiries;
 
-							if (displayPosts.length === 0) {
+							if (displayInquiries.length === 0) {
 								const colspan = limit > 0 ? 1 : 5;
 								html = `<tr><td colspan="${colspan}" style="text-align:center; padding: 50px;">등록된 활동사항이 없습니다.</td></tr>`;
 							} else {
-								displayPosts.forEach((post, index) => {
+								displayInquiries.forEach((inq, index) => {
 									if (limit > 0) {
+										// Main Page Layout
 										html += `
-								<tr>
-									<td class="latest_space">
-										<a href="community/inquiry.html?id=${post.id}">${post.title}</a>
-									</td>
-								</tr>
-							`;
+					<tr>
+						<td class="latest_space">
+							<a href="community/inquiry.html?id=${inq.id}">${inq.title}</a>
+						</td>
+					</tr>
+				`;
 									} else {
-										const statusBadge = post.status === '답변완료'
+										// Subpage Layout
+										const statusBadge = inq.status === '답변완료'
 											? '<span style="color:blue;">[답변완료]</span>'
 											: '<span style="color:gray;">[대기]</span>';
 
 										html += `
-								<tr onmouseover="this.style.backgroundColor='#fcfcfc'" onmouseout="this.style.backgroundColor=''">
-									<td class="num">${posts.length - index}</td>
-									<td class="title" style="text-align:left; padding-left:10px;">
-										<a href="#" onclick="viewInquiryPost(event, '${post.id}')">${post.title}</a>
-									</td>
-									<td class="name"><span class="member">${post.author}</span></td>
-									<td class="date">${post.date}</td>
-									<td class="status">${statusBadge}</td>
-								</tr>
-							`;
+					<tr onmouseover="this.style.backgroundColor='#fcfcfc'" onmouseout="this.style.backgroundColor=''">
+						<td class="num">${inquiries.length - index}</td>
+						<td class="title" style="text-align:left; padding-left:10px;">
+							<a href="#" onclick="viewInquiryPost(event, ${inq.id})">${inq.title}</a>
+						</td>
+						<td class="name"><span class="guest">${inq.author}</span></td>
+						<td class="date">${inq.date}</td>
+						<td class="status">${statusBadge}</td>
+					</tr>
+											`;
 									}
 								});
 							}
 							tbody.innerHTML = html;
 						}
 
-						async function viewInquiryPost(e, id) {
+						function viewInquiryPost(e, id) {
 							if (e) e.preventDefault();
 
-							const post = await getPost(BOARD_KEY, id);
+							const post = getPost(BOARD_KEY, id);
 							if (!post) {
 								alert('존재하지 않는 게시물입니다.');
 								return;
@@ -618,169 +528,48 @@
 							document.getElementById('view_date').innerText = post.date;
 							document.getElementById('view_content').innerText = post.content;
 
+							// File Display
 							const fileArea = document.getElementById('view_file_area');
 							fileArea.innerHTML = '';
 							if (post.file) {
 								if (post.file.data) {
+									// Image
 									fileArea.innerHTML = `<img src="${post.file.data}" style="max-width:100%; margin-top:10px;">`;
 								} else {
+									// Just name (Large file or non-image)
 									fileArea.innerHTML = `<div style="background:#eee; padding:10px; margin-top:10px;">첨부파일: ${post.file.name} (${Math.round(post.file.size / 1024)}KB)</div>`;
 								}
 							}
 
-							// Inject Edit Buttons if container exists
-							// Attempt to find a place to put buttons
 							const viewContainer = document.getElementById('view_container');
-							// We append to viewContainer logic if needed, but original probably has button area?
-							// Original didn't show button area in my view.
-							// I will append it manually if not exist.
-
-							let btnDiv = document.getElementById('inquiry_view_btns');
-							if (!btnDiv) {
-								btnDiv = document.createElement('div');
-								btnDiv.id = 'inquiry_view_btns';
-								btnDiv.style.textAlign = 'center';
-								btnDiv.style.marginTop = '30px';
-								viewContainer.appendChild(btnDiv);
-							}
-
-							btnDiv.innerHTML = `
-                                <button onclick="checkPasswordAndEdit('${post.id}')" style="padding: 10px 20px; background: #333; color: #fff; border: none; cursor: pointer; border-radius: 5px; margin-right:5px;">수정</button>
- 				                <button onclick="showList()" style="padding: 10px 30px; background: #666; color: #fff; border: none; cursor: pointer;">목록으로</button>
-                             `;
-
-
 							viewContainer.style.display = 'block';
 
+							// Hide other elements
 							if (document.querySelector('.tbl_type')) document.querySelector('.tbl_type').style.display = 'none';
 							if (document.querySelector('.btn_box')) document.querySelector('.btn_box').style.display = 'none';
 							if (document.getElementById('pagingNew')) document.getElementById('pagingNew').style.display = 'none';
 							if (document.getElementById('search_box_container')) document.getElementById('search_box_container').style.display = 'none';
 
-							renderCommentSectionSync('comment-section', BOARD_KEY, post.id);
+							// Render Comments
+							renderCommentSection('comment-section', BOARD_KEY, post.id);
 
+							// Update URL
 							history.pushState({ id: id }, null, `?id=${id}`);
 						}
 
-						// Password & Edit Logic
-						async function checkPasswordAndEdit(id) {
-							const post = await getPost(BOARD_KEY, id);
-							if (!post) { alert('게시물을 찾을 수 없습니다.'); return; }
-
-							// If no password (old posts or inquiry without pw), just allow?
-							if (!post.password) {
-								if (confirm('비밀번호가 없는 게시물입니다. 수정하시겠습니까?')) {
-									loadEditForm(post);
-								}
-								return;
-							}
-
-							document.getElementById('modal_target_id').value = id;
-							document.getElementById('modal_pw_input').value = '';
-							document.getElementById('password_modal').style.display = 'flex';
-							document.getElementById('modal_pw_input').focus();
-						}
-
-						function closePasswordModal() {
-							document.getElementById('password_modal').style.display = 'none';
-						}
-
-						async function confirmPasswordModal() {
-							const id = document.getElementById('modal_target_id').value;
-							const input = document.getElementById('modal_pw_input').value;
-							const post = await getPost(BOARD_KEY, id);
-
-							if (post && input.trim() === post.password.trim()) {
-								closePasswordModal();
-								loadEditForm(post);
-							} else {
-								alert('비밀번호가 일치하지 않습니다.');
-							}
-						}
-
-						document.getElementById('modal_pw_input').addEventListener('keypress', function (e) {
-							if (e.key === 'Enter') confirmPasswordModal();
-						});
-
-						function loadEditForm(post) {
-							document.getElementById('inquiry_id').value = post.id;
-							document.getElementById('inquiry_title').value = post.title; // Notice: HTML ID is 'inq_title'?
-							// Wait, submitInquiry uses 'inq_title'. But verify in loadEditForm too.
-							// I need to be careful about IDs.
-							// original submitInquiry used 'inq_title'.
-							if (document.getElementById('inq_title')) document.getElementById('inq_title').value = post.title;
-							if (document.getElementById('inq_author')) document.getElementById('inq_author').value = post.author;
-							if (document.getElementById('inq_content')) document.getElementById('inq_content').value = post.content;
-							// pw?
-							if (document.getElementById('inquiry_pw')) document.getElementById('inquiry_pw').value = post.password || '';
-
-							toggleWriteForm();
-						}
-
-						async function renderCommentSectionSync(containerId, boardKey, postId) {
-							const container = document.getElementById(containerId);
-							if (!container) return;
-
-							const comments = await getComments(boardKey, postId);
-
-							let html = `
-                                <div class="comment_wrap" style="margin-top: 50px; background: #f9f9f9; padding: 20px;">
-                                    <h4 style="font-size: 16px; font-weight: bold; margin-bottom: 15px;">댓글 <span>(${comments.length})</span></h4>
-                                    <ul class="comment_list" style="margin-bottom: 20px;">
-                            `;
-
-							if (comments.length === 0) {
-								html += `<li style="color: #888; padding: 10px 0;">등록된 댓글이 없습니다.</li>`;
-							} else {
-								comments.forEach(c => {
-									html += `
-                                        <li style="border-bottom: 1px solid #eee; padding: 10px 0;">
-                                            <div style="font-weight: bold; margin-bottom: 5px;">${c.author} <span style="font-weight: normal; font-size: 12px; color: #888;">${c.date}</span></div>
-                                            <div style="line-height: 1.5;">${c.content.replace(/\n/g, '<br>')}</div>
-                                        </li>
-                                    `;
-								});
-							}
-
-							window.submitComment = async function (e, bKey, pId) {
-								e.preventDefault();
-								const author = document.getElementById('cmt_author').value;
-								const content = document.getElementById('cmt_content').value;
-								const pw = document.getElementById('cmt_pw').value;
-								await addComment(bKey, pId, { author, content, pw });
-								renderCommentSectionSync('comment-section', bKey, pId);
-							}
-
-							html += `
-                                    </ul>
-                                    <div class="comment_form">
-                                        <form onsubmit="submitComment(event, '${boardKey}', '${postId}')">
-                                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                                                <input type="text" id="cmt_author" placeholder="이름" required style="padding: 5px; border: 1px solid #ddd; width: 100px;">
-                                                <input type="password" id="cmt_pw" placeholder="비밀번호" style="padding: 5px; border: 1px solid #ddd; width: 100px;">
-                                            </div>
-                                            <div style="display: flex; gap: 10px;">
-                                                <textarea id="cmt_content" placeholder="댓글을 남겨주세요." required style="flex: 1; height: 60px; padding: 10px; border: 1px solid #ddd; resize: none;"></textarea>
-                                                <button type="submit" style="width: 80px; background: #333; color: #fff; border: none; font-weight: bold;">등록</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            `;
-							container.innerHTML = html;
-						}
-
-
+						// Check URL for direct link
 						window.onload = function () {
 							const urlParams = new URLSearchParams(window.location.search);
 							const id = urlParams.get('id');
 							if (id) {
 								viewInquiryPost(null, id);
 							} else {
+								// Init List
 								renderInquiryTable('inquiry-list-container');
 							}
 						}
 
+						// Handle Back Button
 						window.onpopstate = function (event) {
 							if (event.state && event.state.id) {
 								viewInquiryPost(null, event.state.id);

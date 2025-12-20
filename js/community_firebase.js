@@ -1,0 +1,243 @@
+/**
+ * Community Logic - Firebase Version
+ * Replaces community_common.js to use Firestore for shared data.
+ */
+
+// Import Firebase (ES Modules via CDN for static site)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, query, orderBy, limit, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+// --- CONFIGURATION ---
+// TODO: USER MUST REPLACE THIS WITH THEIR OWN CONFIG
+const firebaseConfig = {
+    apiKey: "AIzaSyDxmxP6LPDM69GdXpCTrv9_WgZllzs3bv8",
+    authDomain: "homepage-5534d.firebaseapp.com",
+    projectId: "homepage-5534d",
+    storageBucket: "homepage-5534d.firebasestorage.app",
+    messagingSenderId: "445520729520",
+    appId: "1:445520729520:web:30692dc01acc2ee81db275",
+    measurementId: "G-RMRC5JHJSL"
+};
+
+// Initialize only if not already done (though module scope prevents double init usually)
+let app, db, auth;
+try {
+    app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    auth = getAuth(app);
+    console.log("Firebase Initialized");
+} catch (e) {
+    console.error("Firebase Init Error (Did you set the keys?):", e);
+}
+
+export function isFirebaseInitialized() {
+    return !!app && !!auth;
+}
+
+export const COMM_KEYS = {
+    NOTICE: 'notices',      // Changed from kkuzy_notices for cleaner specific collections
+    INQUIRY: 'inquiries',
+    REVIEW: 'reviews',
+    COMMENTS: 'comments'    // stored as subcollection or separate collection
+};
+
+/**
+ * Reads a file and returns object with Base64 data.
+ * Firestore Document Limit is 1MB. We limit files to ~700KB to be safe.
+ */
+export function readFile(file) {
+    return new Promise((resolve, reject) => {
+        if (!file) {
+            resolve(null);
+            return;
+        }
+
+        if (file.size > 700 * 1024) { // 700KB Limit
+            alert("첨부 파일 용량이 700KB를 초과하여 파일명만 저장됩니다. (공유 DB 용량 제한)");
+            resolve({
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                data: null,
+                isLarge: true
+            });
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            resolve({
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                data: e.target.result,
+                isLarge: false
+            });
+        };
+        reader.onerror = (e) => reject(e);
+        reader.readAsDataURL(file);
+    });
+}
+
+// --- Post CRUD (Async now!) ---
+
+export async function getPosts(boardKey) {
+    if (!db) return [];
+    try {
+        const q = query(collection(db, boardKey), orderBy("date", "desc"));
+        const querySnapshot = await getDocs(q);
+        const posts = [];
+        querySnapshot.forEach((doc) => {
+            posts.push({ id: doc.id, ...doc.data() });
+        });
+        return posts;
+    } catch (e) {
+        console.error("Error getting posts:", e);
+        return [];
+    }
+}
+
+export async function getPost(boardKey, id) {
+    if (!db) return null;
+    // In our old system, ID was an int. In Firestore, it's a string (doc ID).
+    // We will support both by trying to find valid doc.
+    try {
+        // If we are calling getPost from a list that already has the ID, we can just fetch it.
+        // However, we often used array.find in the old code. 
+        // Here we must fetch specific doc.
+
+        // Note: For simplicity in migration, if ID is passed, we fetch that doc.
+        const docRef = doc(db, boardKey, String(id));
+        const docSnap = await getDocs(query(collection(db, boardKey))); // Inefficient to fetch all, but IDs might be custom
+
+        // Better approach: fetch all and find (like before) OR fetch specific.
+        // Let's stick to 'fetch specific' if we have the ID.
+        // BUT, our legacy IDs were numbers. Firestore IDs are strings.
+        // We need to handle 'find by property id' vs 'find by doc id'.
+        // To keep it simple: We will use Timestamp as ID for new posts.
+
+        // Let's just re-use getPosts and find for now to match old logic signature exactly?
+        // No, that's inefficient.
+        // Let's assume ID is the Document Key.
+
+        // FIX: The old code used integer IDs. We should transition to String IDs.
+        // But for compatibility with existing URL params, we can just treat them as strings.
+        return (await getPosts(boardKey)).find(p => String(p.id) === String(id));
+    } catch (e) {
+        console.error("Error getting post:", e);
+        return null;
+    }
+}
+
+export async function savePost(boardKey, post) {
+    if (!db) return;
+    try {
+        // Post object: { id (optional), title, author, ... }
+        if (post.id) {
+            // Update
+            const docRef = doc(db, boardKey, String(post.id));
+            await setDoc(docRef, post, { merge: true });
+        } else {
+            // Create
+            // We use Date.now() as ID to keep sorting simple and consistent with old style unique IDs
+            const newId = String(Date.now());
+            post.id = newId;
+            await setDoc(doc(db, boardKey, newId), post);
+        }
+        return post;
+    } catch (e) {
+        console.error("Error saving post:", e);
+        alert("저장 중 오류가 발생했습니다: " + e.message);
+    }
+}
+
+export async function deletePost(boardKey, id) {
+    if (!db) return;
+    try {
+        await deleteDoc(doc(db, boardKey, String(id)));
+        return true;
+    } catch (e) {
+        console.error("Error deleting post:", e);
+        alert("삭제 중 오류가 발생했습니다: " + e.message);
+        return false;
+    }
+}
+
+export async function verifyPassword(boardKey, id, password) {
+    const post = await getPost(boardKey, id);
+    if (!post) return false;
+    return post.password === password;
+}
+
+// --- Comments ---
+
+export async function getComments(boardKey, postId) {
+    if (!db) return [];
+    try {
+        // Sub-collection 'comments' under the post document
+        const q = query(collection(db, boardKey, String(postId), "comments"), orderBy("date", "asc"));
+        const querySnapshot = await getDocs(q);
+        const comments = [];
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            // id is doc.id
+            comments.push({ id: doc.id, ...data });
+        });
+        return comments;
+    } catch (e) {
+        console.error("Error getting comments:", e);
+        return [];
+    }
+}
+
+export async function addComment(boardKey, postId, comment) {
+    if (!db) return;
+    try {
+        comment.date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        // Add to subcollection
+        await addDoc(collection(db, boardKey, String(postId), "comments"), comment);
+    } catch (e) {
+        console.error("Error adding comment:", e);
+    }
+}
+
+// --- Authentication (Admin) ---
+
+export async function adminLogin(email, password) {
+    if (!auth) {
+        throw new Error("Firebase Auth가 초기화되지 않았습니다. 설정(firebaseConfig)을 확인해주세요.");
+    }
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        return userCredential.user;
+    } catch (error) {
+        console.error("Login Failed", error);
+        throw error;
+    }
+}
+
+export async function adminLogout() {
+    if (!auth) return;
+    try {
+        await signOut(auth);
+    } catch (error) {
+        console.error("Logout Failed", error);
+    }
+}
+
+export function monitorAuth(callback) {
+    if (!auth) return;
+    onAuthStateChanged(auth, (user) => {
+        callback(user);
+    });
+}
+
+export function enableContentProtection() {
+    document.addEventListener('contextmenu', function (e) {
+        if (e.target.tagName === 'IMG') e.preventDefault();
+    });
+    document.addEventListener('dragstart', function (e) {
+        if (e.target.tagName === 'IMG') e.preventDefault();
+    });
+}

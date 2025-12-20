@@ -17,6 +17,8 @@
             background: #fff;
             padding: 20px;
             border-right: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
         }
 
         .content {
@@ -39,62 +41,103 @@
         .hidden {
             display: none;
         }
+
+        /* Login Overlay */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #343a40;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #login-box {
+            background: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            width: 400px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
     </style>
+    <script type="module" src="../js/community_firebase.js"></script>
 </head>
 
 <body>
 
-    <div class="container-fluid">
+
+
+    <!-- Login Overlay -->
+    <div id="login-overlay">
+        <div id="login-box">
+            <h2 style="margin-bottom: 30px; font-weight: bold;">관리자 로그인</h2>
+            <!-- Email Input Removed -->
+            <!-- <input type="email" id="admin-email" class="form-control" placeholder="이메일 주소" style="margin-bottom: 15px;"> -->
+            <input type="password" id="admin-password" class="form-control" placeholder="비밀번호"
+                style="margin-bottom: 20px;">
+            <button class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 16px;"
+                onclick="tryLogin()">로그인</button>
+            <p id="login-msg" style="color: red; margin-top: 15px; font-size: 14px;"></p>
+        </div>
+    </div>
+
+    <div class="container-fluid" id="admin-main" style="filter: blur(5px);">
         <div class="row">
             <div class="col-md-2 sidebar">
-                <h4>愿由ъ옄 硫붾돱</h4>
-                <ul class="nav flex-column mt-4">
-                    <li class="nav-item"><a class="nav-link active" onclick="showTab('dashboard')">??쒕낫??/a></li>
-                    <li class="nav-item"><a class="nav-link" onclick="showTab('orders')">二쇰Ц 愿由?/a></li>
-                    <li class="nav-item"><a class="nav-link" onclick="showTab('notices')">怨듭??ы빆 愿由?/a></li>
-                    <li class="nav-item"><a class="nav-link" onclick="showTab('inquiries')">臾몄쓽?ы빆 愿由?/a></li>
+                <h4>관리자 메뉴</h4>
+                <ul class="nav flex-column mt-4" style="flex-grow: 1;">
+                    <li class="nav-item"><a class="nav-link active" onclick="showTab('dashboard')">대시보드</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showTab('orders')">주문 관리</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showTab('notices')">공지사항 관리</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showTab('inquiries')">활동사항 관리</a></li>
                 </ul>
                 <div class="mt-5">
-                    <a href="../index.html" class="btn btn-outline-secondary btn-sm w-100">?덊럹?댁?濡??대룞</a>
+                    <a href="../index.html" class="btn btn-outline-secondary btn-sm w-100 mb-2">홈페이지로 이동</a>
+                    <button class="btn btn-danger btn-sm w-100" onclick="tryLogout()">관리자 로그아웃</button>
                 </div>
             </div>
 
             <div class="col-md-10">
                 <div id="dashboard" class="content">
                     <h2>??쒕낫??/h2>
-                    <p>愿由ъ옄 ?섏씠吏???ㅼ떊 寃껋쓣 ?섏쁺?⑸땲??</p>
-                    <div class="row mt-4">
-                        <div class="col-md-4">
-                            <div class="card text-white bg-primary mb-3">
-                                <div class="card-header">?좉퇋 二쇰Ц</div>
-                                <div class="card-body">
-                                    <h5 class="card-title" id="dash-orders-count">0嫄?/h5>
+                        <p>愿由ъ옄 ?섏씠吏???ㅼ떊 寃껋쓣 ?섏쁺?⑸땲??</p>
+                        <div class="row mt-4">
+                            <div class="col-md-4">
+                                <div class="card text-white bg-primary mb-3">
+                                    <div class="card-header">?좉퇋 二쇰Ц</div>
+                                    <div class="card-body">
+                                        <h5 class="card-title" id="dash-orders-count">0嫄?/h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-white bg-success mb-3">
+                                    <div class="card-header">怨듭??ы빆</div>
+                                    <div class="card-body">
+                                        <h5 class="card-title" id="dash-notices-count">0嫄?/h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-white bg-warning mb-3">
+                                    <div class="card-header">?좉퇋 臾몄쓽</div>
+                                    <div class="card-body">
+                                        <h5 class="card-title" id="dash-inquiries-count">0嫄?/h5>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="card text-white bg-success mb-3">
-                                <div class="card-header">怨듭??ы빆</div>
-                                <div class="card-body">
-                                    <h5 class="card-title" id="dash-notices-count">0嫄?/h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card text-white bg-warning mb-3">
-                                <div class="card-header">?좉퇋 臾몄쓽</div>
-                                <div class="card-body">
-                                    <h5 class="card-title" id="dash-inquiries-count">0嫄?/h5>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <div id="orders" class="content hidden">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h2>二쇰Ц 愿由?/h2>
-                        <button class="btn btn-primary btn-sm" onclick="addMockOrder()">?뚯뒪??二쇰Ц 異붽?</button>
+                            <button class="btn btn-primary btn-sm" onclick="addMockOrder()">?뚯뒪??二쇰Ц 異붽?</button>
                     </div>
                     <table class="table table-hover">
                         <thead>
@@ -116,7 +159,8 @@
                 <div id="notices" class="content hidden">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h2>怨듭??ы빆 愿由?/h2>
-                        <button class="btn btn-primary btn-sm" onclick="showAddNoticeModal()">怨듭??ы빆 ?묒꽦</button>
+                            <button class="btn btn-primary btn-sm" onclick="showAddNoticeModal()">怨듭??ы빆
+                                ?묒꽦</button>
                     </div>
                     <table class="table table-hover">
                         <thead>
@@ -137,7 +181,7 @@
                 <div id="inquiries" class="content hidden">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h2>臾몄쓽?ы빆 愿由?/h2>
-                        <button class="btn btn-primary btn-sm" onclick="addMockInquiry()">?뚯뒪??臾몄쓽 異붽?</button>
+                            <button class="btn btn-primary btn-sm" onclick="addMockInquiry()">?뚯뒪??臾몄쓽 異붽?</button>
                     </div>
                     <table class="table table-hover">
                         <thead>
@@ -188,8 +232,55 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/admin.js"></script>
+
+    <script>
+        // Formerly imported community_firebase.js, but user requested simple password-only login.
+        // import { adminLogin, adminLogout, monitorAuth, isFirebaseInitialized } from '../js/community_firebase.js';
+
+        // Window Functions
+        window.tryLogin = function () {
+            // Simple Password Check
+            const input = document.getElementById('admin-password');
+            const pw = input.value.trim(); // Added trim()
+
+            if (!pw) return alert('비밀번호를 입력하세요.');
+
+            if (pw === '4321') {
+                // Success
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('admin-main').style.filter = 'none';
+                // No persistence: localStorage.setItem('admin_simple_auth', 'true');
+            } else {
+                alert('비밀번호가 일치하지 않습니다.');
+                input.value = ''; // Clear input on fail
+                input.focus();
+            }
+        }
+
+        window.tryLogout = function () {
+            if (confirm('관리자 로그아웃 하시겠습니까?')) {
+                // localStorage.removeItem('admin_simple_auth');
+                location.reload();
+            }
+        }
+
+        // Add Enter Key Support
+        document.getElementById('admin-password').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                tryLogin();
+            }
+        });
+
+        // Check Previous Session - DISABLED
+        // document.addEventListener('DOMContentLoaded', () => {
+        //     if (localStorage.getItem('admin_simple_auth') === 'true') {
+        //         document.getElementById('login-overlay').style.display = 'none';
+        //         document.getElementById('admin-main').style.filter = 'none';
+        //     }
+        // });
+    </script>
 </body>
 
 </html>
-

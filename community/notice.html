@@ -339,11 +339,23 @@
 			<a href="#" onclick="toggleWriteForm(); return false;" style="font-size:12px; color:#ccc;">관리자 글쓰기</a>
 		</div>
 
-		<script src="../js/community_common.js"></script>
-		<script>
+		<!-- Same fix as review.html -->
+		<!-- Use Firebase Module -->
+		<script type="module" src="../js/community_firebase.js"></script>
+
+		<script type="module">
+			import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, getComments, addComment } from '../js/community_firebase.js';
+
 			const BOARD_KEY = COMM_KEYS.NOTICE;
 
 			enableContentProtection();
+
+			// Expose for onClick
+			window.toggleWriteForm = toggleWriteForm;
+			window.showList = showList;
+			window.submitNotice = submitNotice;
+			window.searchNotices = searchNotices;
+			window.viewPost = viewPost;
 
 			function toggleWriteForm() {
 				var form = document.getElementById('write_form_container');
@@ -389,14 +401,14 @@
 					file: fileData
 				};
 
-				savePost(BOARD_KEY, newNotice);
+				await savePost(BOARD_KEY, newNotice);
 
 				alert('공지사항이 등록되었습니다.');
 				document.querySelector('form').reset();
 				showList();
 			}
 
-			function searchNotices() {
+			async function searchNotices() {
 				const key = document.getElementById('search_key').value;
 				const keyword = document.getElementById('search_keyword').value.toLowerCase();
 				if (!keyword) {
@@ -404,7 +416,7 @@
 					return;
 				}
 
-				const allPosts = getPosts(BOARD_KEY);
+				const allPosts = await getPosts(BOARD_KEY);
 				const filtered = allPosts.filter(post => {
 					if (key === 'all') {
 						return post.title.toLowerCase().includes(keyword) || post.content.toLowerCase().includes(keyword);
@@ -422,7 +434,9 @@
 				if (filtered.length === 0) {
 					tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 50px;">검색 결과가 없습니다.</td></tr>';
 				} else {
-					// Sort by date desc
+					// Date desc
+					// filtered is subset of already sorted array if we use getPosts, assuming stability
+					// But let's sort to be safe
 					filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
 					let html = '';
 					filtered.forEach((notice, index) => {
@@ -430,7 +444,7 @@
 					<tr onmouseover="this.style.backgroundColor='#fcfcfc'" onmouseout="this.style.backgroundColor=''">
 						<td class="num">${filtered.length - index}</td>
 						<td class="title" style="text-align:left; padding-left:10px;">
-							<a href="#" onclick="viewPost(event, ${notice.id})">${notice.title}</a>
+							<a href="#" onclick="viewPost(event, '${notice.id}')">${notice.title}</a>
 						</td>
 						<td class="name"><span class="member">${notice.author}</span></td>
 						<td class="date">${notice.date}</td>
@@ -442,10 +456,13 @@
 			}
 
 			// Overwrite renderNoticeList to add click handler
-			function renderNoticeList(containerId, limit = 0) {
-				const notices = getPosts(BOARD_KEY);
+			async function renderNoticeList(containerId, limit = 0) {
 				const tbody = document.getElementById(containerId);
 				if (!tbody) return;
+
+				tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 50px;">로딩중...</td></tr>';
+
+				const notices = await getPosts(BOARD_KEY);
 
 				notices.sort((a, b) => new Date(b.date) - new Date(a.date));
 
@@ -472,7 +489,7 @@
 					<tr onmouseover="this.style.backgroundColor='#fcfcfc'" onmouseout="this.style.backgroundColor=''">
 						<td class="num">${notices.length - index}</td>
 						<td class="title" style="text-align:left; padding-left:10px;">
-							<a href="#" onclick="viewPost(event, ${notice.id})">${notice.title}</a>
+							<a href="#" onclick="viewPost(event, '${notice.id}')">${notice.title}</a>
 						</td>
 						<td class="name"><span class="member">${notice.author}</span></td>
 						<td class="date">${notice.date}</td>
@@ -485,10 +502,10 @@
 				tbody.innerHTML = html;
 			}
 
-			function viewPost(e, id) {
+			async function viewPost(e, id) {
 				if (e) e.preventDefault();
 
-				const post = getPost(BOARD_KEY, id);
+				const post = await getPost(BOARD_KEY, id);
 				if (!post) {
 					alert('존재하지 않는 게시물입니다.');
 					return;
@@ -515,8 +532,11 @@
 				document.getElementById('view_container').style.display = 'block';
 				document.querySelector('.tbl_type').style.display = 'none';
 
-				// Render Comments
-				renderCommentSection('comment-section', BOARD_KEY, post.id);
+				// Render Comments (Assuming reuse of renderCommentSectionSync or similar)
+				// BUT notice.html didn't seem to implement comments fully in the original code? 
+				// Ah, it called renderCommentSection('comment-section', BOARD_KEY, post.id) in original code.
+				// So we should replicate it.
+				renderCommentSectionSync('comment-section', BOARD_KEY, post.id);
 
 				// Update URL
 				history.pushState({ id: id }, null, `?id=${id}`);
@@ -542,6 +562,65 @@
 					showList();
 				}
 			};
+
+			// Re-adding the sync comment renderer helper for Notices too
+			async function renderCommentSectionSync(containerId, boardKey, postId) {
+				const container = document.getElementById(containerId);
+				if (!container) return;
+
+				const comments = await getComments(boardKey, postId);
+
+				// Notice board might not need comments, but keeping consistency
+				let html = `
+                    <div class="comment_wrap" style="margin-top: 50px; background: #f9f9f9; padding: 20px;">
+                        <h4 style="font-size: 16px; font-weight: bold; margin-bottom: 15px;">댓글 <span>(${comments.length})</span></h4>
+                        <ul class="comment_list" style="margin-bottom: 20px;">
+                `;
+
+				if (comments.length === 0) {
+					html += `<li style="color: #888; padding: 10px 0;">등록된 댓글이 없습니다.</li>`;
+				} else {
+					comments.forEach(c => {
+						html += `
+                            <li style="border-bottom: 1px solid #eee; padding: 10px 0;">
+                                <div style="font-weight: bold; margin-bottom: 5px;">${c.author} <span style="font-weight: normal; font-size: 12px; color: #888;">${c.date}</span></div>
+                                <div style="line-height: 1.5;">${c.content.replace(/\n/g, '<br>')}</div>
+                            </li>
+                        `;
+					});
+				}
+
+				// Admin replies usually?
+				window.submitComment = async function (e, bKey, pId) {
+					e.preventDefault();
+					// Notice usually admins reply, but let's allow basic comment
+					// But notice.html might not have comment form HTML by default?
+					// Ah, renderCommentSection creates it.
+					const author = document.getElementById('cmt_author').value;
+					const content = document.getElementById('cmt_content').value;
+					const pw = document.getElementById('cmt_pw').value;
+					await addComment(bKey, pId, { author, content, pw });
+					renderCommentSectionSync('comment-section', bKey, pId);
+				}
+
+				html += `
+                        </ul>
+                        <div class="comment_form">
+                            <form onsubmit="submitComment(event, '${boardKey}', '${postId}')">
+                                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                    <input type="text" id="cmt_author" placeholder="이름" required style="padding: 5px; border: 1px solid #ddd; width: 100px;">
+                                    <input type="password" id="cmt_pw" placeholder="비밀번호" style="padding: 5px; border: 1px solid #ddd; width: 100px;">
+                                </div>
+                                <div style="display: flex; gap: 10px;">
+                                    <textarea id="cmt_content" placeholder="댓글을 남겨주세요." required style="flex: 1; height: 60px; padding: 10px; border: 1px solid #ddd; resize: none;"></textarea>
+                                    <button type="submit" style="width: 80px; background: #333; color: #fff; border: none; font-weight: bold;">등록</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+				container.innerHTML = html;
+			}
 		</script>
 
 		<div style="width: 93px; height:auto; visibility:hidden;">copy_space</div>
