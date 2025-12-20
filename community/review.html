@@ -761,7 +761,15 @@
                 // Note: submitComment also needs to be global or attached
                 // Let's attach submitComment globally in the module setup
                 window.submitComment = async function (e, bKey, pId) {
-                    html += `
+                    e.preventDefault();
+                    const author = document.getElementById('cmt_author').value;
+                    const content = document.getElementById('cmt_content').value;
+                    const pw = document.getElementById('cmt_pw').value;
+                    await addComment(bKey, pId, { author, content, pw });
+                    renderCommentSectionSync('comment-section', bKey, pId);
+                }
+
+                html += `
                         </ul>
                         <div class="comment_form">
                             <form onsubmit="submitComment(event, '${boardKey}', '${postId}')">
@@ -777,18 +785,18 @@
                         </div>
                     </div>
                 `;
-                    container.innerHTML = html;
-                }
+                container.innerHTML = html;
+            } // end renderCommentSectionSync
 
         </script>
 
         <div style="width: 93px; height:auto; visibility:hidden;">copy_space</div>
 
         <script type="text/javascript">
-                $("a[href='#top']").click(function () {
-                    $("html, body").animate({ scrollTop: 0 }, "slow");
-                    return false;
-                });
+            $("a[href='#top']").click(function () {
+                $("html, body").animate({ scrollTop: 0 }, "slow");
+                return false;
+            });
         </script>
 
         <!-- Floating Talk Button -->
