@@ -612,11 +612,10 @@
 							}
 					</script>
 
-					<!-- Same fix as review.html -->
-					<!-- Use Firebase Module -->
-					<script type="module" src="../js/community_firebase.js?v=debug_1"></script>
+					<!-- Duplicate Script Disabled -->
+					<!-- <script type="module" src="../js/community_firebase.js?v=debug_1"></script> -->
 
-					<script type="module">
+					<script type="text/plain">
 							import { COMM_KEYS, getPosts, getPost, savePost, enableContentProtection, readFile, uploadFile, getComments, addComment, ensureAuth } from '../js/community_firebase.js?v=debug_1';
 
 							console.log("Inquiry Module Script Started");
