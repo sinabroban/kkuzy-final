@@ -133,18 +133,22 @@ export function readFile(file) {
 
 // --- Post CRUD (Async now!) ---
 
-export async function getPosts(boardKey) {
+export async function getPosts(collectionName) {
     if (!db) return [];
     try {
-        const q = query(collection(db, boardKey), orderBy("date", "desc"));
+        // alert(`DEBUG: Fetching from ${collectionName}...`); // Too noisy for init
+        const q = query(collection(db, collectionName));
         const querySnapshot = await getDocs(q);
         const posts = [];
         querySnapshot.forEach((doc) => {
             posts.push({ id: doc.id, ...doc.data() });
         });
+        // alert(`DEBUG: Fetched ${posts.length} posts from ${collectionName}`);
+        if (posts.length === 0) console.warn(`No posts found in ${collectionName}`);
         return posts;
     } catch (e) {
-        console.error("Error getting posts:", e);
+        console.error("Error getting documents: ", e);
+        alert(`데이터 불러오기 실패 (${collectionName}): ${e.message}`);
         return [];
     }
 }
