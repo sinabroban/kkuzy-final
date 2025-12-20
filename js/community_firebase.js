@@ -327,7 +327,17 @@ export async function uploadFile(file) {
 
         alert(`DEBUG: 업로드 시작... \n경로: ${storagePath} \n크기: ${file.size}`);
 
-        const snapshot = await uploadBytes(storageRef, file);
+        // Create a timeout promise
+        const timeout = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error("업로드 시간 초과 (15초). 네트워크/방화벽/CORS 문제일 수 있습니다.")), 15000);
+        });
+
+        // Race between upload and timeout
+        const snapshot = await Promise.race([
+            uploadBytes(storageRef, file),
+            timeout
+        ]);
+
         alert("DEBUG: 업로드 성공! URL 가져오는 중...");
         const url = await getDownloadURL(snapshot.ref);
 
@@ -339,7 +349,17 @@ export async function uploadFile(file) {
         };
     } catch (e) {
         console.error("Upload failed:", e);
-        alert("파일 업로드에 실패했습니다 (권한 혹은 네트워크 문제): " + e.message);
+        // Specialized error messages
+        let msg = e.message;
+        if (msg.includes('storage/unauthorized')) {
+            msg = "권한 없음 (Firebase Storage Rules를 확인하세요. 'allow write: if true;' 혹은 'if request.auth != null;')";
+        } else if (msg.includes('storage/canceled')) {
+            msg = "업로드가 취소되었습니다.";
+        } else if (msg.includes('network') || msg.includes('CORS')) {
+            msg = "네트워크 오류 (CORS 설정이나 인터넷 연결을 확인하세요).";
+        }
+
+        alert(`파일 업로드 실패:\n${msg}`);
         throw e;
     }
 }
