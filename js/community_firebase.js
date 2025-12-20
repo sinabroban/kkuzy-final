@@ -45,6 +45,7 @@ try {
     console.log("Firebase Initialized");
 } catch (e) {
     console.error("Firebase Init Error (Did you set the keys?):", e);
+    alert("치명적 오류: 파이어베이스 초기화 실패.\n" + e.message);
 }
 
 export function isFirebaseInitialized() {
@@ -134,7 +135,10 @@ export function readFile(file) {
 // --- Post CRUD (Async now!) ---
 
 export async function getPosts(collectionName) {
-    if (!db) return [];
+    if (!db) {
+        alert("데이터베이스 연결 끊김: 초기화가 되지 않았습니다.");
+        return [];
+    }
     try {
         // alert(`DEBUG: Fetching from ${collectionName}...`); // Too noisy for init
         const q = query(collection(db, collectionName));
