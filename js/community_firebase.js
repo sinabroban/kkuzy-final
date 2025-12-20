@@ -314,10 +314,15 @@ export function enableContentProtection() {
 export async function uploadFile(file) {
     if (!file) return null;
 
+    alert(`DEBUG: uploadFile 진입. 파일명: ${file.name}`);
+
     try {
         const timestamp = Date.now();
         const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
         const storagePath = `uploads/${timestamp}_${safeName}`;
+
+        if (!storage) throw new Error("Firebase Storage가 초기화되지 않았습니다.");
+
         const storageRef = ref(storage, storagePath);
 
         alert(`DEBUG: 업로드 시작... \n경로: ${storagePath} \n크기: ${file.size}`);
