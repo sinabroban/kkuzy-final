@@ -472,12 +472,12 @@
 
 						async function submitInquiry(e) {
 							e.preventDefault();
-							alert("등록 프로세스를 시작합니다..."); // DEBUG 1
+							// alert("등록 프로세스를 시작합니다..."); // REMOVE DEBUG
 
 							try {
 								try {
 									await ensureAuth();
-									alert("인증 확인 완료. 데이터 준비 중..."); // DEBUG 2
+									// alert("인증 확인 완료. 데이터 준비 중..."); // REMOVE DEBUG
 								} catch (authErr) {
 									alert("인증 오류(서버 연결 실패): " + authErr);
 									return;
@@ -492,7 +492,6 @@
 								var fileInput = document.getElementById('inq_file');
 								var date = new Date().toISOString().split('T')[0];
 
-								// Validate
 								if (!title) throw new Error("제목을 입력해주세요.");
 								if (!author) throw new Error("작성자를 입력해주세요.");
 								if (!content) throw new Error("내용을 입력해주세요.");
@@ -504,17 +503,22 @@
 										const file = fileInput.files[0];
 										if (file.size > 50 * 1024 * 1024) throw new Error("파일 용량이 너무 큽니다 (50MB 제한).");
 
-										// Disable button during upload
-										const submitBtn = document.querySelector('.btn_confirm');
-										const originalText = submitBtn.innerText;
-										submitBtn.innerText = "파일 업로드 중... (잠시만 기다려주세요)";
-										submitBtn.disabled = true;
+										// FIX: Select correct button
+										const submitBtn = document.querySelector('form button[type="submit"]');
+										let originalText = "등록하기";
+										if (submitBtn) {
+											originalText = submitBtn.innerText;
+											submitBtn.innerText = "파일 업로드 중... (기다려주세요)";
+											submitBtn.disabled = true;
+										}
 
 										try {
 											fileData = await uploadFile(file);
 										} finally {
-											submitBtn.innerText = originalText;
-											submitBtn.disabled = false;
+											if (submitBtn) {
+												submitBtn.innerText = originalText;
+												submitBtn.disabled = false;
+											}
 										}
 									} catch (uploadError) {
 										alert("파일 업로드 오류: " + uploadError);
@@ -536,12 +540,9 @@
 									file: fileData
 								};
 
-								alert("서버에 저장을 시도합니다..."); // DEBUG 3
+								// alert("서버에 저장을 시도합니다..."); // REMOVE DEBUG
 								const saved = await savePost(BOARD_KEY, newInquiry);
-								if (!saved) {
-									// savePost checked alert
-									return;
-								}
+								if (!saved) return;
 
 								if (id) {
 									alert('활동사항이 수정되었습니다.');
@@ -554,7 +555,7 @@
 
 							} catch (topLevelError) {
 								console.error(topLevelError);
-								alert("알 수 없는 오류 발생: " + topLevelError.message);
+								alert("오류 발생: " + topLevelError.message);
 							}
 						}
 
