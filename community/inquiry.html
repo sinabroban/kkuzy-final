@@ -593,7 +593,7 @@
 									file: fileData
 								};
 
-								alert("[4/5] 서버에 저장을 시도합니다..."); // REMOVE DEBUG
+								/* alert("[4/5] 서버에 저장을 시도합니다..."); // REMOVE DEBUG */
 								const saved = await savePost(BOARD_KEY, newInquiry);
 								if (!saved) return;
 
@@ -602,7 +602,13 @@
 									viewInquiryPost(null, id);
 								} else {
 									alert('활동사항이 등록되었습니다.');
-									document.querySelector('form').reset();
+									// Manually clear inputs since <form> tag was removed
+									document.getElementById('inq_title').value = '';
+									document.getElementById('inq_author').value = '';
+									if (document.getElementById('inquiry_pw')) document.getElementById('inquiry_pw').value = '';
+									document.getElementById('inq_content').value = '';
+									document.getElementById('inq_file').value = '';
+
 									showList();
 								}
 
