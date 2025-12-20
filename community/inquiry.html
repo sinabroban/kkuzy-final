@@ -458,11 +458,11 @@
 
 						function resetWriteForm() {
 							document.getElementById('inquiry_id').value = '';
-							document.getElementById('inquiry_title').value = '';
-							document.getElementById('inquiry_author').value = '';
-							document.getElementById('inquiry_pw').value = '';
-							document.getElementById('inquiry_content').value = '';
-							document.getElementById('inquiry_file').value = '';
+							document.getElementById('inq_title').value = '';
+							document.getElementById('inq_author').value = '';
+							if (document.getElementById('inquiry_pw')) document.getElementById('inquiry_pw').value = '';
+							document.getElementById('inq_content').value = '';
+							document.getElementById('inq_file').value = '';
 						}
 
 						function showList() {
@@ -477,6 +477,16 @@
 
 							renderInquiryTable('inquiry-list-container');
 							history.pushState(null, null, location.pathname);
+						}
+
+						function loadEditForm(post) {
+							document.getElementById('inquiry_id').value = post.id;
+							document.getElementById('inq_title').value = post.title;
+							document.getElementById('inq_author').value = post.author;
+							if (document.getElementById('inquiry_pw')) document.getElementById('inquiry_pw').value = post.password || '';
+							document.getElementById('inq_content').value = post.content;
+
+							toggleWriteForm();
 						}
 
 						async function submitInquiry(e) {
@@ -774,15 +784,11 @@
 
 						function loadEditForm(post) {
 							document.getElementById('inquiry_id').value = post.id;
-							document.getElementById('inquiry_title').value = post.title; // Notice: HTML ID is 'inq_title'?
-							// Wait, submitInquiry uses 'inq_title'. But verify in loadEditForm too.
-							// I need to be careful about IDs.
-							// original submitInquiry used 'inq_title'.
-							if (document.getElementById('inq_title')) document.getElementById('inq_title').value = post.title;
-							if (document.getElementById('inq_author')) document.getElementById('inq_author').value = post.author;
-							if (document.getElementById('inq_content')) document.getElementById('inq_content').value = post.content;
-							// pw?
+							document.getElementById('inq_title').value = post.title;
+							document.getElementById('inq_author').value = post.author;
 							if (document.getElementById('inquiry_pw')) document.getElementById('inquiry_pw').value = post.password || '';
+							document.getElementById('inq_content').value = post.content;
+							// File cannot be set programmatically
 
 							toggleWriteForm();
 						}
