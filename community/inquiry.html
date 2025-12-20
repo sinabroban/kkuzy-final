@@ -435,49 +435,7 @@
 
 						enableContentProtection();
 
-						function toggleWriteForm() {
-							var form = document.getElementById('write_form_container');
-							var list = document.querySelector('.tbl_type');
-							var btnBox = document.querySelector('.btn_box');
-							var view = document.getElementById('view_container');
-							var paging = document.getElementById('pagingNew');
-							var search = document.getElementById('search_box_container');
-
-							if (form.style.display === 'none') {
-								form.style.display = 'block';
-								if (list) list.style.display = 'none';
-								if (btnBox) btnBox.style.display = 'none';
-								if (view) view.style.display = 'none';
-								if (paging) paging.style.display = 'none';
-								if (search) search.style.display = 'none';
-								form.scrollIntoView({ behavior: "smooth" });
-							} else {
-								showList();
-							}
-						}
-
-						function resetWriteForm() {
-							document.getElementById('inquiry_id').value = '';
-							document.getElementById('inq_title').value = '';
-							document.getElementById('inq_author').value = '';
-							if (document.getElementById('inquiry_pw')) document.getElementById('inquiry_pw').value = '';
-							document.getElementById('inq_content').value = '';
-							document.getElementById('inq_file').value = '';
-						}
-
-						function showList() {
-							document.getElementById('write_form_container').style.display = 'none';
-							document.getElementById('view_container').style.display = 'none';
-							if (document.querySelector('.tbl_type')) document.querySelector('.tbl_type').style.display = 'table';
-							if (document.querySelector('.btn_box')) document.querySelector('.btn_box').style.display = 'block';
-							if (document.getElementById('pagingNew')) document.getElementById('pagingNew').style.display = 'block';
-							if (document.getElementById('search_box_container')) document.getElementById('search_box_container').style.display = 'block';
-
-							resetWriteForm();
-
-							renderInquiryTable('inquiry-list-container');
-							history.pushState(null, null, location.pathname);
-						}
+						// UI functions are now defined in independent script tag above
 
 						function loadEditForm(post) {
 							document.getElementById('inquiry_id').value = post.id;
