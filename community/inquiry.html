@@ -566,6 +566,7 @@
 								// Handle File
 								let fileData = null;
 								if (fileInput.files.length > 0) {
+									alert(`파일이 감지되었습니다! (${fileInput.files[0].name})`);
 									try {
 										const file = fileInput.files[0];
 										if (file.size > 50 * 1024 * 1024) throw new Error("파일 용량이 너무 큽니다 (50MB 제한).");
