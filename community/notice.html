@@ -532,6 +532,7 @@
 			window.toggleWriteForm = toggleWriteForm;
 			window.showList = showList;
 			window.showWriteForm = toggleWriteForm; // Assuming showWriteForm is an alias for toggleWriteForm to show the form
+			window.renderNoticeList = renderNoticeList;
 
 			// Overwrite renderNoticeList to add click handler
 			async function renderNoticeList(containerId, limit = 0) {
