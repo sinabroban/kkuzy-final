@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>긴급 데이터 정리 도구</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="module">
+        import { COMM_KEYS, getPosts, deletePost } from '../js/community_firebase.js?v=cleanup_tool';
+
+        window.loadData = async function () {
+            document.getElementById('status').innerText = "데이터 불러오는 중...";
+
+            const collections = [
+                { key: COMM_KEYS.NOTICE, name: '공지사항 (Notice)' },
+                { key: COMM_KEYS.INQUIRY, name: '활동사항 (Inquiry)' },
+                { key: COMM_KEYS.REVIEW, name: '사용후기 (Review)' }
+            ];
+
+            let html = '';
+
+            for (const col of collections) {
+                const posts = await getPosts(col.key);
+                html += `<h2>${col.name} (${posts.length})</h2><ul>`;
+                if (posts.length === 0) {
+                    html += `<li>데이터 없음</li>`;
+                } else {
+                    posts.forEach(p => {
+                        html += `<li>
+                            [${p.date || '날짜없음'}] <b>${p.title}</b> (ID: ${p.id})
+                            <button onclick="doDelete('${col.key}', '${p.id}')" style="background:red; color:white; border:none; padding:5px 10px; cursor:pointer; margin-left:10px;">삭제하기</button>
+                        </li>`;
+                    });
+                }
+                html += `</ul><hr>`;
+            }
+
+            document.getElementById('list-area').innerHTML = html;
+            document.getElementById('status').innerText = "조회 완료";
+        };
+
+        window.doDelete = async function (collection, id) {
+            if (confirm('정말 삭제하시겠습니까? (복구 불가)')) {
+                await deletePost(collection, id);
+                alert('삭제되었습니다.');
+                window.loadData(); // Refresh
+            }
+        };
+
+        // Auto load
+        window.loadData();
+    </script>
+</head>
+
+<body style="padding:20px; font-family:sans-serif;">
+    <h1>데이터 긴급 삭제 도구</h1>
+    <p>관리자 페이지 업데이트가 늦어지는 경우, 이 페이지에서 직접 삭제하세요.</p>
+    <button onclick="loadData()" style="padding:10px 20px; font-size:16px;">새로고침</button>
+    <div id="status" style="margin-top:10px; color:blue;">대기 중...</div>
+    <div id="list-area" style="margin-top:20px; border:1px solid #ccc; padding:10px;"></div>
+</body>
+
+</html>
