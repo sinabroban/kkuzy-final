@@ -2,44 +2,146 @@
 <html lang="ko">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>袁몄?戮??ъ뾽??愿由ъ옄 ?섏씠吏</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <meta charset="utf-8">
+    <title>꾸지뽕사업단 관리자</title>
+    <meta name="viewport" content="width=1280">
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="../js/jquery-2.1.4.min.js"></script>
+    <script type="module" src="../js/community_firebase.js?v=20251220_alert_fix"></script>
     <style>
         body {
-            padding: 20px;
-            background-color: #f8f9fa;
+            background: #f4f6f9;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        .admin-wrap {
+            display: flex;
+            min-height: 100vh;
         }
 
         .sidebar {
-            min-height: 100vh;
-            background: #fff;
-            padding: 20px;
-            border-right: 1px solid #dee2e6;
+            width: 250px;
+            background: #343a40;
+            color: #fff;
+            flex-shrink: 0;
             display: flex;
             flex-direction: column;
         }
 
-        .content {
+        .sidebar-header {
             padding: 20px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-size: 1.25rem;
+            font-weight: bold;
+            border-bottom: 1px solid #4b545c;
         }
 
         .nav-link {
-            cursor: pointer;
-            color: #333;
+            display: block;
+            padding: 15px 20px;
+            color: #c2c7d0;
+            text-decoration: none;
+            border-bottom: 1px solid #4b545c;
         }
 
+        .nav-link:hover,
         .nav-link.active {
-            font-weight: bold;
-            color: #0d6efd;
+            background: #494e53;
+            color: #fff;
         }
 
-        .hidden {
-            display: none;
+        .content {
+            flex-grow: 1;
+            padding: 30px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 1px 3px rgba(0, 0, 0, .2);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, .125);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #dee2e6;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #f8f9fa;
+        }
+
+        .btn {
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #007bff;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        textarea.form-control {
+            height: 150px;
+            resize: vertical;
         }
 
         /* Login Overlay */
@@ -65,12 +167,9 @@
             text-align: center;
         }
     </style>
-    <script type="module" src="../js/community_firebase.js?v=20251220_alert_fix"></script>
 </head>
 
 <body>
-
-
 
     <!-- Login Overlay -->
     <div id="login-overlay">
@@ -86,164 +185,200 @@
         </div>
     </div>
 
-    <div class="container-fluid" id="admin-main" style="filter: blur(5px);">
-        <div class="row">
-            <div class="col-md-2 sidebar">
-                <h4>관리자 메뉴</h4>
-                <ul class="nav flex-column mt-4" style="flex-grow: 1;">
-                    <li class="nav-item"><a class="nav-link active" onclick="showTab('dashboard')">대시보드</a></li>
-                    <li class="nav-item"><a class="nav-link" onclick="showTab('orders')">주문 관리</a></li>
-                    <li class="nav-item"><a class="nav-link" onclick="showTab('notices')">공지사항 관리</a></li>
-                    <li class="nav-item"><a class="nav-link" onclick="showTab('inquiries')">활동사항 관리</a></li>
-                </ul>
-                <div class="mt-5">
-                    <a href="../index.html" class="btn btn-outline-secondary btn-sm w-100 mb-2">홈페이지로 이동</a>
-                    <button class="btn btn-danger btn-sm w-100" onclick="tryLogout()">관리자 로그아웃</button>
+    <div class="admin-wrap" id="admin-main" style="filter: blur(5px);">
+        <div class="sidebar">
+            <div class="sidebar-header">관리자 페이지</div>
+            <nav style="flex-grow: 1;">
+                <a href="#" class="nav-link active" data-target="dashboard">대시보드</a>
+                <a href="#" class="nav-link" data-target="notices">공지사항 관리</a>
+                <a href="#" class="nav-link" data-target="inquiries">활동사항 관리</a>
+                <a href="#" class="nav-link" data-target="reviews">사용후기 관리</a>
+            </nav>
+            <a href="#" class="nav-link" onclick="tryLogout()"
+                style="background: #c31d22; text-align: center; font-weight: bold;">로그아웃</a>
+        </div>
+
+        <div class="content">
+            <!-- Dashboard -->
+            <div id="dashboard" class="page-section">
+                <h2 style="margin-bottom: 20px;">대시보드</h2>
+                <div style="display: flex; gap: 20px;">
+                    <div class="card" style="flex: 1;">
+                        <div class="card-body">
+                            <h3>접수된 활동사항</h3>
+                            <p style="font-size: 2rem; font-weight: bold; color: #17a2b8;" id="dash-inquiry-count">0</p>
+                        </div>
+                    </div>
+                    <div class="card" style="flex: 1;">
+                        <div class="card-body">
+                            <h3>등록된 사용후기</h3>
+                            <p style="font-size: 2rem; font-weight: bold; color: #ffc107;" id="dash-review-count">0</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="col-md-10">
-                <div id="dashboard" class="content">
-                    <h2>??쒕낫??/h2>
-                        <p>愿由ъ옄 ?섏씠吏???ㅼ떊 寃껋쓣 ?섏쁺?⑸땲??</p>
-                        <div class="row mt-4">
-                            <div class="col-md-4">
-                                <div class="card text-white bg-primary mb-3">
-                                    <div class="card-header">?좉퇋 二쇰Ц</div>
-                                    <div class="card-body">
-                                        <h5 class="card-title" id="dash-orders-count">0嫄?/h5>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card text-white bg-success mb-3">
-                                    <div class="card-header">怨듭??ы빆</div>
-                                    <div class="card-body">
-                                        <h5 class="card-title" id="dash-notices-count">0嫄?/h5>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card text-white bg-warning mb-3">
-                                    <div class="card-header">?좉퇋 臾몄쓽</div>
-                                    <div class="card-body">
-                                        <h5 class="card-title" id="dash-inquiries-count">0嫄?/h5>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                </div>
-
-                <div id="orders" class="content hidden">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2>二쇰Ц 愿由?/h2>
-                            <button class="btn btn-primary btn-sm" onclick="addMockOrder()">?뚯뒪??二쇰Ц 異붽?</button>
+            <!-- Notices -->
+            <div id="notices" class="page-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">공지사항 관리</h3>
+                        <button class="btn btn-primary" onclick="showNoticeForm()">글쓰기</button>
                     </div>
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>二쇰Ц?쇱옄</th>
-                                <th>?곹뭹紐?/th>
-                                <th>二쇰Ц??/th>
-                                <th>?곹깭</th>
-                                <th>愿由?/th>
-                            </tr>
-                        </thead>
-                        <tbody id="order-list">
-                            <!-- Orders will be loaded here -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <div id="notices" class="content hidden">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2>怨듭??ы빆 愿由?/h2>
-                            <button class="btn btn-primary btn-sm" onclick="showAddNoticeModal()">怨듭??ы빆
-                                ?묒꽦</button>
+                    <div class="card-body">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>제목</th>
+                                    <th>작성일</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="notice-list">
+                                <!-- JS populated -->
+                            </tbody>
+                        </table>
                     </div>
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>?묒꽦??/th>
-                                <th>?쒕ぉ</th>
-                                <th>?묒꽦??/th>
-                                <th>愿由?/th>
-                            </tr>
-                        </thead>
-                        <tbody id="notice-list">
-                            <!-- Notices will be loaded here -->
-                        </tbody>
-                    </table>
                 </div>
+            </div>
 
-                <div id="inquiries" class="content hidden">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2>臾몄쓽?ы빆 愿由?/h2>
-                            <button class="btn btn-primary btn-sm" onclick="addMockInquiry()">?뚯뒪??臾몄쓽 異붽?</button>
+            <!-- Inquiries -->
+            <div id="inquiries" class="page-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">활동사항 관리</h3>
                     </div>
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>?묒꽦??/th>
-                                <th>?쒕ぉ</th>
-                                <th>?묒꽦??/th>
-                                <th>?곹깭</th>
-                                <th>愿由?/th>
-                            </tr>
-                        </thead>
-                        <tbody id="inquiry-list">
-                            <!-- Inquiries will be loaded here -->
-                        </tbody>
-                    </table>
+                    <div class="card-body">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>작성자</th>
+                                    <th>제목</th>
+                                    <th>상태</th>
+                                    <th>작성일</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inquiry-list">
+                                <!-- JS populated -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
+            </div>
+
+            <!-- Reviews -->
+            <div id="reviews" class="page-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">사용후기 관리</h3>
+                    </div>
+                    <div class="card-body">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>제목</th>
+                                    <th>작성자</th>
+                                    <th>날짜</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="review-list">
+                                <!-- JS populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Notice Write Modal -->
+    <div id="notice-form-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+        <div class="card" style="width: 600px; max-width:90%;">
+            <div class="card-header">
+                <h3 class="card-title" id="notice-modal-title">공지사항 작성</h3>
+                <button class="btn btn-danger" onclick="$('#notice-form-modal').hide();">닫기</button>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label>제목</label>
+                    <input type="text" id="notice-title" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>내용</label>
+                    <textarea id="notice-content" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>첨부파일 (이미지)</label>
+                    <input type="file" id="notice-file" class="form-control" accept="image/*">
+                    <div id="notice-file-preview" style="margin-top:10px;"></div>
+                </div>
+                <button class="btn btn-success" onclick="saveNoticeBtn()">저장</button>
             </div>
         </div>
     </div>
 
-    <!-- Add Notice Modal -->
-    <div class="modal fade" id="addNoticeModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">怨듭??ы빆 ?묒꽦</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- Reply Modal -->
+    <div id="reply-form-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+        <div class="card" style="width: 600px; max-width:90%;">
+            <div class="card-header">
+                <h3 class="card-title">활동사항 답변하기</h3>
+                <button class="btn btn-danger" onclick="$('#reply-form-modal').hide()">닫기</button>
+            </div>
+            <div class="card-body">
+                <div class="form-group" style="background:#f9f9f9; padding:10px; border-radius:5px;">
+                    <label>활동사항 제목</label>
+                    <p id="reply-inq-title" style="font-weight:bold;"></p>
+                    <label style="margin-top:10px;">활동사항 내용</label>
+                    <p id="reply-inq-content" style="white-space:pre-wrap; color:#666;"></p>
                 </div>
-                <div class="modal-body">
-                    <form id="noticeForm">
-                        <div class="mb-3">
-                            <label class="form-label">?쒕ぉ</label>
-                            <input type="text" class="form-control" id="noticeTitle" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">?댁슜</label>
-                            <textarea class="form-control" id="noticeContent" rows="5" required></textarea>
-                        </div>
-                    </form>
+                <div class="form-group">
+                    <label>답변 내용</label>
+                    <textarea id="reply-content" class="form-control" style="height:100px;"></textarea>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">痍⑥냼</button>
-                    <button type="button" class="btn btn-primary" onclick="saveNotice()">???/button>
-                </div>
+                <button class="btn btn-success" onclick="saveReplyBtn()">등록</button>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/admin.js"></script>
+    <!-- Confirm Modal -->
+    <div id="delete-confirm-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
+        <div class="card" style="width: 300px; text-align:center;">
+            <div class="card-body">
+                <h3 style="font-size:18px; margin-bottom:20px;">정말 삭제하시겠습니까?</h3>
+                <div style="display:flex; justify-content:center; gap:10px;">
+                    <button class="btn btn-danger" onclick="confirmDelete()">삭제</button>
+                    <button class="btn" style="background:#6c757d; color:#fff;"
+                        onclick="$('#delete-confirm-modal').hide()">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // Formerly imported community_firebase.js, but user requested simple password-only login.
-        // import { adminLogin, adminLogout, monitorAuth, isFirebaseInitialized } from '../js/community_firebase.js';
+        // FAILSAFE: Global Login Function (Standard Script)
+        // This runs regardless of Firebase module success/failure
+        // Local function to expose render to global scope
+        window.triggerRender = function () {
+            renderAll();
+        }
+
+        // If global login happened before module load, render now
+        if (window.isLoggedIn) {
+            renderAll();
+        }
 
         // Window Functions
         window.tryLogin = function () {
+            // alert('Debug: TryLogin Clicked'); // Debug check
             // Simple Password Check
             const input = document.getElementById('admin-password');
-            const pw = input.value.trim(); // Added trim()
+            const pw = input.value.trim();
 
             if (!pw) return alert('비밀번호를 입력하세요.');
 
@@ -251,17 +386,63 @@
                 // Success
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('admin-main').style.filter = 'none';
-                // No persistence: localStorage.setItem('admin_simple_auth', 'true');
+                window.isLoggedIn = true; // Set flag for module to check
+                if (typeof window.triggerRender === 'function') {
+                    window.triggerRender(); // Call module's render function
+                }
             } else {
                 alert('비밀번호가 일치하지 않습니다.');
-                input.value = ''; // Clear input on fail
+                input.value = '';
                 input.focus();
             }
         }
 
         window.tryLogout = function () {
             if (confirm('관리자 로그아웃 하시겠습니까?')) {
-                // localStorage.removeItem('admin_simple_auth');
+                location.reload();
+            }
+        }
+
+        // Add Enter Key Support
+        document.addEventListener('DOMContentLoaded', function () {
+            const pwInput = document.getElementById('admin-password');
+            if (pwInput) {
+                pwInput.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        tryLogin();
+                    }
+                });
+            }
+        });
+    </script>
+
+    <script type="module">
+        import { COMM_KEYS, getPosts, savePost, deletePost, readFile, addComment, adminLogin, adminLogout, monitorAuth, getPost, isFirebaseInitialized } from '../js/community_firebase.js?v=20251220_alert_fix';
+
+        // State
+        let currentAuthUser = null;
+        let noticeList = [];
+        let inquiryList = [];
+        let reviewList = [];
+
+        let currentEditId = null; // For Notices
+        let currentReplyId = null; // For Inquiries
+        let deleteTargetId = null;
+        let deleteTargetBoard = null;
+
+        // Check Init (Disabled for simple mode)
+        // if (!isFirebaseInitialized()) { ... }
+
+        // --- AUTH LOGIC (SIMPLIFIED for 4321) ---
+
+        // Removed Firebase Monitor Auth to prevent persistence/freeze
+        // monitorAuth((user) => { ... });
+
+
+
+
+        window.tryLogout = function () {
+            if (confirm('관리자 로그아웃 하시겠습니까?')) {
                 location.reload();
             }
         }
@@ -273,13 +454,200 @@
             }
         });
 
-        // Check Previous Session - DISABLED
-        // document.addEventListener('DOMContentLoaded', () => {
-        //     if (localStorage.getItem('admin_simple_auth') === 'true') {
-        //         document.getElementById('login-overlay').style.display = 'none';
-        //         document.getElementById('admin-main').style.filter = 'none';
-        //     }
-        // });
+        // --- DATA LOGIC ---
+
+        async function renderAll() {
+            // Bypass auth check for simple mode
+            // if (!currentAuthUser) return;
+            // Fake user for logic compatibility
+            currentAuthUser = { email: 'admin@demo.com' };
+
+            // Fetch All
+            noticeList = await getPosts(COMM_KEYS.NOTICE);
+            inquiryList = await getPosts(COMM_KEYS.INQUIRY);
+            reviewList = await getPosts(COMM_KEYS.REVIEW);
+
+            // Dashboard
+            document.getElementById('dash-inquiry-count').innerText = inquiryList.length;
+            document.getElementById('dash-review-count').innerText = reviewList.length;
+
+            // Notice Table
+            const noticeTbody = document.getElementById('notice-list');
+            if (noticeList.length === 0) {
+                noticeTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">등록된 공지사항이 없습니다.</td></tr>';
+            } else {
+                let html = '';
+                noticeList.forEach(n => {
+                    html += `<tr>
+                        <td>${n.title}</td>
+                        <td>${n.date}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="showNoticeForm('${n.id}')">수정</button>
+                            <button class="btn btn-danger btn-sm" onclick="askDelete('${COMM_KEYS.NOTICE}', '${n.id}')">삭제</button>
+                        </td>
+                    </tr>`;
+                });
+                noticeTbody.innerHTML = html;
+            }
+
+            // Inquiry Table
+            const inquTbody = document.getElementById('inquiry-list');
+            if (inquiryList.length === 0) {
+                inquTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">접수된 활동사항이 없습니다.</td></tr>';
+            } else {
+                let html = '';
+                inquiryList.forEach(q => {
+                    const statusColor = q.status === '답변완료' ? 'blue' : 'red';
+                    html += `<tr>
+                        <td>${q.author}</td>
+                        <td>${q.title}</td>
+                        <td><span style="color:${statusColor}">${q.status || '답변대기'}</span></td>
+                        <td>${q.date}</td>
+                        <td>
+                            <button class="btn btn-success btn-sm" onclick="showReplyForm('${q.id}')">답변</button>
+                            <button class="btn btn-danger btn-sm" onclick="askDelete('${COMM_KEYS.INQUIRY}', '${q.id}')">삭제</button>
+                        </td>
+                    </tr>`;
+                });
+                inquTbody.innerHTML = html;
+            }
+
+            // Review Table
+            const reviewTbody = document.getElementById('review-list');
+            if (reviewList.length === 0) {
+                reviewTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">등록된 후기가 없습니다.</td></tr>';
+            } else {
+                let html = '';
+                reviewList.forEach(r => {
+                    html += `<tr>
+                        <td>${r.title}</td>
+                        <td>${r.author}</td>
+                        <td>${r.date}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="askDelete('${COMM_KEYS.REVIEW}', '${r.id}')">삭제</button>
+                        </td>
+                    </tr>`;
+                });
+                reviewTbody.innerHTML = html;
+            }
+        }
+
+        // Notice Actions
+        window.showNoticeForm = async function (id = null) {
+            currentEditId = id;
+            if (id) {
+                const n = noticeList.find(item => item.id == id); // string comparison safe
+                if (n) {
+                    $('#notice-modal-title').text('공지사항 수정');
+                    $('#notice-title').val(n.title);
+                    $('#notice-content').val(n.content);
+                    $('#notice-file-preview').html(n.file ? `<img src="${n.file.data || ''}" style="max-height:50px;"> 기존파일존재` : '');
+                }
+            } else {
+                $('#notice-modal-title').text('공지사항 작성');
+                $('#notice-title').val('');
+                $('#notice-content').val('');
+                $('#notice-file-preview').html('');
+            }
+            $('#notice-file').val('');
+            $('#notice-form-modal').css('display', 'flex');
+        }
+
+        window.saveNoticeBtn = async function () {
+            const title = $('#notice-title').val();
+            const content = $('#notice-content').val();
+            const fileInput = document.getElementById('notice-file');
+
+            if (!title) return alert('제목을 입력하세요.');
+
+            // File Handle
+            let fileData = null;
+            if (fileInput.files.length > 0) {
+                fileData = await readFile(fileInput.files[0]);
+            } else if (currentEditId) {
+                // Keep existing logic: fetch from DB or find in list
+                const old = noticeList.find(n => n.id == currentEditId);
+                if (old) fileData = old.file;
+            }
+
+            const notice = {
+                id: currentEditId || null,
+                title: title,
+                content: content,
+                author: '관리자',
+                date: new Date().toISOString().split('T')[0],
+                file: fileData
+            };
+
+            await savePost(COMM_KEYS.NOTICE, notice);
+            alert('저장되었습니다.');
+            $('#notice-form-modal').hide();
+            renderAll();
+        }
+
+        // Inquiry Reply
+        window.showReplyForm = function (id) {
+            currentReplyId = id;
+            const q = inquiryList.find(i => i.id == id);
+            if (q) {
+                $('#reply-inq-title').text(q.title);
+                $('#reply-inq-content').text(q.content);
+                $('#reply-content').val('');
+                $('#reply-form-modal').css('display', 'flex');
+            }
+        }
+
+        window.saveReplyBtn = async function () {
+            const content = $('#reply-content').val();
+            if (!content) return alert('내용을 입력하세요.');
+
+            // Add Comment
+            await addComment(COMM_KEYS.INQUIRY, currentReplyId, {
+                author: '관리자',
+                content: content,
+                password: '' // Admin no pw needed
+            });
+
+            // Update Status
+            // We need to fetch the post, update status, save it.
+            const post = await getPost(COMM_KEYS.INQUIRY, currentReplyId);
+            if (post) {
+                post.status = '답변완료';
+                await savePost(COMM_KEYS.INQUIRY, post);
+            }
+
+            alert('답변이 등록되었습니다.');
+            $('#reply-form-modal').hide();
+            renderAll();
+        }
+
+        // Delete
+        window.askDelete = function (boardKey, id) {
+            deleteTargetBoard = boardKey;
+            deleteTargetId = id;
+            $('#delete-confirm-modal').css('display', 'flex');
+        }
+
+        window.confirmDelete = async function () {
+            if (deleteTargetBoard && deleteTargetId) {
+                await deletePost(deleteTargetBoard, deleteTargetId);
+                $('#delete-confirm-modal').hide();
+                renderAll();
+            }
+        }
+
+        // Navigation Tab Logic (jQuery original logic adapted)
+        $('.nav-link').click(function (e) {
+            const href = $(this).attr('href');
+            if (href.startsWith('#')) {
+                e.preventDefault();
+                $('.nav-link').removeClass('active');
+                $(this).addClass('active');
+                $('.page-section').hide();
+                $('#' + $(this).data('target')).show();
+            }
+        });
+
     </script>
 </body>
 
