@@ -105,8 +105,8 @@ export function readFile(file) {
             return;
         }
 
-        if (file.size > 500 * 1024) { // 500KB Limit to prevent oversize documents
-            alert("첨부 파일 용량이 500KB를 초과하여 파일명만 저장됩니다. (공유 DB 용량 제한)");
+        if (file.size > 300 * 1024) { // 300KB Limit for Base64 Safety (Firestore 1MB limit)
+            alert("첨부 파일 용량이 300KB를 초과하여 (서버 저장 실패 시) 파일명만 저장됩니다.\n안정적인 저장을 위해 이미지 용량을 줄여주세요.");
             resolve({
                 name: file.name,
                 size: file.size,
@@ -211,7 +211,9 @@ export async function savePost(collectionName, data) {
         return data;
     } catch (e) {
         console.error("Error saving post:", e);
-        alert(`저장 실패 (${collectionName}): ${e.message}`);
+        let msg = e.message;
+        if (msg.includes("exceeded")) msg = "용량 초과 (이미지가 너무 큽니다)";
+        alert(`저장 실패 (${collectionName}): ${msg}`);
         return null;
     }
 }
@@ -362,8 +364,8 @@ export async function uploadFile(file) {
         alert(`파일 업로드 실패:\n${msg}`);
 
         // FALLBACK: Try to save as Base64 (Legacy Mode) to bypass CORS
-        if (msg.includes('CORS') || msg.includes('네트워크') || msg.includes('초과')) {
-            const fallbackChoice = confirm("네트워크/보안 문제로 클라우드 업로드가 차단되었습니다.\n\n이미지를 문서 안에 직접 저장하시겠습니까?\n(화질이 원본보다 낮을 수 있지만 저장은 가능합니다.)");
+        if (true) { // Always offer fallback on upload failure for better UX
+            const fallbackChoice = confirm("파일(이미지) 업로드에 실패했습니다.\n(원인: " + msg + ")\n\n이미지를 문서 안에 직접 포함하여 저장하시겠습니까?\n(300KB 이하 이미지만 가능합니다.)");
             if (fallbackChoice) {
                 try {
                     const base64Data = await readFile(file);
