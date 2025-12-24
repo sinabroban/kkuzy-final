@@ -6,7 +6,61 @@
     <title>긴급 데이터 정리 도구</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script type="module">
-        import { COMM_KEYS, getPosts, deletePost } from '../js/community_firebase.js?v=cleanup_tool';
+        import { COMM_KEYS, getPosts, deletePost } from '../js/community_firebase.js';
+
+        window.autoCleanup = async function () {
+            if (!confirm("제목에 'test', '테스트', '123' 등이 포함된 테스트성 게시물을 자동으로 찾아 삭제하시겠습니까?\n(삭제 후 복구할 수 없습니다.)")) return;
+
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerText = "데이터 분석 및 삭제 중... (잠시만 기다려주세요)";
+
+            const collections = [
+                { key: COMM_KEYS.NOTICE, name: '공지사항' },
+                { key: COMM_KEYS.INQUIRY, name: '활동사항' },
+                { key: COMM_KEYS.REVIEW, name: '사용후기' }
+            ];
+
+            let count = 0;
+            let logHtml = '<h3>삭제 로그</h3><ul>';
+
+            try {
+                for (const col of collections) {
+                    const posts = await getPosts(col.key);
+                    for (const p of posts) {
+                        const title = (p.title || '').toLowerCase();
+                        const content = (p.content || '').toLowerCase();
+
+                        // Filter Logic: "test", "테스트", or very short obvious garbage
+                        const isTest = title.includes('test') || title.includes('테스트') || title === '123' || title === 't';
+
+                        if (isTest) {
+                            try {
+                                await deletePost(col.key, p.id);
+                                const msg = `[삭제됨] ${col.name} : ${p.title} (ID:${p.id})`;
+                                console.log(msg);
+                                logHtml += `<li style="color:red;">${msg}</li>`;
+                                count++;
+                            } catch (err) {
+                                console.error(err);
+                                logHtml += `<li style="color:orange;">[실패] ${col.name} : ${p.title} - ${err.message}</li>`;
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                alert("작업 중 오류 발생: " + e.message);
+            }
+
+            logHtml += '</ul>';
+            if (count === 0) logHtml += '<p>삭제할 테스트 데이터를 찾지 못했습니다.</p>';
+
+            document.getElementById('list-area').innerHTML = logHtml;
+            statusDiv.innerText = `작업 완료. 총 ${count}개 삭제됨.`;
+            alert(`작업이 완료되었습니다. 총 ${count}개의 항목을 삭제했습니다.`);
+
+            // Reload list after a short delay to show what remains
+            setTimeout(() => window.loadData(), 3000);
+        };
 
         window.loadData = async function () {
             document.getElementById('status').innerText = "데이터 불러오는 중...";
@@ -49,6 +103,13 @@
 
         // Auto load
         window.loadData();
+
+        // Auto-run if param exists
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('auto') === 'true') {
+            console.log("Auto-cleanup triggered by URL parameter");
+            setTimeout(() => autoCleanup(), 500);
+        }
     </script>
 </head>
 
@@ -56,6 +117,9 @@
     <h1>데이터 긴급 삭제 도구</h1>
     <p>관리자 페이지 업데이트가 늦어지는 경우, 이 페이지에서 직접 삭제하세요.</p>
     <button onclick="loadData()" style="padding:10px 20px; font-size:16px;">새로고침</button>
+    <button onclick="autoCleanup()"
+        style="padding:10px 20px; font-size:16px; background-color: #c31d22; color:white; border:none; margin-left:10px; cursor:pointer;">⚠️
+        테스트 데이터 일괄 삭제 (Method B)</button>
     <div id="status" style="margin-top:10px; color:blue;">대기 중...</div>
     <div id="list-area" style="margin-top:20px; border:1px solid #ccc; padding:10px;"></div>
 </body>

@@ -1,16 +1,27 @@
 /**
- * Community Logic - Firebase Version
- * Replaces community_common.js to use Firestore for shared data.
+ * Community Logic - Firebase Compat Version (Global Scope)
+ * Works directly in file:// protocol without modules.
  */
 
-// Import Firebase (ES Modules via CDN for static site)
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, query, orderBy, limit, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+// Debug Helper (Global)
+window.createDebugOverlay = function () {
+    if (document.getElementById('sys-debug-status')) return;
+    const div = document.createElement('div');
+    div.id = 'sys-debug-status';
+    div.style.cssText = "position:fixed; bottom:10px; left:10px; background:rgba(0,0,0,0.8); color:lime; padding:10px; font-size:12px; z-index:99999; border-radius:5px; font-family:monospace; pointer-events:none; max-width:300px;";
+    div.innerHTML = "System Init...";
+    document.body.appendChild(div);
+};
+
+window.updateDebug = function (msg) {
+    const el = document.getElementById('sys-debug-status');
+    if (el) {
+        el.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        console.log(`[SystemDebug] ${msg}`);
+    }
+};
 
 // --- CONFIGURATION ---
-// TODO: USER MUST REPLACE THIS WITH THEIR OWN CONFIG
 const firebaseConfig = {
     apiKey: "AIzaSyDxmxP6LPDM69GdXpCTrv9_WgZllzs3bv8",
     authDomain: "homepage-5534d.firebaseapp.com",
@@ -21,373 +32,355 @@ const firebaseConfig = {
     measurementId: "G-RMRC5JHJSL"
 };
 
-// Initialize only if not already done (though module scope prevents double init usually)
-let app, db, auth, storage;
-try {
-    app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-    auth = getAuth(app);
-    storage = getStorage(app);
+// Initialize
+let db, auth, storage;
 
-    // Auto-sign in anonymously for guest access (if not already signed in)
-    onAuthStateChanged(auth, (user) => {
+function initFirebase() {
+    // Debug overlay disabled for production
+    // window.createDebugOverlay();
+    // window.updateDebug("Firebase 초기화 중...");
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+
+    db = firebase.firestore();
+    auth = firebase.auth();
+    storage = firebase.storage();
+
+    // Auto-login
+    auth.onAuthStateChanged((user) => {
         if (user) {
-            console.log("Firebase Auth State: Signed In", user.uid);
+            window.updateDebug("인증 성공: " + user.uid.substring(0, 5) + "...");
         } else {
-            console.log("Firebase Auth State: Signed Out. Attempting Anonymous Sign-in...");
-            signInAnonymously(auth).catch((error) => {
-                console.error("Anonymous Sign-in Failed:", error);
-                // We don't alert here to avoid annoying popups on load, but upload might fail later.
+            window.updateDebug("익명 로그인 시도...");
+            auth.signInAnonymously().catch((error) => {
+                console.error("Login Error", error);
+                window.updateDebug("로그인 실패: " + error.message);
             });
         }
     });
-
-    console.log("Firebase Initialized");
-} catch (e) {
-    console.error("Firebase Init Error (Did you set the keys?):", e);
-    alert("치명적 오류: 파이어베이스 초기화 실패.\n" + e.message);
 }
 
-export function isFirebaseInitialized() {
-    return !!app && !!auth;
+// Ensure Init runs after scripts load
+if (typeof firebase !== 'undefined') {
+    initFirebase();
+} else {
+    window.addEventListener('load', function () {
+        if (typeof firebase !== 'undefined') initFirebase();
+        else alert("Firebase SDK 로드 실패. 인터넷 연결을 확인하세요.");
+    });
 }
 
-export function ensureAuth() {
+// --- GLOBALS ---
+const COMM_KEYS = {
+    NOTICE: 'notices',
+    INQUIRY: 'inquiries',
+    REVIEW: 'reviews'
+};
+window.COMM_KEYS = COMM_KEYS;
+
+// --- CRUD ---
+
+window.getPosts = function (collectionName) {
+    window.updateDebug(`${collectionName} 조회 중...`);
     return new Promise((resolve, reject) => {
-        if (!auth) {
-            reject("Firebase Auth not initialized");
-            return;
-        }
-        if (auth.currentUser) {
-            resolve(auth.currentUser);
-            return;
-        }
+        if (!db) { reject(new Error("DB 미연결")); return; }
 
-        // Timeout Safety
-        const timer = setTimeout(() => {
-            reject("인증 시간 초과 (10초). 네트워크 상태를 확인하거나 새로고침 해주세요.");
-        }, 10000);
+        // 5s Timeout
+        const timeout = setTimeout(() => {
+            reject(new Error("타임아웃(5초): 서버 응답 없음"));
+        }, 5000);
 
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            clearTimeout(timer);
-            unsubscribe();
-            if (user) {
-                resolve(user);
-            } else {
-                signInAnonymously(auth).then(resolve).catch((e) => {
-                    console.error("Anonymous Auth Failed:", e);
-                    if (e.code === 'auth/operation-not-allowed' || e.code === 'auth/configuration-not-found' || e.code === 'auth/admin-restricted-operation') {
-                        reject("관리자 설정 필요: Firebase Console -> Build -> Authentication -> Sign-in method 탭에서 '익명(Anonymous)' 로그인을 '사용 설정(Enable)' 해주세요.");
-                    } else {
-                        reject("인증 실패: " + e.message);
-                    }
-                });
-            }
+        db.collection(collectionName).get().then((snapshot) => {
+            clearTimeout(timeout);
+            const posts = [];
+            snapshot.forEach((doc) => {
+                posts.push({ id: doc.id, ...doc.data() });
+            });
+            window.updateDebug(`${collectionName} ${posts.length}건 로드됨`);
+            resolve(posts);
+        }).catch((error) => {
+            clearTimeout(timeout);
+            window.updateDebug("조회 오류: " + error.message);
+            reject(error);
         });
     });
-}
-
-export const COMM_KEYS = {
-    NOTICE: 'notices',      // Changed from kkuzy_notices for cleaner specific collections
-    INQUIRY: 'inquiries',
-    REVIEW: 'reviews',
-    COMMENTS: 'comments'    // stored as subcollection or separate collection
 };
 
-/**
- * Reads a file and returns object with Base64 data.
- * Firestore Document Limit is 1MB. We limit files to ~700KB to be safe.
- */
-export function readFile(file) {
+window.getPost = function (collectionName, id) {
+    return db.collection(collectionName).doc(String(id)).get().then(doc => {
+        if (doc.exists) return { id: doc.id, ...doc.data() };
+        return null;
+    });
+};
+
+window.savePost = function (collectionName, data) {
+    window.updateDebug("저장 중...");
+    if (!data.id) data.id = String(Date.now());
+    if (!data.date) data.date = new Date().toISOString().split('T')[0];
+
+    // Sanitize file objects to prevent Firestore nested entity errors
+    const sanitizeFile = (f) => {
+        if (!f) return null;
+        if (typeof f !== 'object') return null;
+
+        const result = {
+            name: String(f.name || ''),
+            size: Number(f.size || 0)
+        };
+
+        // Include URL if available (successful Firebase Storage upload)
+        if (f.url) {
+            result.url = String(f.url);
+        }
+
+        // Include Base64 data ONLY if:
+        // 1. No URL (fallback case)
+        // 2. File is small enough (< 5MB to stay under Firestore document limit)
+        if (!f.url && f.data && f.size < 5 * 1024 * 1024) {
+            result.data = String(f.data);
+        }
+
+        return result;
+    };
+
+    // Create a clean copy of data
+    const cleanData = { ...data };
+    if (cleanData.file) cleanData.file = sanitizeFile(cleanData.file);
+    if (cleanData.file2) cleanData.file2 = sanitizeFile(cleanData.file2);
+
+    return db.collection(collectionName).doc(String(cleanData.id)).set(cleanData, { merge: true }).then(() => {
+        window.updateDebug("저장 성공!");
+        return data;
+    }).catch(e => {
+        window.updateDebug("저장 실패: " + e.message);
+        throw e;
+    });
+};
+
+window.deletePost = function (collectionName, id) {
+    return db.collection(collectionName).doc(String(id)).delete();
+};
+
+// Internal Fallback Helper
+function attemptFallback(file, reason) {
+    if (!window.updateDebug) console.log("Fallback: " + reason);
+    else window.updateDebug("서버 업로드 실패(" + reason + "). 문서 직접 저장 시도...");
+
     return new Promise((resolve, reject) => {
-        if (!file) {
-            resolve(null);
+        // Firestore limit is 1MB. Safety limit 5MB for fallback.
+        if (file.size > 5 * 1024 * 1024) {
+            reject(new Error("업로드 실패 (보안/네트워크). 파일이 너무 커서(5MB↑) 문서에 직접 저장할 수도 없습니다."));
             return;
         }
-
-        if (file.size > 300 * 1024) { // 300KB Limit for Base64 Safety (Firestore 1MB limit)
-            alert("첨부 파일 용량이 300KB를 초과하여 (서버 저장 실패 시) 파일명만 저장됩니다.\n안정적인 저장을 위해 이미지 용량을 줄여주세요.");
-            resolve({
-                name: file.name,
-                size: file.size,
-                type: file.type,
-                data: null,
-                isLarge: true
-            });
-            return;
-        }
-
         const reader = new FileReader();
         reader.onload = (e) => {
-            resolve({
-                name: file.name,
-                size: file.size,
-                type: file.type,
-                data: e.target.result,
-                isLarge: false
-            });
+            if (window.updateDebug) window.updateDebug("문서 직접 저장(Base64) 완료.");
+            resolve({ name: file.name, data: e.target.result, size: file.size, isFallback: true });
         };
-        reader.onerror = (e) => reject(e);
+        reader.onerror = () => reject(new Error("파일 읽기 실패"));
         reader.readAsDataURL(file);
     });
 }
 
-// --- Post CRUD (Async now!) ---
+window.uploadFile = function (file) {
+    if (!file) return Promise.resolve(null);
+    if (window.updateDebug) window.updateDebug("파일 업로드 시작: " + file.name + " (" + (file.size / 1024 / 1024).toFixed(2) + "MB)");
 
-export async function getPosts(collectionName) {
-    if (!db) {
-        alert("데이터베이스 연결 끊김: 초기화가 되지 않았습니다.");
-        return [];
-    }
-    try {
-        // alert(`DEBUG: Fetching from ${collectionName}...`); // Too noisy for init
-        const q = query(collection(db, collectionName));
-        const querySnapshot = await getDocs(q);
-        const posts = [];
-        querySnapshot.forEach((doc) => {
-            posts.push({ id: doc.id, ...doc.data() });
-        });
-        // alert(`DEBUG: Fetched ${posts.length} posts from ${collectionName}`); // UNCOMMENTED
-        if (posts.length === 0) console.warn(`No posts found in ${collectionName}`);
-        return posts;
-    } catch (e) {
-        console.error("Error getting documents: ", e);
-        alert(`데이터 불러오기 실패 (${collectionName}): ${e.message}`);
-        return [];
-    }
-}
+    return new Promise((resolve, reject) => {
+        let timer = null;
+        let isComplete = false;
 
-export async function getPost(boardKey, id) {
-    if (!db) return null;
-    // In our old system, ID was an int. In Firestore, it's a string (doc ID).
-    // We will support both by trying to find valid doc.
-    try {
-        // If we are calling getPost from a list that already has the ID, we can just fetch it.
-        // However, we often used array.find in the old code. 
-        // Here we must fetch specific doc.
-
-        // Note: For simplicity in migration, if ID is passed, we fetch that doc.
-        const docRef = doc(db, boardKey, String(id));
-        const docSnap = await getDocs(query(collection(db, boardKey))); // Inefficient to fetch all, but IDs might be custom
-
-        // Better approach: fetch all and find (like before) OR fetch specific.
-        // Let's stick to 'fetch specific' if we have the ID.
-        // BUT, our legacy IDs were numbers. Firestore IDs are strings.
-        // We need to handle 'find by property id' vs 'find by doc id'.
-        // To keep it simple: We will use Timestamp as ID for new posts.
-
-        // Let's just re-use getPosts and find for now to match old logic signature exactly?
-        // No, that's inefficient.
-        // Let's assume ID is the Document Key.
-
-        // FIX: The old code used integer IDs. We should transition to String IDs.
-        // But for compatibility with existing URL params, we can just treat them as strings.
-        return (await getPosts(boardKey)).find(p => String(p.id) === String(id));
-    } catch (e) {
-        console.error("Error getting post:", e);
-        return null;
-    }
-}
-
-export async function savePost(collectionName, data) {
-    if (!db) {
-        alert("데이터베이스 연결 실패. 페이지를 새로고침 해주세요.");
-        return null;
-    }
-    try {
-        if (data.id) {
-            // Update
-            const docRef = doc(db, collectionName, String(data.id));
-            await setDoc(docRef, data, { merge: true });
-            // alert(`DEBUG: Updated doc ${data.id} in ${collectionName}`);
-        } else {
-            // Create
-            // We use Date.now() as ID to keep sorting simple and consistent with old style unique IDs
-            const newId = String(Date.now());
-            data.id = newId;
-            await setDoc(doc(db, collectionName, newId), data);
-            // alert(`DEBUG: Created new doc ${newId} in ${collectionName}`);
-        }
-        return data;
-    } catch (e) {
-        console.error("Error saving post:", e);
-        let msg = e.message;
-        if (msg.includes("exceeded")) msg = "용량 초과 (이미지가 너무 큽니다)";
-        alert(`저장 실패 (${collectionName}): ${msg}`);
-        return null;
-    }
-}
-
-export async function deletePost(boardKey, id) {
-    if (!db) return;
-    try {
-        await deleteDoc(doc(db, boardKey, String(id)));
-        return true;
-    } catch (e) {
-        console.error("Error deleting post:", e);
-        alert("삭제 중 오류가 발생했습니다: " + e.message);
-        return false;
-    }
-}
-
-export async function verifyPassword(boardKey, id, password) {
-    const post = await getPost(boardKey, id);
-    if (!post) return false;
-    return post.password === password;
-}
-
-// --- Comments ---
-
-export async function getComments(boardKey, postId) {
-    if (!db) return [];
-    try {
-        // Sub-collection 'comments' under the post document
-        const q = query(collection(db, boardKey, String(postId), "comments"), orderBy("date", "asc"));
-        const querySnapshot = await getDocs(q);
-        const comments = [];
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            // id is doc.id
-            comments.push({ id: doc.id, ...data });
-        });
-        return comments;
-    } catch (e) {
-        console.error("Error getting comments:", e);
-        return [];
-    }
-}
-
-export async function addComment(boardKey, postId, comment) {
-    if (!db) return;
-    try {
-        comment.date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-        // Add to subcollection
-        await addDoc(collection(db, boardKey, String(postId), "comments"), comment);
-    } catch (e) {
-        console.error("Error adding comment:", e);
-    }
-}
-
-// --- Authentication (Admin) ---
-
-export async function adminLogin(email, password) {
-    if (!auth) {
-        throw new Error("Firebase Auth가 초기화되지 않았습니다. 설정(firebaseConfig)을 확인해주세요.");
-    }
-    try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        return userCredential.user;
-    } catch (error) {
-        console.error("Login Failed", error);
-        throw error;
-    }
-}
-
-export async function adminLogout() {
-    if (!auth) return;
-    try {
-        await signOut(auth);
-    } catch (error) {
-        console.error("Logout Failed", error);
-    }
-}
-
-export function monitorAuth(callback) {
-    if (!auth) return;
-    onAuthStateChanged(auth, (user) => {
-        callback(user);
-    });
-}
-
-export function enableContentProtection() {
-    document.addEventListener('contextmenu', function (e) {
-        if (e.target.tagName === 'IMG') e.preventDefault();
-    });
-    document.addEventListener('dragstart', function (e) {
-        if (e.target.tagName === 'IMG') e.preventDefault();
-    });
-}
-
-/**
- * Upload a file to Firebase Storage
- * @param {File} file - The file object to upload
- * @returns {Promise<{name: string, url: string, size: number}>}
- */
-export async function uploadFile(file) {
-    if (!file) return null;
-
-    // alert(`DEBUG: uploadFile 진입. 파일명: ${file.name}`);
-
-    try {
-        const timestamp = Date.now();
-        const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-        const storagePath = `uploads/${timestamp}_${safeName}`;
-
-        if (!storage) throw new Error("Firebase Storage가 초기화되지 않았습니다.");
-
-        const storageRef = ref(storage, storagePath);
-
-        // alert(`DEBUG: 업로드 시작... \n경로: ${storagePath} \n크기: ${file.size}`);
-
-        // Create a timeout promise
-        const timeout = new Promise((_, reject) => {
-            setTimeout(() => reject(new Error("업로드 시간 초과 (15초). 네트워크/방화벽/CORS 문제일 수 있습니다.")), 15000);
-        });
-
-        // Race between upload and timeout
-        const snapshot = await Promise.race([
-            uploadBytes(storageRef, file),
-            timeout
-        ]);
-
-        // alert("DEBUG: 업로드 성공! URL 가져오는 중...");
-        const url = await getDownloadURL(snapshot.ref);
-
-        return {
-            name: file.name,
-            url: url,
-            size: file.size,
-            storagePath: storagePath
-        };
-    } catch (e) {
-        console.error("Upload failed:", e);
-        // Specialized error messages
-        let msg = e.message;
-        if (msg.includes('storage/unauthorized')) {
-            msg = "권한 없음 (Firebase Storage Rules를 확인하세요. 'allow write: if true;' 혹은 'if request.auth != null;')";
-        } else if (msg.includes('storage/canceled')) {
-            msg = "업로드가 취소되었습니다.";
-        } else if (msg.includes('network') || msg.includes('CORS')) {
-            msg = "네트워크 오류 (CORS 설정이나 인터넷 연결을 확인하세요).";
+        // For files under 5MB, use Base64 directly (more reliable)
+        if (file.size < 5 * 1024 * 1024) {
+            attemptFallback(file, "Direct Base64 (under 5MB)").then(resolve).catch(reject);
+            return;
         }
 
-        alert(`파일 업로드 실패:\n${msg}`);
+        if (!storage) {
+            attemptFallback(file, "Storage 미초기화").then(resolve).catch(reject);
+            return;
+        }
 
-        // FALLBACK: Try to save as Base64 (Legacy Mode) to bypass CORS
-        if (true) { // Always offer fallback on upload failure for better UX
-            const fallbackChoice = confirm("파일(이미지) 업로드에 실패했습니다.\n(원인: " + msg + ")\n\n이미지를 문서 안에 직접 포함하여 저장하시겠습니까?\n(300KB 이하 이미지만 가능합니다.)");
-            if (fallbackChoice) {
-                try {
-                    const base64Data = await readFile(file);
-                    if (base64Data) {
-                        alert("비상 저장 모드(Base64)로 변환 성공! 저장을 계속합니다.");
-                        return {
-                            name: file.name,
-                            url: null, // No URL
-                            data: base64Data.data, // Base64 String
-                            size: file.size,
-                            type: file.type,
-                            storagePath: null
-                        };
-                    }
-                } catch (readErr) {
-                    console.error("Fallback failed", readErr);
-                    alert("비상 저장 모드(Base64) 변환 중 오류가 발생했습니다: " + readErr.message);
-                }
+        const ref = storage.ref().child('uploads/' + Date.now() + '_' + file.name);
+        const uploadTask = ref.put(file);
+
+        // 2. Timeout (10s)
+        timer = setTimeout(() => {
+            if (!isComplete) {
+                isComplete = true; // prevent racing
+                uploadTask.cancel();
+                console.warn("Upload Timeout");
+                attemptFallback(file, "시간 초과 10초").then(resolve).catch(reject);
             }
-        }
+        }, 10000);
 
-        // If fallback declined/failed, throw original
-        throw e;
-    }
-}
+        uploadTask.on('state_changed',
+            (snapshot) => { },
+            (error) => {
+                if (isComplete) return;
+                isComplete = true;
+                clearTimeout(timer);
+                console.error("Upload Error", error);
+                attemptFallback(file, error.message).then(resolve).catch(reject);
+            },
+            () => {
+                if (isComplete) return;
+                isComplete = true;
+                clearTimeout(timer);
+                uploadTask.snapshot.ref.getDownloadURL().then(url => {
+                    if (window.updateDebug) window.updateDebug("서버 업로드 성공!");
+                    resolve({ name: file.name, url: url, size: file.size });
+                }).catch(e => {
+                    attemptFallback(file, "URL 획득 실패").then(resolve).catch(reject);
+                });
+            }
+        );
+    });
+};
+
+window.ensureAuth = function () {
+    return new Promise((resolve, reject) => {
+        if (auth && auth.currentUser) resolve(auth.currentUser);
+        else {
+            // quick check
+            setTimeout(() => {
+                if (auth && auth.currentUser) resolve(auth.currentUser);
+                else reject("로그인(인증) 대기 시간 초과");
+            }, 2000);
+        }
+    });
+};
+
+// --- COMMENT SYSTEM ---
+
+window.getComments = function (boardKey, postId) {
+    if (window.updateDebug) window.updateDebug(`댓글 조회: ${boardKey}/${postId}`);
+    return new Promise((resolve, reject) => {
+        if (!db) { reject(new Error("DB 미연결")); return; }
+
+        db.collection(boardKey).doc(String(postId)).collection('comments')
+            .orderBy('date', 'asc')
+            .get()
+            .then((snapshot) => {
+                const comments = [];
+                snapshot.forEach((doc) => {
+                    comments.push({ id: doc.id, ...doc.data() });
+                });
+                if (window.updateDebug) window.updateDebug(`댓글 ${comments.length}건 로드됨`);
+                resolve(comments);
+            })
+            .catch((error) => {
+                console.error("댓글 조회 오류:", error);
+                if (window.updateDebug) window.updateDebug("댓글 조회 오류: " + error.message);
+                reject(error);
+            });
+    });
+};
+
+window.addComment = function (boardKey, postId, comment) {
+    if (window.updateDebug) window.updateDebug("댓글 저장 중...");
+    if (!comment.date) comment.date = new Date().toISOString().split('T')[0];
+    if (!comment.author) comment.author = "익명";
+
+    return db.collection(boardKey).doc(String(postId)).collection('comments')
+        .add(comment)
+        .then((docRef) => {
+            if (window.updateDebug) window.updateDebug("댓글 저장 성공!");
+            return { id: docRef.id, ...comment };
+        })
+        .catch(e => {
+            if (window.updateDebug) window.updateDebug("댓글 저장 실패: " + e.message);
+            throw e;
+        });
+};
+
+window.deleteComment = function (boardKey, postId, commentId) {
+    return db.collection(boardKey).doc(String(postId)).collection('comments')
+        .doc(String(commentId))
+        .delete();
+};
+
+// --- RENDER HELPERS (Global) ---
+
+window.renderNoticeList = function (containerId) {
+    const tbody = document.getElementById(containerId);
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">로딩 중...</td></tr>';
+
+    window.getPosts(COMM_KEYS.NOTICE).then(list => {
+        list.sort((a, b) => new Date(b.date) - new Date(a.date));
+        let html = '';
+        if (list.length === 0) html = '<tr><td colspan="4" style="text-align:center;">글이 없습니다.</td></tr>';
+        else {
+            list.forEach((n, i) => {
+                html += `<tr>
+                    <td class="num">${list.length - i}</td>
+                    <td class="title" style="text-align:left;"><a href="notice.html?id=${n.id}">${n.title}</a> ${n.file ? '💾' : ''}</td>
+                    <td class="name">${n.author}</td>
+                    <td class="date">${n.date}</td>
+                </tr>`;
+            });
+        }
+        tbody.innerHTML = html;
+    }).catch(e => {
+        tbody.innerHTML = `<tr><td colspan="4" style="color:red; text-align:center;">오류: ${e.message}</td></tr>`;
+    });
+};
+
+window.renderInquiryList = function (containerId) {
+    const tbody = document.getElementById(containerId);
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">로딩 중...</td></tr>';
+
+    window.getPosts(COMM_KEYS.INQUIRY).then(list => {
+        list.sort((a, b) => new Date(b.date) - new Date(a.date));
+        let html = '';
+        if (list.length === 0) html = '<tr><td colspan="5" style="text-align:center;">글이 없습니다.</td></tr>';
+        else {
+            list.forEach((q, i) => {
+                const secret = q.secret ? '🔒' : '';
+                const link = `<a href="#" onclick="window.viewPost(event, '${q.id}')">${q.title}</a>`;
+                html += `<tr>
+                    <td class="num">${list.length - i}</td>
+                    <td class="title" style="text-align:left;">${link} ${secret}</td>
+                    <td class="name">${q.author}</td>
+                    <td class="date">${q.date}</td>
+                    <td class="status">${q.status || '대기'}</td>
+                </tr>`;
+            });
+        }
+        tbody.innerHTML = html;
+    }).catch(e => {
+        tbody.innerHTML = `<tr><td colspan="5" style="color:red; text-align:center;">오류: ${e.message}</td></tr>`;
+    });
+};
+
+window.renderReviewList = function (containerId) {
+    const tbody = document.getElementById(containerId);
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">로딩 중...</td></tr>';
+
+    window.getPosts(COMM_KEYS.REVIEW).then(list => {
+        list.sort((a, b) => new Date(b.date) - new Date(a.date));
+        let html = '';
+        if (list.length === 0) html = '<tr><td colspan="5" style="text-align:center;">글이 없습니다.</td></tr>';
+        else {
+            list.forEach((r, i) => {
+                const stars = '★'.repeat(parseInt(r.rating || 5));
+                const link = `<a href="#" onclick="window.viewPost(event, '${r.id}')">${r.title}</a>`;
+                html += `<tr>
+                    <td class="num">${list.length - i}</td>
+                    <td class="title" style="text-align:left;">${link} ${r.file ? '📷' : ''}</td>
+                    <td class="name">${r.author}</td>
+                    <td class="date">${r.date}</td>
+                    <td class="status" style="color:orange;">${stars}</td>
+                </tr>`;
+            });
+        }
+        tbody.innerHTML = html;
+    }).catch(e => {
+        tbody.innerHTML = `<tr><td colspan="5" style="color:red; text-align:center;">오류: ${e.message}</td></tr>`;
+    });
+};

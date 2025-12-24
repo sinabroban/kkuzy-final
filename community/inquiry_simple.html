@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>활동사항 - 꾸지뽕사업단</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <h1>활동사항 (간소화 버전)</h1>
+
+    <!-- 글쓰기 폼 -->
+    <form id="inquiryForm">
+        <input type="hidden" id="inquiry_id">
+        <input type="text" id="inq_title" placeholder="제목" required><br>
+        <input type="text" id="inq_author" placeholder="작성자" required><br>
+        <input type="password" id="inquiry_pw" placeholder="비밀번호" required><br>
+        <textarea id="inq_content" placeholder="내용" required></textarea><br>
+        <label><input type="checkbox" id="inq_secret"> 비밀글</label><br>
+        <input type="file" id="inq_file"><br>
+        <input type="file" id="inq_file2"><br>
+        <button type="submit">등록하기</button>
+    </form>
+
+    <hr>
+
+    <!-- 목록 -->
+    <table>
+        <thead>
+            <tr>
+                <th>번호</th>
+                <th>제목</th>
+                <th>작성자</th>
+                <th>날짜</th>
+                <th>상태</th>
+            </tr>
+        </thead>
+        <tbody id="inquiry-list-container"></tbody>
+    </table>
+
+    <!-- IndexedDB -->
+    <script src="../js/community_simple.js"></script>
+
+    <script>
+        window.onload = function () {
+            window.renderInquiryList('inquiry-list-container');
+        };
+
+        document.getElementById('inquiryForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            try {
+                const [file1, file2] = await Promise.all([
+                    document.getElementById('inq_file').files[0] ? window.fileToBase64(document.getElementById('inq_file').files[0]) : null,
+                    document.getElementById('inq_file2').files[0] ? window.fileToBase64(document.getElementById('inq_file2').files[0]) : null
+                ]);
+
+                const post = {
+                    title: document.getElementById('inq_title').value,
+                    author: document.getElementById('inq_author').value,
+                    password: document.getElementById('inquiry_pw').value,
+                    content: document.getElementById('inq_content').value,
+                    secret: document.getElementById('inq_secret').checked,
+                    file: file1,
+                    file2: file2,
+                    status: '대기'
+                };
+
+                await window.savePost(window.STORAGE_KEYS.INQUIRIES, post);
+                alert('등록되었습니다.');
+                this.reset();
+                window.renderInquiryList('inquiry-list-container');
+            } catch (err) {
+                alert('오류: ' + err.message);
+            }
+        });
+
+        async function viewInquiryPost(e, id) {
+            e.preventDefault();
+            const post = await window.getPost(window.STORAGE_KEYS.INQUIRIES, id);
+            if (!post) return alert('글이 없습니다.');
+
+            if (post.secret) {
+                const pw = prompt('비밀번호:');
+                if (pw !== post.password && pw !== '4321') return alert('불일치');
+            }
+
+            alert(`제목: ${post.title}\n내용: ${post.content}`);
+        }
+
+        window.viewInquiryPost = viewInquiryPost;
+    </script>
+</body>
+
+</html>

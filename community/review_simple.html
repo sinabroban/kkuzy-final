@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>사용후기 - 꾸지뽕사업단</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <h1>사용후기 (간소화 버전)</h1>
+
+    <!-- 글쓰기 폼 -->
+    <form id="reviewForm">
+        <input type="hidden" id="review_id">
+        <input type="text" id="review_title" placeholder="제목" required><br>
+        <input type="text" id="review_author" placeholder="작성자" required><br>
+        <input type="password" id="review_pw" placeholder="비밀번호" required><br>
+        <textarea id="review_content" placeholder="내용" required></textarea><br>
+        <select id="review_rating">
+            <option value="5">★★★★★</option>
+            <option value="4">★★★★☆</option>
+            <option value="3">★★★☆☆</option>
+            <option value="2">★★☆☆☆</option>
+            <option value="1">★☆☆☆☆</option>
+        </select><br>
+        <input type="file" id="review_file"><br>
+        <input type="file" id="review_file2"><br>
+        <button type="submit">등록하기</button>
+    </form>
+
+    <hr>
+
+    <!-- 목록 -->
+    <table>
+        <thead>
+            <tr>
+                <th>번호</th>
+                <th>제목</th>
+                <th>작성자</th>
+                <th>날짜</th>
+                <th>평점</th>
+            </tr>
+        </thead>
+        <tbody id="review-list-container"></tbody>
+    </table>
+
+    <!-- IndexedDB -->
+    <script src="../js/community_simple.js"></script>
+
+    <script>
+        window.onload = function () {
+            window.renderReviewList('review-list-container');
+        };
+
+        document.getElementById('reviewForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            try {
+                const [file1, file2] = await Promise.all([
+                    document.getElementById('review_file').files[0] ? window.fileToBase64(document.getElementById('review_file').files[0]) : null,
+                    document.getElementById('review_file2').files[0] ? window.fileToBase64(document.getElementById('review_file2').files[0]) : null
+                ]);
+
+                const post = {
+                    title: document.getElementById('review_title').value,
+                    author: document.getElementById('review_author').value,
+                    password: document.getElementById('review_pw').value,
+                    content: document.getElementById('review_content').value,
+                    rating: document.getElementById('review_rating').value,
+                    file: file1,
+                    file2: file2
+                };
+
+                await window.savePost(window.STORAGE_KEYS.REVIEWS, post);
+                alert('등록되었습니다.');
+                this.reset();
+                window.renderReviewList('review-list-container');
+            } catch (err) {
+                alert('오류: ' + err.message);
+            }
+        });
+
+        async function viewReviewPost(e, id) {
+            e.preventDefault();
+            const post = await window.getPost(window.STORAGE_KEYS.REVIEWS, id);
+            if (!post) return alert('글이 없습니다.');
+            alert(`제목: ${post.title}\n내용: ${post.content}\n평점: ${'★'.repeat(post.rating)}`);
+        }
+
+        window.viewReviewPost = viewReviewPost;
+    </script>
+</body>
+
+</html>
