@@ -407,7 +407,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
     <!-- Community Firebase Logic -->
-    <script src="../js/community_firebase.js?v=20251224_final"></script>
+    <script src="../js/community_firebase.js?v=20251226_1122"></script>
 
     <!-- Review Page Logic -->
     <script>
@@ -440,31 +440,39 @@
                 var fileInput = document.getElementById('review_file');
                 var date = new Date().toISOString().split('T')[0];
 
-                if (!title || !author || !pw || !content) { alert('필수 항목을 입력해주세요.'); return; }
+                if (!title || !author || !pw || !content) {
+                    alert('필수 항목을 입력해주세요.');
+                    return;
+                }
 
                 const btn = document.querySelector('form button[type="submit"]');
 
+                // Handle file upload
                 let fileData = null;
-                if (fileInput.files.length > 0) {
+                if (fileInput && fileInput.files.length > 0) {
                     const file = fileInput.files[0];
-                    if (file.size > 50 * 1024 * 1024) { alert("파일1: 50MB 이하만 가능합니다."); return; }
+                    if (file.size > 50 * 1024 * 1024) {
+                        alert("파일: 50MB 이하만 가능합니다.");
+                        return;
+                    }
 
-                    if (btn) { btn.innerText = "파일 1 업로드 중..."; btn.disabled = true; }
+                    if (btn) {
+                        btn.innerText = "파일 업로드 중...";
+                        btn.disabled = true;
+                    }
 
                     try {
                         fileData = await uploadFile(file);
+                        console.log("File uploaded successfully:", fileData);
                     } catch (err) {
-                        throw new Error("파일1 업로드 실패: " + (err.message || err));
+                        console.error("File upload error:", err);
+                        alert("파일 업로드 실패: " + err.message);
+                        if (btn) {
+                            btn.innerText = "등록하기";
+                            btn.disabled = false;
+                        }
+                        return;
                     }
-                } else if (id) {
-                    const existing = await getPost(BOARD_KEY, id);
-                    if (existing) fileData = existing.file;
-                }
-
-                let fileData2 = null;
-                if (id) {
-                    const existing = await getPost(BOARD_KEY, id);
-                    if (existing) fileData = existing.file;
                 }
 
                 if (btn) {
@@ -473,11 +481,24 @@
                 }
 
                 var newReview = {
-                    id: id || null,
-                    title, author, password: pw, content, rating, date,
-                    file: fileData
+                    title: title,
+                    author: author,
+                    password: pw,
+                    content: content,
+                    rating: rating,
+                    date: date
                 };
 
+                // Add file if uploaded
+                if (fileData) {
+                    newReview.file = fileData;
+                }
+
+                if (id) {
+                    newReview.id = id;
+                }
+
+                console.log("Saving review:", newReview);
                 const saved = await savePost(BOARD_KEY, newReview);
                 if (!saved) {
                     return;
@@ -487,14 +508,23 @@
                 document.getElementById('reviewForm').reset();
                 document.getElementById('review_id').value = '';
 
-                if (btn) { btn.innerText = "등록하기"; btn.disabled = false; }
-                if (id) window.viewPost(null, id); else window.showList();
+                if (btn) {
+                    btn.innerText = "등록하기";
+                    btn.disabled = false;
+                }
+
+                if (id) window.viewPost(null, id);
+                else window.showList();
+
             } catch (err) {
-                console.error(err);
+                console.error("Error details:", err);
                 alert("오류: " + err.message);
 
                 const btn = document.querySelector('form button[type="submit"]');
-                if (btn) { btn.innerText = "등록하기"; btn.disabled = false; }
+                if (btn) {
+                    btn.innerText = "등록하기";
+                    btn.disabled = false;
+                }
             }
         }
 

@@ -438,7 +438,7 @@
 	<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
 	<!-- Community Firebase Logic -->
-	<script src="../js/community_firebase.js?v=20251224_fix"></script>
+	<script src="../js/community_firebase.js?v=20251226_1122"></script>
 
 	<!-- Inquiry Page Logic -->
 	<script>
@@ -468,56 +468,89 @@
 				var fileInput = document.getElementById('inquiry_file');
 				var date = new Date().toISOString().split('T')[0];
 
-				// Handle File 1
-				let fileData = null;
-				if (fileInput.files.length > 0) {
-					const file = fileInput.files[0];
-					if (file.size > 50 * 1024 * 1024) { alert("파일1: 50MB 이하만 가능합니다."); return; }
+				if (!title || !author || !pw || !content) {
+					alert('필수 항목을 입력해주세요.');
+					return;
+				}
 
-					const submitBtn = document.querySelector('form button[type="submit"]');
-					const orgText = submitBtn ? submitBtn.innerText : "등록하기";
-					if (submitBtn) { submitBtn.innerText = "파일 1 업로드 중..."; submitBtn.disabled = true; }
+				const submitBtn = document.querySelector('form button[type="submit"]');
+
+				// Handle file upload
+				let fileData = null;
+				if (fileInput && fileInput.files.length > 0) {
+					const file = fileInput.files[0];
+					if (file.size > 50 * 1024 * 1024) {
+						alert("파일: 50MB 이하만 가능합니다.");
+						return;
+					}
+
+					if (submitBtn) {
+						submitBtn.innerText = "파일 업로드 중...";
+						submitBtn.disabled = true;
+					}
 
 					try {
 						fileData = await uploadFile(file);
+						console.log("File uploaded successfully:", fileData);
 					} catch (err) {
-						alert("파일1 업로드 실패: " + err.message);
-						if (submitBtn) { submitBtn.innerText = orgText; submitBtn.disabled = false; }
+						console.error("File upload error:", err);
+						alert("파일 업로드 실패: " + err.message);
+						if (submitBtn) {
+							submitBtn.innerText = "등록하기";
+							submitBtn.disabled = false;
+						}
 						return;
 					}
-				} else if (id) {
-					const existing = await getPost(BOARD_KEY, id);
-					if (existing) fileData = existing.file;
 				}
 
-				if (document.querySelector('form button[type="submit"]')) {
-					document.querySelector('form button[type="submit"]').innerText = "저장 중...";
+				if (submitBtn) {
+					submitBtn.innerText = "저장 중...";
+					submitBtn.disabled = true;
 				}
 
+				// Create post object
 				var newInquiry = {
-					id: id ? id : null,
-					title: title, author: author, password: pw, content: content,
-					secret: isSecret, date: date, file: fileData,
+					title: title,
+					author: author,
+					password: pw,
+					content: content,
+					secret: isSecret,
+					date: date,
 					status: '답변대기'
 				};
 
+				// Add file if uploaded
+				if (fileData) {
+					newInquiry.file = fileData;
+				}
+
+				// Add ID if editing
+				if (id) {
+					newInquiry.id = id;
+				}
+
+				console.log("Saving inquiry:", newInquiry);
 				await savePost(BOARD_KEY, newInquiry);
 				alert(id ? '수정되었습니다.' : '등록되었습니다.');
 
 				document.getElementById('inquiryForm').reset();
 				document.getElementById('inquiry_id').value = '';
 
+				if (submitBtn) {
+					submitBtn.innerText = "등록하기";
+					submitBtn.disabled = false;
+				}
+
 				if (id) window.viewPost(null, id); else window.showList();
 
 			} catch (e) {
-				console.error(e);
+				console.error("Error details:", e);
 				alert("오류 발생: " + e.message);
 
 				const btn = document.querySelector('form button[type="submit"]');
 				if (btn) { btn.innerText = "등록하기"; btn.disabled = false; }
 			}
 		}
-
 		async function viewPost(e, id) {
 			if (e) e.preventDefault();
 			const post = await getPost(BOARD_KEY, id);

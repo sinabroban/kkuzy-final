@@ -117,43 +117,74 @@ window.getPost = function (collectionName, id) {
 
 window.savePost = function (collectionName, data) {
     window.updateDebug("저장 중...");
+    console.log("savePost called with data:", data);
+
     if (!data.id) data.id = String(Date.now());
     if (!data.date) data.date = new Date().toISOString().split('T')[0];
 
-    // Sanitize file objects to prevent Firestore nested entity errors
-    const sanitizeFile = (f) => {
-        if (!f) return null;
-        if (typeof f !== 'object') return null;
+    // ULTRA-AGGRESSIVE sanitization - completely rebuild the object
+    const cleanData = {};
 
-        const result = {
-            name: String(f.name || ''),
-            size: Number(f.size || 0)
-        };
+    // Only copy primitive values and simple objects
+    for (let key in data) {
+        if (!data.hasOwnProperty(key)) continue;
 
-        // Include URL if available (successful Firebase Storage upload)
-        if (f.url) {
-            result.url = String(f.url);
+        const value = data[key];
+
+        // Skip undefined and null
+        if (value === undefined || value === null) {
+            cleanData[key] = value;
+            continue;
         }
 
-        // Include Base64 data ONLY if:
-        // 1. No URL (fallback case)
-        // 2. File is small enough (< 5MB to stay under Firestore document limit)
-        if (!f.url && f.data && f.size < 5 * 1024 * 1024) {
-            result.data = String(f.data);
+        // Handle file objects specially
+        if (key === 'file' || key === 'file2') {
+            if (value && typeof value === 'object') {
+                // Create a completely new object with ONLY the properties we need
+                const fileObj = {};
+
+                if (value.name) fileObj.name = String(value.name);
+                if (value.size) fileObj.size = Number(value.size);
+                if (value.type) fileObj.type = String(value.type);
+                if (value.url) fileObj.url = String(value.url);
+                if (value.data) fileObj.data = String(value.data);
+
+                // Only include if we have at least a name
+                if (fileObj.name) {
+                    cleanData[key] = fileObj;
+                }
+            }
+            continue;
         }
 
-        return result;
-    };
+        // For all other properties, ensure they're primitives
+        const valueType = typeof value;
 
-    // Create a clean copy of data
-    const cleanData = { ...data };
-    if (cleanData.file) cleanData.file = sanitizeFile(cleanData.file);
-    if (cleanData.file2) cleanData.file2 = sanitizeFile(cleanData.file2);
+        if (valueType === 'string') {
+            cleanData[key] = String(value);
+        } else if (valueType === 'number') {
+            cleanData[key] = Number(value);
+        } else if (valueType === 'boolean') {
+            cleanData[key] = Boolean(value);
+        } else if (valueType === 'object') {
+            // For any other object, try JSON round-trip
+            try {
+                const jsonStr = JSON.stringify(value);
+                cleanData[key] = JSON.parse(jsonStr);
+            } catch (e) {
+                console.warn(`Could not serialize property ${key}, skipping`, e);
+            }
+        }
+    }
 
-    return db.collection(collectionName).doc(String(cleanData.id)).set(cleanData, { merge: true }).then(() => {
+    console.log("Clean data to be saved:", JSON.stringify(cleanData, null, 2));
+
+    return db.collection(collectionName).doc(String(cleanData.id)).set(cleanData).then(() => {
         window.updateDebug("저장 성공!");
         return data;
     }).catch(e => {
+        console.error("Firestore save error:", e);
+        console.error("Failed data structure:", cleanData);
         window.updateDebug("저장 실패: " + e.message);
         throw e;
     });
@@ -177,7 +208,14 @@ function attemptFallback(file, reason) {
         const reader = new FileReader();
         reader.onload = (e) => {
             if (window.updateDebug) window.updateDebug("문서 직접 저장(Base64) 완료.");
-            resolve({ name: file.name, data: e.target.result, size: file.size, isFallback: true });
+            // Return only primitive types that Firestore can serialize
+            resolve({
+                name: String(file.name || ''),
+                data: String(e.target.result || ''),
+                size: Number(file.size || 0),
+                type: String(file.type || ''),
+                isFallback: true
+            });
         };
         reader.onerror = () => reject(new Error("파일 읽기 실패"));
         reader.readAsDataURL(file);
@@ -186,33 +224,52 @@ function attemptFallback(file, reason) {
 
 window.uploadFile = function (file) {
     if (!file) return Promise.resolve(null);
-    if (window.updateDebug) window.updateDebug("파일 업로드 시작: " + file.name + " (" + (file.size / 1024 / 1024).toFixed(2) + "MB)");
+
+    // Extract file properties IMMEDIATELY to avoid any File object references
+    const fileName = String(file.name);
+    const fileSize = Number(file.size);
+    const fileType = String(file.type);
+
+    if (window.updateDebug) window.updateDebug("파일 업로드 시작: " + fileName + " (" + (fileSize / 1024 / 1024).toFixed(2) + "MB)");
 
     return new Promise((resolve, reject) => {
+        // For files under 1MB, use Base64 directly (Firestore document limit)
+        if (fileSize < 1 * 1024 * 1024) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (window.updateDebug) window.updateDebug("Base64 변환 완료");
+                // Return ONLY plain object with primitive values
+                resolve({
+                    name: fileName,
+                    data: String(e.target.result),
+                    size: fileSize,
+                    type: fileType
+                });
+            };
+            reader.onerror = () => reject(new Error("파일 읽기 실패"));
+            reader.readAsDataURL(file);
+            return;
+        }
+
+        // For larger files, try Firebase Storage
+        if (!storage) {
+            reject(new Error("Storage 미초기화 - 1MB 이하 파일만 가능합니다"));
+            return;
+        }
+
         let timer = null;
         let isComplete = false;
 
-        // For files under 5MB, use Base64 directly (more reliable)
-        if (file.size < 5 * 1024 * 1024) {
-            attemptFallback(file, "Direct Base64 (under 5MB)").then(resolve).catch(reject);
-            return;
-        }
-
-        if (!storage) {
-            attemptFallback(file, "Storage 미초기화").then(resolve).catch(reject);
-            return;
-        }
-
-        const ref = storage.ref().child('uploads/' + Date.now() + '_' + file.name);
+        const ref = storage.ref().child('uploads/' + Date.now() + '_' + fileName);
         const uploadTask = ref.put(file);
 
-        // 2. Timeout (10s)
+        // Timeout (10s)
         timer = setTimeout(() => {
             if (!isComplete) {
-                isComplete = true; // prevent racing
+                isComplete = true;
                 uploadTask.cancel();
                 console.warn("Upload Timeout");
-                attemptFallback(file, "시간 초과 10초").then(resolve).catch(reject);
+                reject(new Error("업로드 시간 초과 - Firebase Storage 권한 설정이 필요하거나 1MB 이하 파일을 사용하세요"));
             }
         }, 10000);
 
@@ -223,7 +280,7 @@ window.uploadFile = function (file) {
                 isComplete = true;
                 clearTimeout(timer);
                 console.error("Upload Error", error);
-                attemptFallback(file, error.message).then(resolve).catch(reject);
+                reject(new Error("업로드 실패: " + error.message));
             },
             () => {
                 if (isComplete) return;
@@ -231,9 +288,15 @@ window.uploadFile = function (file) {
                 clearTimeout(timer);
                 uploadTask.snapshot.ref.getDownloadURL().then(url => {
                     if (window.updateDebug) window.updateDebug("서버 업로드 성공!");
-                    resolve({ name: file.name, url: url, size: file.size });
+                    // Return ONLY plain object with primitive values
+                    resolve({
+                        name: fileName,
+                        url: String(url),
+                        size: fileSize,
+                        type: fileType
+                    });
                 }).catch(e => {
-                    attemptFallback(file, "URL 획득 실패").then(resolve).catch(reject);
+                    reject(new Error("URL 획득 실패: " + e.message));
                 });
             }
         );

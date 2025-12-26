@@ -405,7 +405,7 @@
 	<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
 	<!-- Community Firebase Logic -->
-	<script src="../js/community_firebase.js?v=20251224_fix"></script>
+	<script src="../js/community_firebase.js?v=20251226_1122"></script>
 
 	<!-- Notice Page Logic -->
 	<script>
@@ -435,21 +435,38 @@
 				var fileInput = document.getElementById('notice_file');
 				var date = new Date().toISOString().split('T')[0];
 
-				if (!title || !author || !content) { alert('필수 항목을 입력해주세요.'); return; }
+				if (!title || !author || !content) {
+					alert('필수 항목을 입력해주세요.');
+					return;
+				}
 
 				const btn = document.querySelector('form button[type="submit"]');
 
+				// Handle file upload
 				let fileData = null;
-				if (fileInput.files.length > 0) {
+				if (fileInput && fileInput.files.length > 0) {
 					const file = fileInput.files[0];
-					if (file.size > 50 * 1024 * 1024) { alert("파일1: 50MB 이하만 가능합니다."); return; }
+					if (file.size > 50 * 1024 * 1024) {
+						alert("파일: 50MB 이하만 가능합니다.");
+						return;
+					}
 
-					if (btn) { btn.innerText = "파일 1 업로드 중..."; btn.disabled = true; }
+					if (btn) {
+						btn.innerText = "파일 업로드 중...";
+						btn.disabled = true;
+					}
 
 					try {
 						fileData = await uploadFile(file);
+						console.log("File uploaded successfully:", fileData);
 					} catch (err) {
-						throw new Error("파일1 업로드 실패: " + (err.message || err));
+						console.error("File upload error:", err);
+						alert("파일 업로드 실패: " + err.message);
+						if (btn) {
+							btn.innerText = "등록하기";
+							btn.disabled = false;
+						}
+						return;
 					}
 				}
 
@@ -458,8 +475,19 @@
 					btn.disabled = true;
 				}
 
-				var newNotice = { title, author, content, date, file: fileData };
+				var newNotice = {
+					title: title,
+					author: author,
+					content: content,
+					date: date
+				};
 
+				// Add file if uploaded
+				if (fileData) {
+					newNotice.file = fileData;
+				}
+
+				console.log("Saving notice:", newNotice);
 				const saved = await savePost(BOARD_KEY, newNotice);
 				if (!saved) {
 					return;
@@ -468,14 +496,20 @@
 				alert('공지사항이 등록되었습니다.');
 				document.querySelector('#noticeForm').reset();
 
-				if (btn) { btn.innerText = "등록하기"; btn.disabled = false; }
+				if (btn) {
+					btn.innerText = "등록하기";
+					btn.disabled = false;
+				}
 				showList();
 			} catch (err) {
-				console.error(err);
+				console.error("Error details:", err);
 				alert("오류: " + err.message);
 
 				const btn = document.querySelector('form button[type="submit"]');
-				if (btn) { btn.innerText = "등록하기"; btn.disabled = false; }
+				if (btn) {
+					btn.innerText = "등록하기";
+					btn.disabled = false;
+				}
 			}
 		}
 
