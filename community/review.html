@@ -451,8 +451,8 @@
                 let fileData = null;
                 if (fileInput && fileInput.files.length > 0) {
                     const file = fileInput.files[0];
-                    if (file.size > 50 * 1024 * 1024) {
-                        alert("파일: 50MB 이하만 가능합니다.");
+                    if (file.size > 1 * 1024 * 1024) {
+                        alert("파일: 1MB 이하만 가능합니다. (Firebase Storage 설정 필요)");
                         return;
                     }
 
