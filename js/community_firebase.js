@@ -233,73 +233,26 @@ window.uploadFile = function (file) {
     if (window.updateDebug) window.updateDebug("파일 업로드 시작: " + fileName + " (" + (fileSize / 1024 / 1024).toFixed(2) + "MB)");
 
     return new Promise((resolve, reject) => {
-        // For files under 1MB, use Base64 directly (Firestore document limit)
-        if (fileSize < 1 * 1024 * 1024) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                if (window.updateDebug) window.updateDebug("Base64 변환 완료");
-                // Return ONLY plain object with primitive values
-                resolve({
-                    name: fileName,
-                    data: String(e.target.result),
-                    size: fileSize,
-                    type: fileType
-                });
-            };
-            reader.onerror = () => reject(new Error("파일 읽기 실패"));
-            reader.readAsDataURL(file);
+        // Strict 1MB limit for Firestore compatibility
+        if (fileSize >= 1 * 1024 * 1024) {
+            reject(new Error("파일 크기가 1MB를 초과합니다. 이미지를 압축해주세요."));
             return;
         }
 
-        // For larger files, try Firebase Storage
-        if (!storage) {
-            reject(new Error("Storage 미초기화 - 1MB 이하 파일만 가능합니다"));
-            return;
-        }
-
-        let timer = null;
-        let isComplete = false;
-
-        const ref = storage.ref().child('uploads/' + Date.now() + '_' + fileName);
-        const uploadTask = ref.put(file);
-
-        // Timeout (10s)
-        timer = setTimeout(() => {
-            if (!isComplete) {
-                isComplete = true;
-                uploadTask.cancel();
-                console.warn("Upload Timeout");
-                reject(new Error("업로드 시간 초과 - Firebase Storage 권한 설정이 필요하거나 1MB 이하 파일을 사용하세요"));
-            }
-        }, 10000);
-
-        uploadTask.on('state_changed',
-            (snapshot) => { },
-            (error) => {
-                if (isComplete) return;
-                isComplete = true;
-                clearTimeout(timer);
-                console.error("Upload Error", error);
-                reject(new Error("업로드 실패: " + error.message));
-            },
-            () => {
-                if (isComplete) return;
-                isComplete = true;
-                clearTimeout(timer);
-                uploadTask.snapshot.ref.getDownloadURL().then(url => {
-                    if (window.updateDebug) window.updateDebug("서버 업로드 성공!");
-                    // Return ONLY plain object with primitive values
-                    resolve({
-                        name: fileName,
-                        url: String(url),
-                        size: fileSize,
-                        type: fileType
-                    });
-                }).catch(e => {
-                    reject(new Error("URL 획득 실패: " + e.message));
-                });
-            }
-        );
+        // Convert to Base64 for Firestore storage
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            if (window.updateDebug) window.updateDebug("Base64 변환 완료");
+            // Return ONLY plain object with primitive values
+            resolve({
+                name: fileName,
+                data: String(e.target.result),
+                size: fileSize,
+                type: fileType
+            });
+        };
+        reader.onerror = () => reject(new Error("파일 읽기 실패"));
+        reader.readAsDataURL(file);
     });
 };
 
