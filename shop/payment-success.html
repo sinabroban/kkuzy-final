@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8">
+    <title>결제 완료 - 농업회사법인 꾸지뽕 사업단</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="../js/jquery-2.1.4.min.js"></script>
+
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Noto Sans KR', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .success-container {
+            max-width: 600px;
+            background: #fff;
+            padding: 50px 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 80px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .success-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .success-message {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .order-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .order-info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .order-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-info-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .order-info-value {
+            color: #333;
+            font-weight: bold;
+        }
+
+        .btn-home {
+            display: inline-block;
+            background: #c31d22;
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-home:hover {
+            background: #a01418;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #c31d22;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="success-container">
+        <div id="loadingArea" class="loading">
+            <div class="spinner"></div>
+            <p style="color: #666;">결제 정보를 확인하고 있습니다...</p>
+        </div>
+
+        <div id="successArea" style="display: none;">
+            <div class="success-icon">✅</div>
+            <h1 class="success-title">결제가 완료되었습니다!</h1>
+            <p class="success-message">
+                주문이 정상적으로 접수되었습니다.<br>
+                주문하신 상품은 빠르게 배송 준비하겠습니다.
+            </p>
+
+            <div class="order-info">
+                <div class="order-info-item">
+                    <span class="order-info-label">주문번호</span>
+                    <span class="order-info-value" id="orderIdDisplay">-</span>
+                </div>
+                <div class="order-info-item">
+                    <span class="order-info-label">상품</span>
+                    <span class="order-info-value" id="productDisplay">-</span>
+                </div>
+                <div class="order-info-item">
+                    <span class="order-info-label">결제금액</span>
+                    <span class="order-info-value" id="amountDisplay" style="color: #c31d22;">-</span>
+                </div>
+                <div class="order-info-item">
+                    <span class="order-info-label">결제방법</span>
+                    <span class="order-info-value">카드결제 (토스페이먼츠)</span>
+                </div>
+            </div>
+
+            <a href="../shop/list.html" class="btn-home">상품 목록으로 돌아가기</a>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            // Get URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('orderId');
+            const amount = urlParams.get('amount');
+            const paymentKey = urlParams.get('paymentKey');
+
+            // Retrieve pending order from sessionStorage
+            const pendingOrderData = sessionStorage.getItem('pendingOrder');
+
+            if (!pendingOrderData || !orderId || !amount || !paymentKey) {
+                alert('결제 정보를 찾을 수 없습니다.\n고객센터로 문의해주세요.');
+                window.location.href = '../shop/list.html';
+                return;
+            }
+
+            const pendingOrder = JSON.parse(pendingOrderData);
+
+            // Display order information
+            $('#orderIdDisplay').text(orderId);
+            $('#productDisplay').text(pendingOrder.product);
+            $('#amountDisplay').text(parseInt(amount).toLocaleString() + '원');
+
+            // Save order to localStorage
+            const orders = JSON.parse(localStorage.getItem('kkuzy_orders')) || [];
+            const newOrder = {
+                id: orderId,
+                date: new Date().toLocaleDateString(),
+                name: pendingOrder.name,
+                phone: pendingOrder.phone,
+                address: pendingOrder.address,
+                product: pendingOrder.product,
+                price: parseInt(amount).toLocaleString() + '원',
+                request: pendingOrder.request,
+                status: '결제완료',
+                paymentMethod: '카드결제',
+                paymentKey: paymentKey
+            };
+
+            orders.push(newOrder);
+            localStorage.setItem('kkuzy_orders', JSON.stringify(orders));
+
+            // Clear sessionStorage
+            sessionStorage.removeItem('pendingOrder');
+
+            // Show success message
+            setTimeout(function () {
+                $('#loadingArea').hide();
+                $('#successArea').show();
+            }, 1000);
+
+            // Auto redirect after 5 seconds
+            setTimeout(function () {
+                window.location.href = '../shop/list.html';
+            }, 5000);
+        });
+    </script>
+</body>
+
+</html>

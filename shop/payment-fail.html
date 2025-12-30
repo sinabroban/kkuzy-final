@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8">
+    <title>결제 실패 - 농업회사법인 꾸지뽕 사업단</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="../js/jquery-2.1.4.min.js"></script>
+
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Noto Sans KR', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .fail-container {
+            max-width: 600px;
+            background: #fff;
+            padding: 50px 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .fail-icon {
+            font-size: 80px;
+            color: #dc3545;
+            margin-bottom: 20px;
+        }
+
+        .fail-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .fail-message {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .error-info {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .error-label {
+            color: #856404;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .error-text {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            display: inline-block;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-retry {
+            background: #c31d22;
+            color: #fff;
+        }
+
+        .btn-retry:hover {
+            background: #a01418;
+        }
+
+        .btn-home {
+            background: #6c757d;
+            color: #fff;
+        }
+
+        .btn-home:hover {
+            background: #545b62;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="fail-container">
+        <div class="fail-icon">❌</div>
+        <h1 class="fail-title">결제에 실패했습니다</h1>
+        <p class="fail-message">
+            결제 중 문제가 발생했습니다.<br>
+            다시 시도하시거나 다른 결제 수단을 이용해주세요.
+        </p>
+
+        <div class="error-info">
+            <span class="error-label">실패 사유</span>
+            <p class="error-text" id="errorMessage">알 수 없는 오류가 발생했습니다.</p>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-retry" onclick="retryPayment()">다시 시도하기</button>
+            <a href="../shop/list.html" class="btn btn-home">상품 목록으로</a>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            // Get URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const message = urlParams.get('message');
+
+            // Display error message
+            if (message) {
+                $('#errorMessage').text(decodeURIComponent(message));
+            } else {
+                $('#errorMessage').text('결제가 취소되었거나 오류가 발생했습니다.');
+            }
+        });
+
+        function retryPayment() {
+            // Go back to order page with pending data
+            window.location.href = '../shop/order.html';
+        }
+    </script>
+</body>
+
+</html>
