@@ -256,6 +256,27 @@
 			</div>
 		</div>
 
+		<script>
+			$(document).ready(function () {
+				var $slides = $('.fullBgImg');
+				var slideCount = $slides.length;
+				var currentSlide = 0;
+
+				// 첫 번째 슬라이드만 표시
+				$slides.hide().eq(0).show();
+
+				// 자동 슬라이드 함수
+				function nextSlide() {
+					$slides.eq(currentSlide).fadeOut(1000);
+					currentSlide = (currentSlide + 1) % slideCount;
+					$slides.eq(currentSlide).fadeIn(1000);
+				}
+
+				// 3초마다 슬라이드 전환
+				setInterval(nextSlide, 3000);
+			});
+		</script>
+
 		<style>
 			.catch_area02 {
 				text-align: center;
