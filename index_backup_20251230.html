@@ -223,71 +223,7 @@
 
 		<!-- Main Visual Slider -->
 		<div class="main_visual_container">
-			<div class="fullBgImg slide active"
-				style="background-image:url(images/hero_slide_1.jpg); background-position:50% 50%;">
-
-				<div class="catch_area02">
-					<p class="catch01">It presents a healthy taste.</p>
-					<p class="catch03">HEALING TIME</p>
-					<p class="catch02">청정 괴곡동에서 들려주는 꾸지 이야기</p>
-					<p class="catch04">30년 농부들이 열정적으로 키운 무농약 꾸지뽕의 은은한 향과<br>건강한 맛을 집에서 편히 즐겨보세요.</p>
-					<div class="profile_area">
-						<img src="images/representative.jpg" alt="대표 김선몽">
-						<p>대표 김선몽</p>
-					</div>
-				</div>
-
-			</div>
-
-			<div class="fullBgImg slide"
-				style="background-image:url(images/hero_slide_2.jpg); background-position:50% 50%;">
-
-				<div class="catch_area02">
-					<p class="catch01">It presents a healthy taste.</p>
-					<p class="catch03">HEALING TIME</p>
-					<p class="catch02">청정 괴곡동에서 들려주는 꾸지 이야기</p>
-					<p class="catch04">30년 농부들이 열정적으로 키운 무농약 꾸지뽕의 은은한 향과<br>건강한 맛을 집에서 편히 즐겨보세요.</p>
-					<div class="profile_area">
-						<img src="images/representative.jpg" alt="대표 김선몽">
-						<p>대표 김선몽</p>
-					</div>
-				</div>
-
-			</div>
-
-			<div class="fullBgImg slide"
-				style="background-image:url(images/hero_slide_3.jpg); background-position:50% 50%;">
-
-				<div class="catch_area02">
-					<p class="catch01">It presents a healthy taste.</p>
-					<p class="catch03">HEALING TIME</p>
-					<p class="catch02">청정 괴곡동에서 들려주는 꾸지 이야기</p>
-					<p class="catch04">30년 농부들이 열정적으로 키운 무농약 꾸지뽕의 은은한 향과<br>건강한 맛을 집에서 편히 즐겨보세요.</p>
-					<div class="profile_area">
-						<img src="images/representative.jpg" alt="대표 김선몽">
-						<p>대표 김선몽</p>
-					</div>
-				</div>
-
-			</div>
-
-			<div class="fullBgImg slide"
-				style="background-image:url(images/hero_slide_4.jpg); background-position:50% 50%;">
-
-				<div class="catch_area02">
-					<p class="catch01">It presents a healthy taste.</p>
-					<p class="catch03">HEALING TIME</p>
-					<p class="catch02">청정 괴곡동에서 들려주는 꾸지 이야기</p>
-					<p class="catch04">30년 농부들이 열정적으로 키운 무농약 꾸지뽕의 은은한 향과<br>건강한 맛을 집에서 편히 즐겨보세요.</p>
-					<div class="profile_area">
-						<img src="images/representative.jpg" alt="대표 김선몽">
-						<p>대표 김선몽</p>
-					</div>
-				</div>
-
-			</div>
-
-			<div class="fullBgImg slide"
+			<div class="fullBgImg"
 				style="background-image:url(images/main_visual_new_04.jpg); background-position:50% 50%;">
 
 				<div class="catch_area02">
@@ -303,7 +239,7 @@
 
 			</div>
 
-			<div class="fullBgImg slide"
+			<div class="fullBgImg"
 				style="background-image:url(images/main_visual_new_05.jpg); background-position:50% 50%;">
 
 				<div class="catch_area02">
@@ -317,16 +253,6 @@
 					</div>
 				</div>
 
-			</div>
-
-			<!-- Slider Navigation Dots -->
-			<div class="slider-dots">
-				<span class="dot active" onclick="currentSlide(1)"></span>
-				<span class="dot" onclick="currentSlide(2)"></span>
-				<span class="dot" onclick="currentSlide(3)"></span>
-				<span class="dot" onclick="currentSlide(4)"></span>
-				<span class="dot" onclick="currentSlide(5)"></span>
-				<span class="dot" onclick="currentSlide(6)"></span>
 			</div>
 		</div>
 
@@ -404,61 +330,6 @@
 				font-size: 16px;
 				margin-top: 10px;
 				text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-			}
-
-			/* Hero Slider Styles */
-			.main_visual_container {
-				position: relative;
-				overflow: hidden;
-			}
-
-			.slide {
-				display: none;
-				animation: fadeIn 1s ease-in-out;
-			}
-
-			.slide.active {
-				display: block;
-			}
-
-			@keyframes fadeIn {
-				from {
-					opacity: 0;
-				}
-
-				to {
-					opacity: 1;
-				}
-			}
-
-			/* Slider Navigation Dots */
-			.slider-dots {
-				position: absolute;
-				bottom: 30px;
-				left: 50%;
-				transform: translateX(-50%);
-				z-index: 3001;
-				display: flex;
-				gap: 12px;
-			}
-
-			.dot {
-				width: 12px;
-				height: 12px;
-				border-radius: 50%;
-				background: rgba(255, 255, 255, 0.5);
-				cursor: pointer;
-				transition: all 0.3s;
-			}
-
-			.dot:hover {
-				background: rgba(255, 255, 255, 0.8);
-			}
-
-			.dot.active {
-				background: white;
-				width: 30px;
-				border-radius: 6px;
 			}
 		</style>
 
@@ -1202,61 +1073,6 @@
 		renderMainPageSection(COMM_KEYS.NOTICE, 'main-notice-list', 5, 'community/notice.html');
 		renderMainPageSection(COMM_KEYS.INQUIRY, 'main-inquiry-list', 5, 'community/inquiry.html');
 		renderMainPageSection(COMM_KEYS.REVIEW, 'main-review-list', 5, 'community/review.html');
-	</script>
-
-	<!-- Hero Slider Script -->
-	<script>
-		let slideIndex = 0;
-		let slideTimer;
-
-		// Auto-advance slides
-		function showSlides() {
-			const slides = document.querySelectorAll('.slide');
-			const dots = document.querySelectorAll('.dot');
-
-			// Hide all slides
-			slides.forEach(slide => slide.classList.remove('active'));
-			dots.forEach(dot => dot.classList.remove('active'));
-
-			// Advance to next slide
-			slideIndex++;
-			if (slideIndex > slides.length) slideIndex = 1;
-
-			// Show current slide
-			if (slides[slideIndex - 1]) {
-				slides[slideIndex - 1].classList.add('active');
-				dots[slideIndex - 1].classList.add('active');
-			}
-
-			// Auto-advance every 4 seconds
-			slideTimer = setTimeout(showSlides, 4000);
-		}
-
-		// Jump to specific slide
-		function currentSlide(n) {
-			clearTimeout(slideTimer);
-			const slides = document.querySelectorAll('.slide');
-			const dots = document.querySelectorAll('.dot');
-
-			// Hide all
-			slides.forEach(slide => slide.classList.remove('active'));
-			dots.forEach(dot => dot.classList.remove('active'));
-
-			// Show selected
-			slideIndex = n;
-			if (slides[n - 1]) {
-				slides[n - 1].classList.add('active');
-				dots[n - 1].classList.add('active');
-			}
-
-			// Resume auto-advance
-			slideTimer = setTimeout(showSlides, 4000);
-		}
-
-		// Start slider when page loads
-		document.addEventListener('DOMContentLoaded', function () {
-			showSlides();
-		});
 	</script>
 </body>
 
