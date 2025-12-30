@@ -438,7 +438,7 @@
 	<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
 	<!-- Community Firebase Logic -->
-	<script src="../js/community_firebase.js?v=20251226_1122"></script>
+	<script src="../js/community_firebase.js?v=20251230_1316"></script>
 
 	<!-- Inquiry Page Logic -->
 	<script>
@@ -623,12 +623,12 @@
 				tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 50px;">검색 결과가 없습니다.</td></tr>';
 			} else {
 				let html = '';
-				filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+				filtered.sort((a, b) => Number(a.id) - Number(b.id));
 				filtered.forEach((q, i) => {
 					const secret = q.secret ? '🔒' : '';
 					const statusBadge = q.status === '답변완료' ? '<span style="color:blue;">[답변완료]</span>' : '<span style="color:gray;">[대기]</span>';
 					html += `<tr>
-                        <td class="num">${filtered.length - i}</td>
+                        <td class="num">${i + 1}</td>
                         <td class="title" style="text-align:left; padding-left:10px;">
                              <a href="#" onclick="window.viewPost(event, '${q.id}')">${q.title}</a>
                              ${secret} ${q.file ? '📷' : ''}

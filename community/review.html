@@ -407,7 +407,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
     <!-- Community Firebase Logic -->
-    <script src="../js/community_firebase.js?v=20251226_1122"></script>
+    <script src="../js/community_firebase.js?v=20251230_1316"></script>
 
     <!-- Review Page Logic -->
     <script>
@@ -596,11 +596,11 @@
                 tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 50px;">검색 결과가 없습니다.</td></tr>';
             } else {
                 let html = '';
-                filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+                filtered.sort((a, b) => Number(a.id) - Number(b.id));
                 filtered.forEach((r, i) => {
                     const stars = { '5': '★★★★★', '4': '★★★★☆', '3': '★★★☆☆', '2': '★★☆☆☆', '1': '★☆☆☆☆' }[r.rating] || '★★★★★';
                     html += `<tr>
-                        <td class="num">${filtered.length - i}</td>
+                        <td class="num">${i + 1}</td>
                         <td class="title" style="text-align:left; padding-left:10px;">
                              <a href="#" onclick="window.viewPost(event, '${r.id}')">${r.title}</a>
                              ${r.file ? '<img src="../images/icon_file.gif">' : ''}

@@ -326,13 +326,13 @@ window.renderNoticeList = function (containerId) {
     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">로딩 중...</td></tr>';
 
     window.getPosts(COMM_KEYS.NOTICE).then(list => {
-        list.sort((a, b) => new Date(b.date) - new Date(a.date));
+        list.sort((a, b) => Number(a.id) - Number(b.id));
         let html = '';
         if (list.length === 0) html = '<tr><td colspan="4" style="text-align:center;">글이 없습니다.</td></tr>';
         else {
             list.forEach((n, i) => {
                 html += `<tr>
-                    <td class="num">${list.length - i}</td>
+                    <td class="num">${i + 1}</td>
                     <td class="title" style="text-align:left;"><a href="notice.html?id=${n.id}">${n.title}</a> ${n.file ? '💾' : ''}</td>
                     <td class="name">${n.author}</td>
                     <td class="date">${n.date}</td>
@@ -351,7 +351,7 @@ window.renderInquiryList = function (containerId) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">로딩 중...</td></tr>';
 
     window.getPosts(COMM_KEYS.INQUIRY).then(list => {
-        list.sort((a, b) => new Date(b.date) - new Date(a.date));
+        list.sort((a, b) => Number(a.id) - Number(b.id));
         let html = '';
         if (list.length === 0) html = '<tr><td colspan="5" style="text-align:center;">글이 없습니다.</td></tr>';
         else {
@@ -359,7 +359,7 @@ window.renderInquiryList = function (containerId) {
                 const secret = q.secret ? '🔒' : '';
                 const link = `<a href="#" onclick="window.viewPost(event, '${q.id}')">${q.title}</a>`;
                 html += `<tr>
-                    <td class="num">${list.length - i}</td>
+                    <td class="num">${i + 1}</td>
                     <td class="title" style="text-align:left;">${link} ${secret}</td>
                     <td class="name">${q.author}</td>
                     <td class="date">${q.date}</td>
@@ -379,7 +379,7 @@ window.renderReviewList = function (containerId) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">로딩 중...</td></tr>';
 
     window.getPosts(COMM_KEYS.REVIEW).then(list => {
-        list.sort((a, b) => new Date(b.date) - new Date(a.date));
+        list.sort((a, b) => Number(a.id) - Number(b.id));
         let html = '';
         if (list.length === 0) html = '<tr><td colspan="5" style="text-align:center;">글이 없습니다.</td></tr>';
         else {
@@ -387,7 +387,7 @@ window.renderReviewList = function (containerId) {
                 const stars = '★'.repeat(parseInt(r.rating || 5));
                 const link = `<a href="#" onclick="window.viewPost(event, '${r.id}')">${r.title}</a>`;
                 html += `<tr>
-                    <td class="num">${list.length - i}</td>
+                    <td class="num">${i + 1}</td>
                     <td class="title" style="text-align:left;">${link} ${r.file ? '📷' : ''}</td>
                     <td class="name">${r.author}</td>
                     <td class="date">${r.date}</td>

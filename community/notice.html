@@ -405,7 +405,7 @@
 	<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
 	<!-- Community Firebase Logic -->
-	<script src="../js/community_firebase.js?v=20251226_1122"></script>
+	<script src="../js/community_firebase.js?v=20251230_1316"></script>
 
 	<!-- Notice Page Logic -->
 	<script>
@@ -535,12 +535,12 @@
 			if (!listData || listData.length === 0) {
 				tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 50px;">등록된 게시물이 없습니다.</td></tr>';
 			} else {
-				listData.sort((a, b) => new Date(b.date) - new Date(a.date));
+				listData.sort((a, b) => Number(a.id) - Number(b.id));
 				let html = '';
 				listData.forEach((n, i) => {
 					html += `
 						<tr onmouseover="this.style.backgroundColor='#fcfcfc'" onmouseout="this.style.backgroundColor=''">
-							<td class="num">${listData.length - i}</td>
+							<td class="num">${i + 1}</td>
 							<td class="title" style="text-align:left; padding-left:10px;">
 								<a href="#" onclick="viewPost(event, '${n.id}')">${n.title}</a>
 								${n.file ? '<img src="../images/icon_file.gif" style="vertical-align:middle; margin-left:5px;">' : ''}

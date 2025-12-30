@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8">
+    <title>파일 업로드 테스트</title>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .test-box {
+            border: 2px solid #333;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+
+        .success {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .error {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        #console-output {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .log-line {
+            margin: 5px 0;
+        }
+
+        .log-error {
+            color: #ff6b6b;
+        }
+
+        .log-warn {
+            color: #ffd93d;
+        }
+
+        .log-info {
+            color: #6bcf7f;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔧 파일 업로드 진단 테스트</h1>
+
+    <div class="test-box">
+        <h2>1단계: JavaScript 버전 확인</h2>
+        <p id="version-check">확인 중...</p>
+    </div>
+
+    <div class="test-box">
+        <h2>2단계: 파일 업로드 테스트</h2>
+        <input type="file" id="test-file" accept="image/*">
+        <button onclick="testUpload()">파일 업로드 테스트</button>
+        <p id="upload-result"></p>
+    </div>
+
+    <div class="test-box">
+        <h2>3단계: Firestore 저장 테스트</h2>
+        <button onclick="testSave()">Firestore 저장 테스트</button>
+        <p id="save-result"></p>
+    </div>
+
+    <h2>콘솔 출력:</h2>
+    <div id="console-output"></div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+    <!-- Community Firebase Logic -->
+    <script src="../js/community_firebase.js?v=20251226_final"></script>
+
+    <script>
+        // Custom console logger
+        const consoleOutput = document.getElementById('console-output');
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+
+        function addLog(message, type = 'info') {
+            const line = document.createElement('div');
+            line.className = `log-line log-${type}`;
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            consoleOutput.appendChild(line);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        console.log = function (...args) {
+            originalLog.apply(console, args);
+            addLog(args.join(' '), 'info');
+        };
+
+        console.error = function (...args) {
+            originalError.apply(console, args);
+            addLog('ERROR: ' + args.join(' '), 'error');
+        };
+
+        console.warn = function (...args) {
+            originalWarn.apply(console, args);
+            addLog('WARN: ' + args.join(' '), 'warn');
+        };
+
+        // Check version
+        setTimeout(() => {
+            const versionCheck = document.getElementById('version-check');
+            if (typeof window.uploadFile === 'function') {
+                // Check if it's the new version by checking the function signature
+                const funcStr = window.uploadFile.toString();
+                if (funcStr.includes('fileName') && funcStr.includes('Extract file properties IMMEDIATELY')) {
+                    versionCheck.innerHTML = '✅ <strong>최신 버전 로드됨!</strong> (20251226_final)';
+                    versionCheck.parentElement.classList.add('success');
+                } else {
+                    versionCheck.innerHTML = '❌ <strong>구버전이 로드되었습니다!</strong><br>브라우저 캐시를 완전히 삭제하고 페이지를 새로고침하세요.<br><br><strong>방법:</strong> Ctrl + Shift + Delete → "캐시된 이미지 및 파일" 선택 → 삭제';
+                    versionCheck.parentElement.classList.add('error');
+                }
+            } else {
+                versionCheck.innerHTML = '❌ uploadFile 함수를 찾을 수 없습니다!';
+                versionCheck.parentElement.classList.add('error');
+            }
+        }, 1000);
+
+        // Test upload
+        window.testUpload = async function () {
+            const fileInput = document.getElementById('test-file');
+            const result = document.getElementById('upload-result');
+
+            if (!fileInput.files.length) {
+                result.textContent = '파일을 선택해주세요!';
+                return;
+            }
+
+            result.textContent = '업로드 중...';
+            console.log('=== 파일 업로드 테스트 시작 ===');
+
+            try {
+                const file = fileInput.files[0];
+                console.log('선택된 파일:', file.name, file.size, 'bytes');
+
+                const uploadedData = await window.uploadFile(file);
+                console.log('업로드 결과:', uploadedData);
+                console.log('업로드 결과 타입 확인:', typeof uploadedData);
+                console.log('업로드 결과 JSON:', JSON.stringify(uploadedData, null, 2));
+
+                result.innerHTML = `✅ <strong>업로드 성공!</strong><br>파일명: ${uploadedData.name}<br>크기: ${uploadedData.size} bytes`;
+                result.parentElement.classList.add('success');
+            } catch (err) {
+                console.error('업로드 실패:', err);
+                result.innerHTML = `❌ <strong>업로드 실패!</strong><br>${err.message}`;
+                result.parentElement.classList.add('error');
+            }
+        };
+
+        // Test save
+        window.testSave = async function () {
+            const result = document.getElementById('save-result');
+            result.textContent = '저장 중...';
+            console.log('=== Firestore 저장 테스트 시작 ===');
+
+            try {
+                await window.ensureAuth();
+
+                const testData = {
+                    title: '테스트 게시물 ' + Date.now(),
+                    author: '테스트',
+                    content: '이것은 테스트 게시물입니다.',
+                    date: new Date().toISOString().split('T')[0]
+                };
+
+                console.log('저장할 데이터:', testData);
+
+                const saved = await window.savePost('inquiries', testData);
+                console.log('저장 결과:', saved);
+
+                result.innerHTML = `✅ <strong>저장 성공!</strong><br>ID: ${saved.id || testData.id}`;
+                result.parentElement.classList.add('success');
+
+                // 저장된 데이터 삭제
+                if (saved.id || testData.id) {
+                    await window.deletePost('inquiries', saved.id || testData.id);
+                    console.log('테스트 데이터 삭제 완료');
+                }
+            } catch (err) {
+                console.error('저장 실패:', err);
+                result.innerHTML = `❌ <strong>저장 실패!</strong><br>${err.message}`;
+                result.parentElement.classList.add('error');
+            }
+        };
+    </script>
+</body>
+
+</html>
