@@ -9,10 +9,10 @@
 <html><!--<![endif]-->
 
 <head>
-	<meta charset="utf-8">
 	<title>세심귀뜸봉 - 대전 괴곡동 농업회사법인 꾸지뽕 사업단</title>
 
 	<meta name="viewport" content="width=1280">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge; IE=10; IE=9; IE=8; IE=7">
 	<meta name="naver-site-verification" content="7d2173822288ac547cb1bf4562eaf8f3e2b66770" />
 	<meta name="google-site-verification" content="mB_qthlVOe9E9_pRAiFBCfvZ4U0ggAUCvHxIqZlYT_E" />
@@ -223,71 +223,7 @@
 
 		<!-- Main Visual Slider -->
 		<div class="main_visual_container">
-			<div class="fullBgImg slide active"
-				style="background-image:url(images/hero_slide_1.jpg); background-position:50% 50%;">
-
-				<div class="catch_area02">
-					<p class="catch01">It presents a healthy taste.</p>
-					<p class="catch03">HEALING TIME</p>
-					<p class="catch02">청정 괴곡동에서 들려주는 꾸지 이야기</p>
-					<p class="catch04">30년 농부들이 열정적으로 키운 무농약 꾸지뽕의 은은한 향과<br>건강한 맛을 집에서 편히 즐겨보세요.</p>
-					<div class="profile_area">
-						<img src="images/representative.jpg" alt="대표 김선몽">
-						<p>대표 김선몽</p>
-					</div>
-				</div>
-
-			</div>
-
-			<div class="fullBgImg slide"
-				style="background-image:url(images/hero_slide_2.jpg); background-position:50% 50%;">
-
-				<div class="catch_area02">
-					<p class="catch01">It presents a healthy taste.</p>
-					<p class="catch03">HEALING TIME</p>
-					<p class="catch02">청정 괴곡동에서 들려주는 꾸지 이야기</p>
-					<p class="catch04">30년 농부들이 열정적으로 키운 무농약 꾸지뽕의 은은한 향과<br>건강한 맛을 집에서 편히 즐겨보세요.</p>
-					<div class="profile_area">
-						<img src="images/representative.jpg" alt="대표 김선몽">
-						<p>대표 김선몽</p>
-					</div>
-				</div>
-
-			</div>
-
-			<div class="fullBgImg slide"
-				style="background-image:url(images/hero_slide_3.jpg); background-position:50% 50%;">
-
-				<div class="catch_area02">
-					<p class="catch01">It presents a healthy taste.</p>
-					<p class="catch03">HEALING TIME</p>
-					<p class="catch02">청정 괴곡동에서 들려주는 꾸지 이야기</p>
-					<p class="catch04">30년 농부들이 열정적으로 키운 무농약 꾸지뽕의 은은한 향과<br>건강한 맛을 집에서 편히 즐겨보세요.</p>
-					<div class="profile_area">
-						<img src="images/representative.jpg" alt="대표 김선몽">
-						<p>대표 김선몽</p>
-					</div>
-				</div>
-
-			</div>
-
-			<div class="fullBgImg slide"
-				style="background-image:url(images/hero_slide_4.jpg); background-position:50% 50%;">
-
-				<div class="catch_area02">
-					<p class="catch01">It presents a healthy taste.</p>
-					<p class="catch03">HEALING TIME</p>
-					<p class="catch02">청정 괴곡동에서 들려주는 꾸지 이야기</p>
-					<p class="catch04">30년 농부들이 열정적으로 키운 무농약 꾸지뽕의 은은한 향과<br>건강한 맛을 집에서 편히 즐겨보세요.</p>
-					<div class="profile_area">
-						<img src="images/representative.jpg" alt="대표 김선몽">
-						<p>대표 김선몽</p>
-					</div>
-				</div>
-
-			</div>
-
-			<div class="fullBgImg slide"
+			<div class="fullBgImg"
 				style="background-image:url(images/main_visual_new_04.jpg); background-position:50% 50%;">
 
 				<div class="catch_area02">
@@ -303,7 +239,7 @@
 
 			</div>
 
-			<div class="fullBgImg slide"
+			<div class="fullBgImg"
 				style="background-image:url(images/main_visual_new_05.jpg); background-position:50% 50%;">
 
 				<div class="catch_area02">
@@ -317,16 +253,6 @@
 					</div>
 				</div>
 
-			</div>
-
-			<!-- Slider Navigation Dots -->
-			<div class="slider-dots">
-				<span class="dot active" onclick="currentSlide(1)"></span>
-				<span class="dot" onclick="currentSlide(2)"></span>
-				<span class="dot" onclick="currentSlide(3)"></span>
-				<span class="dot" onclick="currentSlide(4)"></span>
-				<span class="dot" onclick="currentSlide(5)"></span>
-				<span class="dot" onclick="currentSlide(6)"></span>
 			</div>
 		</div>
 
@@ -404,87 +330,6 @@
 				font-size: 16px;
 				margin-top: 10px;
 				text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-			}
-
-			/* Hero Slider Styles */
-			.main_visual_container {
-				position: relative;
-				overflow: hidden;
-			}
-
-			.slide {
-				position: absolute;
-				top: 0;
-				left: 0;
-				width: 100%;
-				height: 100%;
-				opacity: 0;
-				transition: opacity 1.5s ease-in-out;
-				animation: kenBurns 20s infinite;
-			}
-
-			.slide.active {
-				position: relative;
-				opacity: 1;
-				z-index: 2;
-			}
-
-			/* Smooth cross-fade with subtle zoom */
-			@keyframes kenBurns {
-				0% {
-					transform: scale(1);
-				}
-
-				50% {
-					transform: scale(1.05);
-				}
-
-				100% {
-					transform: scale(1);
-				}
-			}
-
-			/* Fade animation with smoother easing */
-			@keyframes fadeIn {
-				from {
-					opacity: 0;
-					transform: scale(1.02);
-				}
-
-				to {
-					opacity: 1;
-					transform: scale(1);
-				}
-			}
-
-			/* Slider Navigation Dots */
-			.slider-dots {
-				position: absolute;
-				bottom: 30px;
-				left: 50%;
-				transform: translateX(-50%);
-				z-index: 3001;
-				display: flex;
-				gap: 12px;
-			}
-
-			.dot {
-				width: 12px;
-				height: 12px;
-				border-radius: 50%;
-				background: rgba(255, 255, 255, 0.5);
-				cursor: pointer;
-				transition: all 0.3s;
-			}
-
-			.dot:hover {
-				background: rgba(255, 255, 255, 0.8);
-			}
-
-			.dot.active {
-				background: white;
-				width: 30px;
-				border-radius: 6px;
 			}
 		</style>
 
@@ -799,397 +644,436 @@
 				position: relative;
 			}
 
-			.bp_wrapper {
-				position: relative;
-				display: inline-block;
-			}
-
-			.bp_wrapper::before {
-				content: '';
-				position: absolute;
-				top: -20px;
-				left: 50%;
-				transform: translateX(-50%);
-				width: 40px;
-				height: 2px;
-				background: #c31d22;
-			}
-
-			.bp_title {
-				font-size: 24px;
+			.philosophy_eng {
+				font-family: 'Caveat', cursive;
+				font-size: 50px;
 				color: #c31d22;
-				font-family: 'NotoKrM';
 				margin-bottom: 20px;
 			}
 
-			.bp_desc {
-				font-size: 18px;
-				color: #444;
-				line-height: 1.8;
-				margin-bottom: 50px;
+			.philosophy_kr {
+				font-size: 24px;
+				font-weight: 500;
+				color: #333;
+				line-height: 1.6;
 			}
 
-			.bp_desc strong {
-				color: #111;
+			.philosophy_desc {
+				font-size: 16px;
+				color: #777;
+				margin-top: 15px;
+				font-weight: 300;
+				line-height: 1.6;
 			}
 
-			/* 05. Community & CS Grid */
-			.community_grid {
-				display: grid;
-				grid-template-columns: 1fr 1fr 1fr;
+			/* 07. Info & CS Grid */
+			.info_grid_section {
+				display: flex;
+				justify-content: space-between;
 				gap: 24px;
-				margin-bottom: 80px;
+				margin-bottom: 60px;
 			}
 
-			.community_box {
+			.info_box {
+				flex: 1;
+				border: 1px solid #e1e1e1;
 				background: #fff;
-				border: 1px solid #eee;
-				border-radius: 12px;
-				padding: 30px;
-				text-align: left;
-				transition: all 0.3s;
+				min-height: 320px;
+				display: flex;
+				flex-direction: column;
 			}
 
-			.community_box:hover {
-				box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-				border-color: #c31d22;
+			.info_box.cs_box {
+				background-color: #f8f8f8;
+				border: none;
 			}
 
-			.comm_header {
+			.info_header {
+				padding: 20px 25px;
+				border-bottom: 2px solid #333;
+				font-size: 20px;
+				font-weight: 700;
+				color: #222;
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
-				margin-bottom: 20px;
-				padding-bottom: 10px;
-				border-bottom: 1px solid #f0f0f0;
 			}
 
-			.comm_title {
-				font-size: 20px;
-				font-weight: bold;
-				color: #333;
-			}
-
-			.comm_more {
+			.info_header span {
 				font-size: 13px;
 				color: #888;
-				text-decoration: none;
+				font-weight: 400;
 			}
 
-			.comm_list li {
-				margin-bottom: 10px;
-				font-size: 15px;
+			.info_content {
+				padding: 20px 25px;
+				flex: 1;
 			}
 
-			.comm_list a {
-				color: #555;
-				text-decoration: none;
-				display: block;
-				white-space: nowrap;
-				overflow: hidden;
-				text-overflow: ellipsis;
+			.cs_phone {
+				display: flex;
+				align-items: center;
+				gap: 15px;
+				margin-bottom: 20px;
 			}
 
-			.comm_list a:hover {
-				color: #c31d22;
-			}
-
-			/* CS Center Box specific */
 			.cs_number {
-				font-size: 32px;
-				font-weight: bold;
+				font-size: 28px;
+				font-weight: 800;
 				color: #c31d22;
-				margin: 10px 0;
 			}
 
-			.cs_info {
+			.cs_desc {
 				font-size: 14px;
 				color: #666;
 				line-height: 1.6;
+				margin-bottom: 20px;
+			}
+
+			.bank_info {
+				border-top: 1px solid #ddd;
+				padding-top: 20px;
+			}
+
+			.bank_label {
+				font-weight: 700;
+				color: #333;
+				margin-bottom: 8px;
+				display: block;
+			}
+
+			.bank_details {
+				font-size: 14px;
+				color: #555;
+				line-height: 1.5;
+			}
+
+			/* 08. Bulk Order Banner */
+			.bulk_order_banner {
+				background-color: #333;
+				color: #fff;
+				padding: 40px 0;
+				text-align: center;
+				margin-bottom: 80px;
+			}
+
+			.bulk_title {
+				font-size: 24px;
+				font-weight: 500;
+				margin-bottom: 10px;
+			}
+
+			.bulk_title span {
+				color: #f4c430;
+				font-weight: 700;
+			}
+
+			.bulk_phone {
+				font-size: 36px;
+				font-weight: 700;
+				margin-bottom: 10px;
+			}
+
+			.bulk_desc {
+				font-size: 15px;
+				color: #ccc;
+				font-weight: 300;
 			}
 		</style>
 
 		<div class="modern_section">
-			<!-- 02. Welcome -->
+
+			<!-- Welcome -->
 			<div class="welcome_section">
-				<p class="welcome_text_sub">자연이 주는 건강한 선물</p>
-				<p class="welcome_text_main"><span>꾸지뽕사업단</span>에 오신것을 환영합니다.</p>
+				<p class="welcome_text_sub">꾸지뽕 마을에 오신것을 환영합니다</p>
+				<p class="welcome_text_main"><span>꾸지뽕</span>이 전하는 <span>건강한</span> 이야기</p>
 			</div>
 
-			<!-- 03. Promo Grid -->
+			<!-- Promo Grid -->
 			<div class="promo_grid">
-				<a href="story/story.html" class="promo_card card_large">
-					<div class="card_overlay">
-						<div class="card_overlay_text">
-							<div class="card_title">브랜드 스토리</div>
-							<div class="card_subtitle">꾸지 명가의 자부심</div>
-						</div>
-						<span class="card_btn">자세히 보기 &rarr;</span>
-					</div>
+				<!-- Large Left Card -->
+				<a href="shop/list.html" class="promo_card card_large">
+					<!-- Removed text/button overlays -->
 				</a>
+
+				<!-- Right Column Cards -->
 				<div class="card_column">
-					<a href="pages/sesim_gwitteumbong.html" class="promo_card card_small_top">
-						<div class="card_overlay">
-							<div class="card_overlay_text">
-								<div class="card_title">세심귀뜸봉</div>
-								<div class="card_subtitle">특별한 힐링 체험</div>
-							</div>
-							<!-- <span class="card_btn">체험 안내</span> -->
-						</div>
+					<a href="pages/project_100.html" class="promo_card card_small_top">
+						<!-- Removed text/button overlays -->
 					</a>
-					<a href="gallery/farm.html" class="promo_card card_small_bottom">
-						<div class="card_overlay">
-							<div class="card_overlay_text">
-								<div class="card_title">농장 갤러리</div>
-								<div class="card_subtitle">생생한 현장 모습</div>
-							</div>
-							<!-- <span class="card_btn">갤러리 이동</span> -->
-						</div>
+					<a href="pages/sub02_2.html" class="promo_card card_small_bottom">
+						<!-- Removed text/button overlays -->
 					</a>
 				</div>
 			</div>
-
-			<!-- 04. Brand Philosophy -->
-			<div class="brand_philosophy">
-				<div class="bp_wrapper">
-					<div class="bp_title">SINCE 1993</div>
-					<div class="bp_desc">
-						<strong>30년 농부의 정성</strong>으로 키운<br>
-						우리 가족 건강 지킴이, <strong>꾸지뽕</strong>
-					</div>
-				</div>
-			</div>
-
-			<!-- 05. Community & CS Grid -->
-			<div class="community_grid">
-				<!-- Notice -->
-				<div class="community_box">
-					<div class="comm_header">
-						<div class="comm_title">공지사항</div>
-						<a href="community/notice.html" class="comm_more">+ 더보기</a>
-					</div>
-					<ul class="comm_list" id="main_notice_list">
-						<!-- Content will be loaded via JS -->
-						<li style="color:#999; text-align:center; padding:20px;">로딩 중...</li>
-					</ul>
-				</div>
-
-				<!-- Review -->
-				<div class="community_box">
-					<div class="comm_header">
-						<div class="comm_title">사용후기</div>
-						<a href="community/review.html" class="comm_more">+ 더보기</a>
-					</div>
-					<ul class="comm_list" id="main_review_list">
-						<!-- Content will be loaded via JS -->
-						<li style="color:#999; text-align:center; padding:20px;">로딩 중...</li>
-					</ul>
-				</div>
-
-				<!-- CS Center -->
-				<div class="community_box" style="background-color: #fdfdfd;">
-					<div class="comm_header">
-						<div class="comm_title" style="color:#c31d22;">고객센터</div>
-					</div>
-					<div class="cs_number">010-5403-4778</div>
-					<div class="cs_info">
-						평일 09:00 - 18:00<br>
-						토요일 09:00 - 13:00<br>
-						일요일/공휴일 휴무
-					</div>
-					<div style="margin-top:15px;">
-						<a href="https://pf.kakao.com/_kkzgn" target="_blank"
-							style="display:inline-block; background:#ffe812; color:#3c1e1e; padding:8px 15px; border-radius:5px; font-weight:bold; font-size:13px; text-decoration:none;">카카오톡
-							상담 ></a>
-					</div>
-				</div>
-			</div>
-
-			<!-- Firebase Integration for Main Page -->
-			<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-			<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-			<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-			<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
-			<script src="js/community_firebase.js?v=20251230_1316"></script>
-			<script>
-				// Load recent posts for Main Page
-				async function loadMainPagePosts() {
-					try {
-						// 1. Notice
-						const notices = await getPosts('notices'); // Fetch all to sort
-						// Sort by date desc
-						if (notices) {
-							notices.sort((a, b) => new Date(b.date) - new Date(a.date));
-							const recentNotices = notices.slice(0, 5);
-							const noticeContainer = document.getElementById('main_notice_list');
-							if (noticeContainer) {
-								let html = '';
-								if (recentNotices.length === 0) {
-									html = '<li style="color:#999; text-align:center; padding:10px;">등록된 공지사항이 없습니다.</li>';
-								} else {
-									recentNotices.forEach(post => {
-										html += `<li><a href="community/notice.html?id=${post.id}">· ${post.title}</a></li>`;
-									});
-								}
-								noticeContainer.innerHTML = html;
-							}
-						}
-
-						// 2. Reviews
-						const reviews = await getPosts('reviews');
-						if (reviews) {
-							reviews.sort((a, b) => new Date(b.date) - new Date(a.date));
-							const recentReviews = reviews.slice(0, 5);
-							const reviewContainer = document.getElementById('main_review_list');
-							if (reviewContainer) {
-								let html = '';
-								if (recentReviews.length === 0) {
-									html = '<li style="color:#999; text-align:center; padding:10px;">등록된 후기가 없습니다.</li>';
-								} else {
-									recentReviews.forEach(post => {
-										html += `<li><a href="community/review.html?id=${post.id}">· ${post.title}</a></li>`;
-									});
-								}
-								reviewContainer.innerHTML = html;
-							}
-						}
-
-					} catch (e) {
-						console.error("Error loading main page posts:", e);
-					}
-				}
-
-				// Init load
-				document.addEventListener('DOMContentLoaded', loadMainPagePosts);
-			</script>
-
 		</div>
-		<!-- MODERNIZED MAIN CONTENT SECTION END -->
 
-
-		<div style="width:100%; height:50px; visibility:hidden;">copy_space</div>
-
-
-		<script type="text/javascript">
-			$("a[href='#top']").click(function () {
-				$("html, body").animate({ scrollTop: 0 }, "slow");
-				return false;
-			});
-
-			/* Slider Logic */
-			let slideIndex = 1;
-			showSlides(slideIndex);
-
-			// Auto slide every 5 seconds
-			let slideTimer = setInterval(function () {
-				plusSlides(1);
-			}, 5000);
-
-			function plusSlides(n) {
-				showSlides(slideIndex += n);
-			}
-
-			function currentSlide(n) {
-				showSlides(slideIndex = n);
-				// Reset timer when manually clicked
-				clearInterval(slideTimer);
-				slideTimer = setInterval(function () {
-					plusSlides(1);
-				}, 5000);
-			}
-
-			function showSlides(n) {
-				let i;
-				let slides = document.getElementsByClassName("slide");
-				let dots = document.getElementsByClassName("dot");
-				if (n > slides.length) { slideIndex = 1 }
-				if (n < 1) { slideIndex = slides.length }
-				for (i = 0; i < slides.length; i++) {
-					slides[i].className = slides[i].className.replace(" active", "");
-					slides[i].style.opacity = 0; // Ensure opacity 0 for non-active
-				}
-				for (i = 0; i < dots.length; i++) {
-					dots[i].className = dots[i].className.replace(" active", "");
-				}
-				slides[slideIndex - 1].className += " active";
-				slides[slideIndex - 1].style.opacity = 1; // Fade in active
-				dots[slideIndex - 1].className += " active";
-			}
-		</script>
-
-
-
-		<!-- Floating Talk Button -->
-		<div class="floating_talk">
-			<a href="https://pf.kakao.com/_kkzgn" target="_blank">
-				<img src="images/quick_kakao_new.png" alt="톡상담/주문" style="width: 100px; height: 100px; display: block;">
+		<div style="width: 1200px; margin: -30px auto 100px; text-align: left; position: relative; z-index: 10;">
+			<a href="pages/dealership.html" class="btn_dealership"
+				style="display: inline-block; padding: 15px 50px; background-color: #4a4a4a; color: #fff; font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 50px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: all 0.3s ease;">
+				<span style="color: #f4c430;">전국대리점 현황</span>(확산중)
 			</a>
 		</div>
 
+		<!-- Brand Philosophy -->
+		<div class="brand_philosophy">
+			<p class="philosophy_eng">DAEJEON's Healthy Taste Ggujibbong</p>
+			<p class="philosophy_kr">선하고 정직한 괴곡마을</p>
+			<p class="philosophy_desc">자연에 순응하며 사람을 아끼는 괴곡마을의 철학으로 농사를 짓습니다.</p>
 
-		<div id="copy_bt">
-			<div class="copy_bt_fix">
-				<ul class="u_left">
-					<li><a href="shop/list.html" target="_self">꾸지뽕 상품안내</a></li>
-					<li>|</li>
-					<li><a href="pages/sub02_2.html" target="_self">회사소개</a></li>
-					<li>|</li>
-					<li><a href="story/story.html" target="_self">꾸지뽕이야기</a></li>
-					<li>|</li>
-					<li><a href="javascript:alert('준비중입니다.');" target="_self">개인정보처리지침</a></li>
-					<li>|</li>
-					<li><a href="admin/admin.html" target="_self">관리자화면</a></li>
-
-				</ul>
-				<ul class="u_right">
-					<li><a href="#" target="_blank"><img src="images/sns_icon01.png" /></a></li>
-					<li><a href="#" target="_blank"><img src="images/sns_icon02.png" /></a></li>
-					<li><a href="#" target="_blank"><img src="images/sns_icon03.png" /></a></li>
-					<li><a href="#" target="_blank"><img src="images/sns_icon04.png" /></a></li>
-				</ul>
-			</div>
+			<!-- Deco Images -->
+			<img src="images/img_bg01.png" style="position:absolute; top:0; right:12%; opacity:0.8;">
+			<img src="images/img_bg02.png" style="position:absolute; bottom:0; left:12%; opacity:0.8;">
 		</div>
 
-		<div id="copy">
-			<div class="copy_fix">
-				<div class="copy01" style="padding-top: 60px;">
-					상호명 : 농업회사법인 꾸지뽕 사업단&nbsp;&nbsp;|&nbsp;&nbsp;대표자 : 김선몽<br>
-					주 소 : 대전광역시 서구 괴곡동 28&nbsp;&nbsp;|&nbsp;&nbsp;사업자등록번호 : 768-45-01182<br>
-					통신판매신고번호 : 제 2025-대전서구-00061 호&nbsp;&nbsp;|&nbsp;&nbsp;TEL : 010-5403-4778<br>
-					개인정보관리책임자 : 김선몽&nbsp;&nbsp;|&nbsp;&nbsp;특판,대량문의 : told7890@naver.com<br><br>
-					<p class="copy01_2">
-						COPYRIGHT 2025(C)&nbsp;&nbsp;&nbsp;<span>농업회사법인 꾸지뽕 사업단</span>&nbsp;&nbsp;&nbsp;ALL RIGHTS
-						RESERVED.
-					</p>
-					<br>
-					농업회사법인 꾸지뽕사업단은 정직한 상품만을 취급합니다.
+		<!-- Info & CS Grid -->
+		<div class="info_grid_section">
+			<!-- Notice -->
+			<div class="info_box">
+				<div class="info_header">
+					<a href="community/notice.html" style="text-decoration:none; color:inherit;">Notice</a>
+					<span>공지사항</span>
 				</div>
-				<div class="copy02">
-					<p class="copy02_title"><span>CS</span> Center</p>
-					<p class="copy02_p01">010-5403-4778</p>
-					<p class="copy02_p02">
+				<div class="info_content">
+					<table width="100%" id="main-notice-list" style="font-size:14px; color:#555;"></table>
+				</div>
+			</div>
+
+			<!-- Media -->
+			<div class="info_box">
+				<div class="info_header">
+					<a href="community/inquiry.html" style="text-decoration:none; color:inherit;">Activities</a>
+					<span>활동사항</span>
+				</div>
+				<div class="info_content">
+					<table width="100%" id="main-inquiry-list" style="font-size:14px; color:#555;"></table>
+				</div>
+			</div>
+
+			<!-- Reviews -->
+			<div class="info_box">
+				<div class="info_header">
+					<a href="community/review.html" style="text-decoration:none; color:inherit;">Reviews</a>
+					<span>사용후기</span>
+				</div>
+				<div class="info_content">
+					<table width="100%" id="main-review-list" style="font-size:14px; color:#555;"></table>
+				</div>
+			</div>
+
+			<!-- CS Center -->
+			<div class="info_box cs_box">
+				<div class="info_header" style="border-bottom:none; padding-bottom:5px;">CS Center <span>고객센터</span>
+				</div>
+				<div class="info_content" style="padding-top:0;">
+					<div class="cs_phone">
+						<img src="images/cs_icon.png" width="40" alt="Phone">
+						<span class="cs_number">010-5403-4778</span>
+					</div>
+					<p class="cs_desc">
 						운영시간 : 평일 08:00 ~ 17:00 / 토요일 08:00 ~ 12:00<br>
 						점심시간 : PM 12:00 ~ PM 13:00<br>
 						고객센터 (토요일 오후, 휴일 휴무)
 					</p>
-				</div>
-				<div class="copy03">
-					<p class="copy03_title"><span>Bank info</span></p>
-					<p class="copy03_p01"><img src="images/bank_icon.png" />농협 : 301-0376-1153-21</p>
-					<p class="copy03_p02">예금주 : 김선몽(꾸지봉사업단대표)</p>
-					<div style="margin-top: 20px;">
-						<p style="font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #fff;">오시는길</p>
-						<p style="font-size: 12px; color: #888; margin-bottom: 10px;">주소: 대전광역시 서구 괴곡동 28</p>
-						<img src="images/map_location.png" alt="오시는길 지도"
-							style="max-width: 100%; height: auto; border-radius: 5px;">
+					<div class="bank_info">
+						<span class="bank_label">무통장 입금안내</span>
+						<p class="bank_details">
+							농협 301-0376-1153-21<br>
+							예금주 : 김선몽
+						</p>
 					</div>
 				</div>
 			</div>
 		</div>
 
+	</div>
+
+	<!-- Bulk Order Banner -->
+	<div class="bulk_order_banner">
+		<p class="bulk_title">꾸지뽕나무 <span>대량구매문의!</span></p>
+		<p class="bulk_phone">010-5403-4778</p>
+		<p class="bulk_desc">대량구매를 원하시는 고객님께서는 전화문의 부탁드립니다.</p>
+	</div>
+	<!-- MODERNIZED MAIN CONTENT SECTION END -->
+
+	<script type="text/javascript">
+		$("a[href='#top']").click(function () {
+			$("html, body").animate({ scrollTop: 0 }, "slow");
+			return false;
+		});
+	</script>
+
+
+
+
+
+
+
+	<div id="copy_bt">
+		<div class="copy_bt_fix">
+			<ul class="u_left">
+				<li><a href="shop/list.html" target="_self">꾸지뽕 상품안내</a></li>
+				<li>|</li>
+				<li><a href="pages/sub02_2.html" target="_self">회사소개</a></li>
+				<li>|</li>
+				<li><a href="story/story.html" target="_self">꾸지뽕이야기</a></li>
+				<li>|</li>
+				<li><a href="javascript:alert('준비중입니다.');" target="_self">개인정보처리지침</a></li>
+				<li>|</li>
+				<li><a href="admin/admin.html" target="_self">관리자화면</a></li>
+
+			</ul>
+			<ul class="u_right">
+				<li><a href="#" target="_blank"><img src="images/sns_icon01.png" /></a></li>
+				<li><a href="#" target="_blank"><img src="images/sns_icon02.png" /></a></li>
+				<li><a href="#" target="_blank"><img src="images/sns_icon03.png" /></a></li>
+				<li><a href="#" target="_blank"><img src="images/sns_icon04.png" /></a></li>
+			</ul>
+		</div>
+	</div>
+	<div id="copy">
+		<div class="copy_fix">
+			<div class="copy01" style="padding-top: 20px;">
+				상호명 : 농업회사법인 꾸지뽕 사업단&nbsp;&nbsp;|&nbsp;&nbsp;대표자 : 김선몽<br>
+				주 소 : 대전광역시 서구 괴곡동 28&nbsp;&nbsp;|&nbsp;&nbsp;사업자등록번호 : 768-45-01182<br>
+				통신판매신고번호 : 제 2025-대전서구-00061 호&nbsp;&nbsp;|&nbsp;&nbsp;TEL : 010-5403-4778<br>
+				개인정보관리책임자 : 김선몽&nbsp;&nbsp;|&nbsp;&nbsp;특판,대량문의 : told7890@naver.com<br><br>
+				<p class="copy01_2">
+					COPYRIGHT 2025(C)&nbsp;&nbsp;&nbsp;<span>농업회사법인 꾸지뽕
+						사업단</span>&nbsp;&nbsp;&nbsp;ALL
+					RIGHTS RESERVED.
+				</p>
+				<br>
+				농업회사법인 꾸지뽕사업단은 정직한 상품만을 취급합니다.
+			</div>
+			<div class="copy02">
+				<p class="copy02_title"><span>CS</span> Center</p>
+				<p class="copy02_p01">010-5403-4778</p>
+				<p class="copy02_p02">
+					운영시간 : 평일 08:00 ~ 17:00 / 토요일 08:00 ~ 12:00<br>
+					점심시간 : PM 12:00 ~ PM 13:00<br>
+					고객센터 (토요일 오후, 휴일 휴무)
+				</p>
+			</div>
+			<div class="copy03">
+				<p class="copy03_title">
+					<span>Bank info</span>
+					<a href="https://pf.kakao.com/_kkzgn" target="_blank"
+						style="display:inline-block; margin-left:10px; vertical-align:middle;">
+						<img src="images/sns_icon04.png" style="width:30px; border-radius:50%;" alt="Kakao Talk">
+					</a>
+				</p>
+				<p class="copy03_p01"><img src="images/bank_icon.png" />농협 : 301-0376-1153-21</p>
+				<p class="copy03_p02">예금주 : 김선몽(꾸지봉사업단대표)</p>
+				<div style="margin-top: 20px;">
+					<p style="font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #fff;">
+						오시는길</p>
+					<p style="font-size: 12px; color: #888; margin-bottom: 10px;">주소: 대전광역시 서구 괴곡동
+						28</p>
+					<img src="images/map_location.png" alt="오시는길 지도"
+						style="max-width: 100%; height: auto; border-radius: 5px;">
+				</div>
+			</div>
+		</div>
+	</div>
+
 
 	</div>
 
+	<!-- Floating Talk Button (Hidden) -->
+	<div class="floating_talk" style="display:none;">
+		<a href="https://pf.kakao.com/_kkzgn" target="_blank">
+			<img src="images/quick_kakao_new.png" alt="톡상담/주문" style="width: 100px; height: 100px; display: block;">
+		</a>
+	</div>
+
+	<!-- Standalone Main Page Logic -->
+	<script type="module">
+		// Import Firebase (ES Modules via CDN)
+		import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+		import { getFirestore, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+		const firebaseConfig = {
+			apiKey: "AIzaSyDxmxP6LPDM69GdXpCTrv9_WgZllzs3bv8",
+			authDomain: "homepage-5534d.firebaseapp.com",
+			projectId: "homepage-5534d",
+			storageBucket: "homepage-5534d.firebasestorage.app",
+			messagingSenderId: "445520729520",
+			appId: "1:445520729520:web:30692dc01acc2ee81db275",
+			measurementId: "G-RMRC5JHJSL"
+		};
+
+		let app, db;
+		try {
+			app = initializeApp(firebaseConfig);
+			db = getFirestore(app);
+			console.log("Main Page: Firebase Initialized");
+		} catch (e) {
+			console.error("Firebase Init Error:", e);
+		}
+
+		const COMM_KEYS = { NOTICE: 'notices', INQUIRY: 'inquiries', REVIEW: 'reviews' };
+
+		async function getPosts(collectionName) {
+			if (!db) return [];
+			try {
+				const q = query(collection(db, collectionName));
+				const querySnapshot = await getDocs(q);
+				const posts = [];
+				querySnapshot.forEach((doc) => { posts.push({ id: doc.id, ...doc.data() }); });
+				return posts;
+			} catch (e) {
+				console.error(e); return [];
+			}
+		}
+
+		async function renderMainPageSection(boardKey, containerId, count, pageUrl) {
+			const container = document.getElementById(containerId);
+			if (!container) return;
+
+			try {
+				const posts = await getPosts(boardKey);
+				posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+				const displayPosts = posts.slice(0, count);
+
+				let html = '';
+				if (displayPosts.length === 0) {
+					html = `<tr><td style="text-align:center; padding: 20px; color: #999;">등록된 게시물이 없습니다.</td></tr>`;
+				} else {
+					displayPosts.forEach(post => {
+						let postUrl = `${pageUrl}?id=${post.id}`;
+						html += `
+                        <tr>
+                            <td class="latest_space">
+                                <a href="${postUrl}" style="
+                                    display: block;
+                                    width: 100%;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                    white-space: nowrap;
+                                    padding: 8px 0;
+                                    color: #555;
+                                    text-decoration: none;
+                                    font-size: 14px;
+                                " onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                                    - ${post.title}
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+					});
+				}
+				container.innerHTML = html;
+			} catch (error) {
+				console.error(`Error loading ${containerId}:`, error);
+			}
+		}
+
+		// Execute
+		renderMainPageSection(COMM_KEYS.NOTICE, 'main-notice-list', 5, 'community/notice.html');
+		renderMainPageSection(COMM_KEYS.INQUIRY, 'main-inquiry-list', 5, 'community/inquiry.html');
+		renderMainPageSection(COMM_KEYS.REVIEW, 'main-review-list', 5, 'community/review.html');
+	</script>
 </body>
 
 </html>
