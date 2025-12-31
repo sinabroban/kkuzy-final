@@ -223,9 +223,9 @@
 
 		<!-- Main Visual Slider -->
 		<div class="main_visual_container">
+			<!-- Slide 1 -->
 			<div class="fullBgImg"
-				style="background-image:url(images/main_visual_new_04.jpg); background-position:50% 50%;">
-
+				style="background-image:url(images/main_visual_new_01.jpg); background-position:50% 50%;">
 				<div class="catch_area02">
 					<p class="catch01">It presents a healthy taste.</p>
 					<p class="catch03">HEALING TIME</p>
@@ -236,12 +236,11 @@
 						<p>대표 김선몽</p>
 					</div>
 				</div>
-
 			</div>
 
+			<!-- Slide 2 -->
 			<div class="fullBgImg"
-				style="background-image:url(images/main_visual_new_05.jpg); background-position:50% 50%;">
-
+				style="background-image:url(images/main_visual_new_02.jpg); background-position:50% 50%;">
 				<div class="catch_area02">
 					<p class="catch01">It presents a healthy taste.</p>
 					<p class="catch03">HEALING TIME</p>
@@ -252,30 +251,272 @@
 						<p>대표 김선몽</p>
 					</div>
 				</div>
+			</div>
 
+			<!-- Slide 3 -->
+			<div class="fullBgImg"
+				style="background-image:url(images/main_visual_new_03.jpg); background-position:50% 50%;">
+				<div class="catch_area02">
+					<p class="catch01">It presents a healthy taste.</p>
+					<p class="catch03">HEALING TIME</p>
+					<p class="catch02">청정 괴곡동에서 들려주는 꾸지 이야기</p>
+					<p class="catch04">30년 농부들이 열정적으로 키운 무농약 꾸지뽕의 은은한 향과<br>건강한 맛을 집에서 편히 즐겨보세요.</p>
+					<div class="profile_area">
+						<img src="images/representative.jpg" alt="대표 김선몽">
+						<p>대표 김선몽</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Slide 4 -->
+			<div class="fullBgImg"
+				style="background-image:url(images/main_visual_new_04.jpg); background-position:50% 50%;">
+				<div class="catch_area02">
+					<p class="catch01">It presents a healthy taste.</p>
+					<p class="catch03">HEALING TIME</p>
+					<p class="catch02">청정 괴곡동에서 들려주는 꾸지 이야기</p>
+					<p class="catch04">30년 농부들이 열정적으로 키운 무농약 꾸지뽕의 은은한 향과<br>건강한 맛을 집에서 편히 즐겨보세요.</p>
+					<div class="profile_area">
+						<img src="images/representative.jpg" alt="대표 김선몽">
+						<p>대표 김선몽</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Slide 5 -->
+			<div class="fullBgImg"
+				style="background-image:url(images/main_visual_new_05.jpg); background-position:50% 50%;">
+				<div class="catch_area02">
+					<p class="catch01">It presents a healthy taste.</p>
+					<p class="catch03">HEALING TIME</p>
+					<p class="catch02">청정 괴곡동에서 들려주는 꾸지 이야기</p>
+					<p class="catch04">30년 농부들이 열정적으로 키운 무농약 꾸지뽕의 은은한 향과<br>건강한 맛을 집에서 편히 즐겨보세요.</p>
+					<div class="profile_area">
+						<img src="images/representative.jpg" alt="대표 김선몽">
+						<p>대표 김선몽</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Slide 6 -->
+			<div class="fullBgImg"
+				style="background-image:url(images/main_visual_new_06.jpg); background-position:50% 50%;">
+				<div class="catch_area02">
+					<p class="catch01">It presents a healthy taste.</p>
+					<p class="catch03">HEALING TIME</p>
+					<p class="catch02">청정 괴곡동에서 들려주는 꾸지 이야기</p>
+					<p class="catch04">30년 농부들이 열정적으로 키운 무농약 꾸지뽕의 은은한 향과<br>건강한 맛을 집에서 편히 즐겨보세요.</p>
+					<div class="profile_area">
+						<img src="images/representative.jpg" alt="대표 김선몽">
+						<p>대표 김선몽</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- 슬라이더 네비게이션 -->
+			<div class="slider_nav">
+				<button class="slider_prev" aria-label="이전 슬라이드">&#10094;</button>
+				<button class="slider_next" aria-label="다음 슬라이드">&#10095;</button>
+			</div>
+
+			<!-- 슬라이더 인디케이터 -->
+			<div class="slider_indicators">
+				<span class="indicator active" data-slide="0"></span>
+				<span class="indicator" data-slide="1"></span>
+				<span class="indicator" data-slide="2"></span>
+				<span class="indicator" data-slide="3"></span>
+				<span class="indicator" data-slide="4"></span>
+				<span class="indicator" data-slide="5"></span>
 			</div>
 		</div>
 
 		<script>
 			$(document).ready(function () {
+				var $container = $('.main_visual_container');
 				var $slides = $('.fullBgImg');
 				var slideCount = $slides.length;
 				var currentSlide = 0;
+				var autoSlideTimer;
+				var isAnimating = false;
 
 				// 첫 번째 슬라이드만 표시
 				$slides.hide().eq(0).show();
 
-				// 자동 슬라이드 함수
-				function nextSlide() {
-					$slides.eq(currentSlide).fadeOut(1000);
-					currentSlide = (currentSlide + 1) % slideCount;
-					$slides.eq(currentSlide).fadeIn(1000);
+				// 슬라이드 전환 함수
+				function goToSlide(index) {
+					if (isAnimating || index === currentSlide) return;
+					isAnimating = true;
+
+					$slides.eq(currentSlide).fadeOut(800);
+					$slides.eq(index).fadeIn(800, function () {
+						isAnimating = false;
+					});
+
+					// 인디케이터 업데이트
+					$('.indicator').removeClass('active');
+					$('.indicator').eq(index).addClass('active');
+
+					currentSlide = index;
 				}
 
-				// 3초마다 슬라이드 전환
-				setInterval(nextSlide, 3000);
+				// 다음 슬라이드
+				function nextSlide() {
+					var next = (currentSlide + 1) % slideCount;
+					goToSlide(next);
+				}
+
+				// 이전 슬라이드
+				function prevSlide() {
+					var prev = (currentSlide - 1 + slideCount) % slideCount;
+					goToSlide(prev);
+				}
+
+				// 자동 슬라이드 시작
+				function startAutoSlide() {
+					stopAutoSlide();
+					autoSlideTimer = setInterval(nextSlide, 4000);
+				}
+
+				// 자동 슬라이드 정지
+				function stopAutoSlide() {
+					if (autoSlideTimer) {
+						clearInterval(autoSlideTimer);
+					}
+				}
+
+				// 버튼 클릭 이벤트
+				$('.slider_prev').on('click', function () {
+					prevSlide();
+					startAutoSlide();
+				});
+
+				$('.slider_next').on('click', function () {
+					nextSlide();
+					startAutoSlide();
+				});
+
+				// 인디케이터 클릭 이벤트
+				$('.indicator').on('click', function () {
+					var index = $(this).data('slide');
+					goToSlide(index);
+					startAutoSlide();
+				});
+
+				// 마우스 오버 시 일시정지
+				$container.on('mouseenter', function () {
+					stopAutoSlide();
+				});
+
+				$container.on('mouseleave', function () {
+					startAutoSlide();
+				});
+
+				// 자동 슬라이드 시작
+				startAutoSlide();
 			});
 		</script>
+
+		<style>
+			/* 슬라이더 네비게이션 버튼 */
+			.slider_nav {
+				position: absolute;
+				top: 50%;
+				left: 0;
+				right: 0;
+				transform: translateY(-50%);
+				display: flex;
+				justify-content: space-between;
+				padding: 0 40px;
+				z-index: 3001;
+				pointer-events: none;
+			}
+
+			.slider_nav button {
+				pointer-events: auto;
+				background-color: rgba(255, 255, 255, 0.3);
+				border: none;
+				color: white;
+				font-size: 24px;
+				width: 50px;
+				height: 50px;
+				border-radius: 50%;
+				cursor: pointer;
+				transition: all 0.3s ease;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				backdrop-filter: blur(5px);
+			}
+
+			.slider_nav button:hover {
+				background-color: rgba(195, 29, 34, 0.8);
+				transform: scale(1.1);
+			}
+
+			.slider_nav button:active {
+				transform: scale(0.95);
+			}
+
+			/* 슬라이더 인디케이터 */
+			.slider_indicators {
+				position: absolute;
+				bottom: 30px;
+				left: 50%;
+				transform: translateX(-50%);
+				display: flex;
+				gap: 12px;
+				z-index: 3001;
+			}
+
+			.indicator {
+				width: 12px;
+				height: 12px;
+				border-radius: 50%;
+				background-color: rgba(255, 255, 255, 0.5);
+				cursor: pointer;
+				transition: all 0.3s ease;
+				border: 2px solid transparent;
+			}
+
+			.indicator:hover {
+				background-color: rgba(255, 255, 255, 0.8);
+				transform: scale(1.2);
+			}
+
+			.indicator.active {
+				background-color: #c31d22;
+				border-color: white;
+				width: 30px;
+				border-radius: 6px;
+			}
+
+			/* 반응형 */
+			@media (max-width: 768px) {
+				.slider_nav {
+					padding: 0 20px;
+				}
+
+				.slider_nav button {
+					width: 40px;
+					height: 40px;
+					font-size: 18px;
+				}
+
+				.slider_indicators {
+					bottom: 20px;
+					gap: 8px;
+				}
+
+				.indicator {
+					width: 8px;
+					height: 8px;
+				}
+
+				.indicator.active {
+					width: 20px;
+				}
+			}
+		</style>
 
 		<style>
 			.catch_area02 {
