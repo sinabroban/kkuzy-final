@@ -743,6 +743,7 @@
             const content = $('#notice-content').val();
             const fileInput = document.getElementById('notice-file');
             if (!title) return alert('제목을 입력하세요.');
+
             let fileData = null;
             if (fileInput.files.length > 0) {
                 fileData = await readFile(fileInput.files[0]);
@@ -750,7 +751,26 @@
                 const old = noticeList.find(n => n.id == currentEditId);
                 if (old) fileData = old.file;
             }
-            const notice = { id: currentEditId || null, title: title, content: content, author: '관리자', date: new Date().toISOString().split('T')[0], file: fileData };
+
+            // 기존 게시물의 hits 값 보존 (조회수 유지)
+            let hits = 0;
+            if (currentEditId) {
+                const old = noticeList.find(n => n.id == currentEditId);
+                if (old && old.hits !== undefined) {
+                    hits = old.hits;
+                }
+            }
+
+            const notice = {
+                id: currentEditId || null,
+                title: title,
+                content: content,
+                author: '관리자',
+                date: new Date().toISOString().split('T')[0],
+                file: fileData,
+                hits: hits  // hits 필드 명시적으로 추가
+            };
+
             await savePost(COMM_KEYS.NOTICE, notice);
             alert('저장되었습니다.');
             $('#notice-form-modal').hide();
