@@ -640,39 +640,90 @@
                 btn.disabled = true;
 
                 try {
-                    // File 1
-                    let fileData = null;
-                    if (fileInput.files.length > 0) {
-                        btn.innerText = "파일1 업로드 중...";
-                        try {
-                            fileData = await uploadFile(fileInput.files[0]);
-                        } catch (e) { alert("파일1 업로드 실패: " + e.message); btn.innerText = orgText; btn.disabled = false; return; }
-                    } else if (currentEditId) {
-                        const old = noticeList.find(n => n.id == currentEditId);
-                        if (old) fileData = old.file;
-                    }
+                    let notice;
 
-                    // File 2
-                    let fileData2 = null;
-                    if (fileInput2.files.length > 0) {
-                        btn.innerText = "파일2 업로드 중...";
-                        try {
-                            fileData2 = await uploadFile(fileInput2.files[0]);
-                        } catch (e) { alert("파일2 업로드 실패: " + e.message); btn.innerText = orgText; btn.disabled = false; return; }
-                    } else if (currentEditId) {
+                    if (currentEditId) {
+                        // 수정 모드: 기존 게시물의 모든 필드를 보존
                         const old = noticeList.find(n => n.id == currentEditId);
-                        if (old) fileData2 = old.file2;
-                    }
+                        if (old) {
+                            // 기존 객체를 복사하여 모든 필드 보존 (hits, file2 등 모든 필드)
+                            notice = { ...old };
+                            // 수정된 필드만 업데이트
+                            notice.title = title;
+                            notice.content = content;
 
-                    const notice = {
-                        id: currentEditId || null,
-                        title: title,
-                        content: content,
-                        author: '관리자',
-                        date: new Date().toISOString().split('T')[0],
-                        file: fileData,
-                        file2: fileData2
-                    };
+                            // 파일1이 새로 선택된 경우만 업데이트
+                            if (fileInput.files.length > 0) {
+                                btn.innerText = "파일1 업로드 중...";
+                                try {
+                                    notice.file = await uploadFile(fileInput.files[0]);
+                                } catch (e) {
+                                    alert("파일1 업로드 실패: " + e.message);
+                                    btn.innerText = orgText;
+                                    btn.disabled = false;
+                                    return;
+                                }
+                            }
+
+                            // 파일2가 새로 선택된 경우만 업데이트
+                            if (fileInput2.files.length > 0) {
+                                btn.innerText = "파일2 업로드 중...";
+                                try {
+                                    notice.file2 = await uploadFile(fileInput2.files[0]);
+                                } catch (e) {
+                                    alert("파일2 업로드 실패: " + e.message);
+                                    btn.innerText = orgText;
+                                    btn.disabled = false;
+                                    return;
+                                }
+                            }
+                            // 파일을 선택하지 않았으면 기존 file/file2 값 유지 (이미 ...old로 복사됨)
+                        } else {
+                            // 기존 게시물을 찾을 수 없는 경우
+                            alert('게시물을 찾을 수 없습니다.');
+                            btn.innerText = orgText;
+                            btn.disabled = false;
+                            return;
+                        }
+                    } else {
+                        // 새 글 작성 모드: 필수 필드만 설정
+                        let fileData = null;
+                        if (fileInput.files.length > 0) {
+                            btn.innerText = "파일1 업로드 중...";
+                            try {
+                                fileData = await uploadFile(fileInput.files[0]);
+                            } catch (e) {
+                                alert("파일1 업로드 실패: " + e.message);
+                                btn.innerText = orgText;
+                                btn.disabled = false;
+                                return;
+                            }
+                        }
+
+                        let fileData2 = null;
+                        if (fileInput2.files.length > 0) {
+                            btn.innerText = "파일2 업로드 중...";
+                            try {
+                                fileData2 = await uploadFile(fileInput2.files[0]);
+                            } catch (e) {
+                                alert("파일2 업로드 실패: " + e.message);
+                                btn.innerText = orgText;
+                                btn.disabled = false;
+                                return;
+                            }
+                        }
+
+                        notice = {
+                            id: null,
+                            title: title,
+                            content: content,
+                            author: '관리자',
+                            date: new Date().toISOString().split('T')[0],
+                            file: fileData,
+                            file2: fileData2,
+                            hits: 0
+                        };
+                    }
 
                     await savePost(COMM_KEYS.NOTICE, notice);
                     alert('저장되었습니다.');
