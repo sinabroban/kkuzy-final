@@ -744,32 +744,45 @@
             const fileInput = document.getElementById('notice-file');
             if (!title) return alert('제목을 입력하세요.');
 
-            let fileData = null;
-            if (fileInput.files.length > 0) {
-                fileData = await readFile(fileInput.files[0]);
-            } else if (currentEditId) {
-                const old = noticeList.find(n => n.id == currentEditId);
-                if (old) fileData = old.file;
-            }
+            let notice;
 
-            // 기존 게시물의 hits 값 보존 (조회수 유지)
-            let hits = 0;
             if (currentEditId) {
+                // 수정 모드: 기존 게시물의 모든 필드를 보존
                 const old = noticeList.find(n => n.id == currentEditId);
-                if (old && old.hits !== undefined) {
-                    hits = old.hits;
-                }
-            }
+                if (old) {
+                    // 기존 객체를 복사하여 모든 필드 보존 (hits, file2 등 모든 필드)
+                    notice = { ...old };
+                    // 수정된 필드만 업데이트
+                    notice.title = title;
+                    notice.content = content;
 
-            const notice = {
-                id: currentEditId || null,
-                title: title,
-                content: content,
-                author: '관리자',
-                date: new Date().toISOString().split('T')[0],
-                file: fileData,
-                hits: hits  // hits 필드 명시적으로 추가
-            };
+                    // 파일이 새로 선택된 경우만 업데이트
+                    if (fileInput.files.length > 0) {
+                        notice.file = await readFile(fileInput.files[0]);
+                    }
+                    // 파일을 선택하지 않았으면 기존 file 값 유지 (이미 ...old로 복사됨)
+                } else {
+                    // 기존 게시물을 찾을 수 없는 경우
+                    alert('게시물을 찾을 수 없습니다.');
+                    return;
+                }
+            } else {
+                // 새 글 작성 모드: 필수 필드만 설정
+                let fileData = null;
+                if (fileInput.files.length > 0) {
+                    fileData = await readFile(fileInput.files[0]);
+                }
+
+                notice = {
+                    id: null,
+                    title: title,
+                    content: content,
+                    author: '관리자',
+                    date: new Date().toISOString().split('T')[0],
+                    file: fileData,
+                    hits: 0
+                };
+            }
 
             await savePost(COMM_KEYS.NOTICE, notice);
             alert('저장되었습니다.');
