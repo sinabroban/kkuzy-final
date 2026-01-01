@@ -4,63 +4,408 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=1280">
-    <title>개인정보처리방침 - 대전꾸지뽕</title>
+    <title>개인정보처리방침 - 농업회사법인 꾸지뽕 사업단</title>
     <link rel="stylesheet" href="../css/style.css" type="text/css">
     <link rel="stylesheet" href="../css/responsive.css" type="text/css">
+    <script src="../js/jquery-2.1.4.min.js"></script>
+    <script src="../js/common.js"></script>
     <style>
+        body {
+            background-color: #f4f6f9;
+        }
+
         .privacy_wrap {
-            width: 1200px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 100px 0;
-            font-family: 'NotoKrL', sans-serif;
+            padding: 80px 20px;
+            font-family: 'Noto Sans KR', sans-serif;
         }
 
         .privacy_title {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: bold;
             color: #333;
-            margin-bottom: 40px;
-            border-bottom: 2px solid #333;
-            padding-bottom: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .privacy_subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 50px;
+            font-size: 14px;
         }
 
         .privacy_content {
-            font-size: 16px;
-            line-height: 1.8;
-            color: #555;
-            background: #f9f9f9;
-            padding: 40px;
+            background: #fff;
+            padding: 50px;
             border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            line-height: 1.8;
+        }
+
+        .privacy_section {
+            margin-bottom: 40px;
+        }
+
+        .privacy_section h2 {
+            font-size: 22px;
+            font-weight: bold;
+            color: #c31d22;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .privacy_section h3 {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin: 20px 0 10px 0;
+        }
+
+        .privacy_section p {
+            color: #555;
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+
+        .privacy_section ul {
+            margin: 10px 0 15px 20px;
+            color: #555;
+        }
+
+        .privacy_section li {
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .privacy_table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .privacy_table th,
+        .privacy_table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .privacy_table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .highlight_box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .contact_box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .btn_home {
+            display: inline-block;
+            background: #c31d22;
+            color: #fff;
+            padding: 15px 40px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 30px;
+            transition: background 0.3s;
+        }
+
+        .btn_home:hover {
+            background: #a01418;
+        }
+
+        @media (max-width: 768px) {
+            .privacy_wrap {
+                padding: 40px 15px;
+            }
+
+            .privacy_content {
+                padding: 30px 20px;
+            }
+
+            .privacy_title {
+                font-size: 28px;
+            }
+
+            .privacy_section h2 {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
 
 <body>
     <div id="wrap">
-        <!-- Header will be consistent with other pages -->
+        <div class="menu_area">
+            <div class="sub_logo">
+                <a href="../index.html" target="_self"><img src="../images/logo_v2.jpg" alt="대전꾸지뽕"
+                        style="height: 50px; width: auto;" /></a>
+            </div>
+        </div>
+
         <div class="privacy_wrap">
             <h1 class="privacy_title">개인정보처리방침</h1>
+            <p class="privacy_subtitle">시행일자: 2025년 1월 1일</p>
+
             <div class="privacy_content">
-                <p><strong>1. 개인정보의 처리 목적</strong><br>
-                    대전꾸지뽕(이하 '회사')은(는) 다음의 목적을 위하여 개인정보를 처리합니다. 처리하고 있는 개인정보는 다음의 목적 이외의 용도로는 이용되지 않으며 이용 목적이 변경되는 경우에는
-                    「개인정보 보호법」 제18조에 따라 별도의 동의를 받는 등 필요한 조치를 이행할 예정입니다.</p>
-                <br>
-                <p><strong>2. 개인정보의 처리 및 보유 기간</strong><br>
-                    ① 회사는 법령에 따른 개인정보 보유·이용기간 또는 정보주체로부터 개인정보를 수집 시에 동의받은 개인정보 보유·이용기간 내에서 개인정보를 처리·보유합니다.</p>
-                <br>
-                <p><strong>3. 정보주체와 법정대리인의 권리·의무 및 그 행사방법</strong><br>
-                    ① 정보주체는 회사에 대해 언제든지 개인정보 열람·정정·삭제·처리정지 요구 등의 권리를 행사할 수 있습니다.</p>
-                <br>
-                <p>※ 본 방침은 2025년 1월 1일부터 시행됩니다.</p>
+                <div class="privacy_section">
+                    <h2>제1조 (개인정보의 처리 목적)</h2>
+                    <p>농업회사법인 꾸지뽕 사업단(이하 '회사')은 다음의 목적을 위하여 개인정보를 처리합니다. 처리하고 있는 개인정보는 다음의 목적 이외의 용도로는 이용되지 않으며, 이용
+                        목적이 변경되는 경우에는 「개인정보 보호법」 제18조에 따라 별도의 동의를 받는 등 필요한 조치를 이행할 예정입니다.</p>
+
+                    <h3>1. 재화 또는 서비스 제공</h3>
+                    <ul>
+                        <li>물품배송, 서비스 제공, 계약서·청구서 발송, 콘텐츠 제공, 맞춤서비스 제공</li>
+                        <li>본인인증, 연령인증, 요금결제·정산을 목적으로 개인정보를 처리합니다.</li>
+                    </ul>
+
+                    <h3>2. 고객문의 및 민원처리</h3>
+                    <ul>
+                        <li>민원인의 신원 확인, 민원사항 확인, 사실조사를 위한 연락·통지</li>
+                        <li>처리결과 통보 목적으로 개인정보를 처리합니다.</li>
+                    </ul>
+
+                    <h3>3. 마케팅 및 광고에의 활용</h3>
+                    <ul>
+                        <li>신규 서비스(제품) 개발 및 맞춤 서비스 제공, 이벤트 및 광고성 정보 제공 및 참여기회 제공</li>
+                        <li>인구통계학적 특성에 따른 서비스 제공 및 광고 게재, 서비스의 유효성 확인</li>
+                        <li>접속빈도 파악 또는 회원의 서비스 이용에 대한 통계를 목적으로 개인정보를 처리합니다.</li>
+                    </ul>
+                </div>
+
+                <div class="privacy_section">
+                    <h2>제2조 (개인정보의 처리 및 보유기간)</h2>
+                    <p>회사는 법령에 따른 개인정보 보유·이용기간 또는 정보주체로부터 개인정보를 수집 시에 동의받은 개인정보 보유·이용기간 내에서 개인정보를 처리·보유합니다.</p>
+
+                    <table class="privacy_table">
+                        <tr>
+                            <th>구분</th>
+                            <th>보유 및 이용 기간</th>
+                            <th>비고</th>
+                        </tr>
+                        <tr>
+                            <td>주문 및 배송 정보</td>
+                            <td>전자상거래법에 따라 5년</td>
+                            <td>계약 또는 청약철회 등에 관한 기록</td>
+                        </tr>
+                        <tr>
+                            <td>대금결제 및 재화 공급 기록</td>
+                            <td>전자상거래법에 따라 5년</td>
+                            <td>대금결제 및 재화 등의 공급에 관한 기록</td>
+                        </tr>
+                        <tr>
+                            <td>소비자 불만 또는 분쟁처리 기록</td>
+                            <td>전자상거래법에 따라 3년</td>
+                            <td>소비자의 불만 또는 분쟁처리에 관한 기록</td>
+                        </tr>
+                        <tr>
+                            <td>표시/광고에 관한 기록</td>
+                            <td>전자상거래법에 따라 6개월</td>
+                            <td>표시/광고에 관한 기록</td>
+                        </tr>
+                        <tr>
+                            <td>웹사이트 방문기록</td>
+                            <td>통신비밀보호법에 따라 3개월</td>
+                            <td>로그기록, IP주소 등</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="privacy_section">
+                    <h2>제3조 (처리하는 개인정보의 항목)</h2>
+                    <p>회사는 다음의 개인정보 항목을 처리하고 있습니다.</p>
+
+                    <h3>1. 주문/결제 시 수집항목</h3>
+                    <ul>
+                        <li>필수항목: 성명, 연락처(전화번호), 배송지 주소</li>
+                        <li>선택항목: 배송 요청사항</li>
+                        <li>자동수집항목: 서비스 이용기록, 접속 로그, 쿠키, 접속 IP 정보</li>
+                    </ul>
+
+                    <h3>2. 고객문의 시 수집항목</h3>
+                    <ul>
+                        <li>필수항목: 작성자명, 연락처, 문의내용</li>
+                        <li>선택항목: 이메일, 첨부파일</li>
+                    </ul>
+                </div>
+
+                <div class="privacy_section">
+                    <h2>제4조 (개인정보의 제3자 제공)</h2>
+                    <p>회사는 정보주체의 개인정보를 제1조(개인정보의 처리 목적)에서 명시한 범위 내에서만 처리하며, 정보주체의 동의, 법률의 특별한 규정 등 「개인정보 보호법」 제17조 및
+                        제18조에 해당하는 경우에만 개인정보를 제3자에게 제공합니다.</p>
+
+                    <div class="highlight_box">
+                        <strong>배송을 위한 제3자 제공</strong><br>
+                        상품 배송을 위해 필요한 최소한의 정보(성명, 연락처, 배송지 주소)가 배송업체에 제공될 수 있습니다. 배송 완료 후 관련 정보는 즉시 파기됩니다.
+                    </div>
+                </div>
+
+                <div class="privacy_section">
+                    <h2>제5조 (개인정보처리의 위탁)</h2>
+                    <p>회사는 원활한 개인정보 업무처리를 위하여 다음과 같이 개인정보 처리업무를 위탁하고 있습니다.</p>
+
+                    <table class="privacy_table">
+                        <tr>
+                            <th>위탁받는 자</th>
+                            <th>위탁하는 업무의 내용</th>
+                            <th>개인정보의 보유 및 이용기간</th>
+                        </tr>
+                        <tr>
+                            <td>배송업체</td>
+                            <td>상품 배송</td>
+                            <td>배송 완료 후 즉시 파기</td>
+                        </tr>
+                    </table>
+
+                    <p>※ 회사는 위탁계약 체결 시 「개인정보 보호법」 제26조에 따라 위탁업무 수행목적 외 개인정보 처리금지, 기술적·관리적 보호조치, 재위탁 제한, 수탁자에 대한 관리·감독,
+                        손해배상 등 책임에 관한 사항을 계약서 등 문서에 명시하고, 수탁자가 개인정보를 안전하게 처리하는지를 감독하고 있습니다.</p>
+                </div>
+
+                <div class="privacy_section">
+                    <h2>제6조 (정보주체의 권리·의무 및 행사방법)</h2>
+                    <p>정보주체는 회사에 대해 언제든지 다음 각 호의 개인정보 보호 관련 권리를 행사할 수 있습니다.</p>
+
+                    <ul>
+                        <li>개인정보 열람 요구</li>
+                        <li>개인정보에 오류 등이 있을 경우 정정 요구</li>
+                        <li>개인정보 삭제 요구</li>
+                        <li>개인정보 처리정지 요구</li>
+                    </ul>
+
+                    <p>권리 행사는 회사에 대해 서면, 전화, 전자우편 등을 통하여 하실 수 있으며 회사는 이에 대해 지체없이 조치하겠습니다.</p>
+
+                    <div class="contact_box">
+                        <strong>개인정보 관련 문의</strong><br>
+                        전화: <strong>010-5408-6668</strong><br>
+                        이메일: <strong>문의처 이메일 주소</strong><br>
+                        주소: <strong>대전광역시 유성구 계룡로105번길 15</strong>
+                    </div>
+                </div>
+
+                <div class="privacy_section">
+                    <h2>제7조 (개인정보의 파기)</h2>
+                    <p>회사는 개인정보 보유기간의 경과, 처리목적 달성 등 개인정보가 불필요하게 되었을 때에는 지체없이 해당 개인정보를 파기합니다.</p>
+
+                    <h3>파기절차 및 방법</h3>
+                    <ul>
+                        <li><strong>파기절차:</strong> 불필요한 개인정보 및 개인정보파일은 개인정보책임자의 책임 하에 내부방침 절차에 따라 다음과 같이 처리하고 있습니다.</li>
+                        <li><strong>파기방법:</strong> 전자적 파일 형태로 기록·저장된 개인정보는 기록을 재생할 수 없도록 파기하며, 종이 문서에 기록·저장된 개인정보는 분쇄기로
+                            분쇄하거나 소각하여
+                            파기합니다.</li>
+                    </ul>
+                </div>
+
+                <div class="privacy_section">
+                    <h2>제8조 (개인정보의 안전성 확보조치)</h2>
+                    <p>회사는 개인정보의 안전성 확보를 위해 다음과 같은 조치를 취하고 있습니다.</p>
+
+                    <ul>
+                        <li><strong>관리적 조치:</strong> 내부관리계획 수립·시행, 정기적 직원 교육 등</li>
+                        <li><strong>기술적 조치:</strong> 개인정보처리시스템 등의 접근권한 관리, 접근통제시스템 설치, 고유식별정보 등의 암호화, 보안프로그램 설치</li>
+                        <li><strong>물리적 조치:</strong> 전산실, 자료보관실 등의 접근통제</li>
+                    </ul>
+                </div>
+
+                <div class="privacy_section">
+                    <h2>제9조 (개인정보 자동 수집 장치의 설치·운영 및 거부에 관한 사항)</h2>
+                    <p>회사는 이용자에게 개별적인 맞춤서비스를 제공하기 위해 이용정보를 저장하고 수시로 불러오는 '쿠키(cookie)'를 사용합니다.</p>
+
+                    <h3>쿠키의 사용 목적</h3>
+                    <ul>
+                        <li>이용자의 접속 빈도나 방문 시간 등을 분석</li>
+                        <li>이용자의 취향과 관심분야를 파악 및 자취 추적</li>
+                        <li>각종 이벤트 참여 정도 및 방문 횟수 파악 등을 통한 타겟 마케팅 및 개인 맞춤 서비스 제공</li>
+                    </ul>
+
+                    <h3>쿠키의 설치·운영 및 거부</h3>
+                    <p>이용자는 쿠키 설치에 대한 선택권을 가지고 있습니다. 웹브라우저에서 옵션을 설정함으로써 모든 쿠키를 허용하거나, 쿠키가 저장될 때마다 확인을 거치거나, 모든 쿠키의 저장을
+                        거부할
+                        수 있습니다.</p>
+                    <p>※ 다만, 쿠키의 저장을 거부할 경우 맞춤형 서비스 이용에 어려움이 발생할 수 있습니다.</p>
+                </div>
+
+                <div class="privacy_section">
+                    <h2>제10조 (개인정보 보호책임자)</h2>
+                    <p>회사는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 개인정보 처리와 관련한 정보주체의 불만처리 및 피해구제 등을 위하여 아래와 같이 개인정보 보호책임자를 지정하고
+                        있습니다.</p>
+
+                    <div class="contact_box">
+                        <strong>▶ 개인정보 보호책임자</strong><br>
+                        성명: 김선몽<br>
+                        직책: 대표<br>
+                        연락처: 010-5408-6668<br>
+                        <br>
+                        <strong>※ 개인정보 보호 담당부서로 연결됩니다.</strong><br>
+                        <br>
+                        정보주체께서는 회사의 서비스를 이용하시면서 발생한 모든 개인정보 보호 관련 문의, 불만처리, 피해구제 등에 관한 사항을 개인정보 보호책임자 및 담당부서로 문의하실 수
+                        있습니다. 회사는 정보주체의 문의에 대해 지체없이 답변 및 처리해드릴 것입니다.
+                    </div>
+                </div>
+
+                <div class="privacy_section">
+                    <h2>제11조 (권익침해 구제방법)</h2>
+                    <p>정보주체는 아래의 기관에 대해 개인정보 침해에 대한 피해구제, 상담 등을 문의하실 수 있습니다.</p>
+
+                    <ul>
+                        <li><strong>개인정보 침해신고센터 (한국인터넷진흥원 운영)</strong><br>
+                            - 소관업무: 개인정보 침해사실 신고, 상담 신청<br>
+                            - 홈페이지: privacy.kisa.or.kr<br>
+                            - 전화: (국번없이) 118<br>
+                            - 주소: (58324) 전남 나주시 진흥길 9(빛가람동 301-2) 3층 개인정보침해신고센터
+                        </li>
+                        <li><strong>개인정보 분쟁조정위원회</strong><br>
+                            - 소관업무: 개인정보 분쟁조정신청, 집단분쟁조정 (민사적 해결)<br>
+                            - 홈페이지: www.kopico.go.kr<br>
+                            - 전화: (국번없이) 1833-6972<br>
+                            - 주소: (03171)서울특별시 종로구 세종대로 209 정부서울청사 4층
+                        </li>
+                        <li><strong>대검찰청 사이버범죄수사단</strong><br>
+                            - 전화: 02-3480-3573<br>
+                            - 홈페이지: www.spo.go.kr
+                        </li>
+                        <li><strong>경찰청 사이버안전국</strong><br>
+                            - 전화: (국번없이) 182<br>
+                            - 홈페이지: cyberbureau.police.go.kr
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="privacy_section">
+                    <h2>제12조 (개인정보 처리방침 변경)</h2>
+                    <p>이 개인정보 처리방침은 2025년 1월 1일부터 적용되며, 법령 및 방침에 따른 변경내용의 추가, 삭제 및 정정이 있는 경우에는 변경사항의 시행 7일 전부터 공지사항을 통하여
+                        고지할
+                        것입니다.</p>
+                </div>
+
+                <div style="text-align: center; margin-top: 50px;">
+                    <p style="color: #999; font-size: 14px;">본 개인정보처리방침은 2025년 1월 1일부터 시행됩니다.</p>
+                    <p style="color: #999; font-size: 14px; margin-bottom: 30px;">농업회사법인 꾸지뽕 사업단</p>
+                    <a href="../index.html" class="btn_home">홈으로 돌아가기</a>
+                </div>
             </div>
-            <div style="text-align: center; margin-top: 40px;">
-                <a href="../index.html"
-                    style="background: #333; color: #fff; padding: 15px 40px; text-decoration: none; border-radius: 5px;">홈으로
-                    돌아가기</a>
-            </div>
+        </div>
+
+        <div id="copy" style="background:#333; color:#aaa; padding:20px; text-align:center; margin-top:50px;">
+            <p>COPYRIGHT 2025(C) 농업회사법인 꾸지뽕 사업단 ALL RIGHTS RESERVED.</p>
         </div>
     </div>
 </body>
 
 </html>
-
