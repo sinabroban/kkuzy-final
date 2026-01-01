@@ -215,6 +215,7 @@
             <div class="sidebar-header">관리자 페이지</div>
             <nav style="flex-grow: 1;">
                 <a href="#" class="nav-link active" data-target="dashboard">대시보드</a>
+                <a href="#" class="nav-link" data-target="orders">주문 관리</a>
                 <a href="#" class="nav-link" data-target="notices">공지사항 관리</a>
                 <a href="#" class="nav-link" data-target="inquiries">활동사항 관리</a>
                 <a href="#" class="nav-link" data-target="reviews">사용후기 관리</a>
@@ -238,6 +239,12 @@
                         <div class="card-body">
                             <h3>등록된 사용후기</h3>
                             <p style="font-size: 2rem; font-weight: bold; color: #ffc107;" id="dash-review-count">0</p>
+                        </div>
+                    </div>
+                    <div class="card" style="flex: 1;">
+                        <div class="card-body">
+                            <h3>접수된 주문</h3>
+                            <p style="font-size: 2rem; font-weight: bold; color: #28a745;" id="dash-order-count">0</p>
                         </div>
                     </div>
                     <div class="card" style="flex: 1; border-left: 5px solid #dc3545;">
@@ -293,6 +300,34 @@
                                 </tr>
                             </thead>
                             <tbody id="inquiry-list">
+                                <!-- JS populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders -->
+            <div id="orders" class="page-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">주문 관리</h3>
+                    </div>
+                    <div class="card-body">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th width="120">주문번호</th>
+                                    <th>주문자</th>
+                                    <th>연락처</th>
+                                    <th>상품</th>
+                                    <th width="100">금액</th>
+                                    <th width="90">상태</th>
+                                    <th width="100">주문일</th>
+                                    <th width="150">관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="order-list">
                                 <!-- JS populated -->
                             </tbody>
                         </table>
@@ -418,6 +453,72 @@
         </div>
     </div>
 
+    <!-- Order Detail Modal -->
+    <div id="order-detail-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
+        <div class="card" style="width: 600px; max-width:90%; max-height:90vh; overflow-y:auto;">
+            <div class="card-header">
+                <h3 class="card-title">주문 상세정보</h3>
+                <button class="btn btn-danger" onclick="$('#order-detail-modal').hide()">닫기</button>
+            </div>
+            <div class="card-body">
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label style="font-weight:bold; color:#666;">주문번호</label>
+                    <p id="order-detail-id" style="font-size:14px; margin:5px 0;"></p>
+                </div>
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label style="font-weight:bold; color:#666;">주문일</label>
+                    <p id="order-detail-date" style="font-size:14px; margin:5px 0;"></p>
+                </div>
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label style="font-weight:bold; color:#666;">주문자명</label>
+                    <p id="order-detail-name" style="font-size:14px; margin:5px 0;"></p>
+                </div>
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label style="font-weight:bold; color:#666;">연락처</label>
+                    <p id="order-detail-phone" style="font-size:14px; margin:5px 0;"></p>
+                </div>
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label style="font-weight:bold; color:#666;">배송지 주소</label>
+                    <p id="order-detail-address" style="font-size:14px; margin:5px 0; white-space:pre-wrap;"></p>
+                </div>
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label style="font-weight:bold; color:#666;">주문 상품</label>
+                    <p id="order-detail-product" style="font-size:14px; margin:5px 0;"></p>
+                </div>
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label style="font-weight:bold; color:#666;">주문 금액</label>
+                    <p id="order-detail-price" style="font-size:16px; margin:5px 0; font-weight:bold; color:#c31d22;">
+                    </p>
+                </div>
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label style="font-weight:bold; color:#666;">결제 방법</label>
+                    <p id="order-detail-payment" style="font-size:14px; margin:5px 0;"></p>
+                </div>
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label style="font-weight:bold; color:#666;">요청사항</label>
+                    <p id="order-detail-request"
+                        style="font-size:14px; margin:5px 0; white-space:pre-wrap; color:#666;"></p>
+                </div>
+                <div class="form-group"
+                    style="margin-bottom:20px; padding:15px; background:#f8f9fa; border-radius:5px;">
+                    <label style="font-weight:bold; color:#666;">주문 상태 변경</label>
+                    <div id="order-status-current"
+                        style="margin:10px 0; padding:10px; background:#fff; border-radius:3px; font-weight:bold;">
+                    </div>
+                    <div style="display:flex; gap:5px; margin-top:10px; flex-wrap:wrap;">
+                        <button class="btn btn-warning" style="flex:1; min-width:100px;"
+                            onclick="updateOrderStatusBtn('입금확인')">입금확인</button>
+                        <button class="btn btn-primary" style="flex:1; min-width:100px;"
+                            onclick="updateOrderStatusBtn('배송중')">배송중</button>
+                        <button class="btn btn-success" style="flex:1; min-width:100px;"
+                            onclick="updateOrderStatusBtn('배송완료')">배송완료</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Confirm Modal -->
     <div id="delete-confirm-modal"
         style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
@@ -460,8 +561,10 @@
             let noticeList = [];
             let inquiryList = [];
             let reviewList = [];
+            let orderList = [];
             let currentEditId = null;
             let currentReplyId = null;
+            let currentOrderId = null;
             let deleteTargetId = null;
             let deleteTargetBoard = null;
 
@@ -479,6 +582,9 @@
 
                     const revCount = document.getElementById('dash-review-count');
                     if (revCount) revCount.innerText = reviewList.length;
+
+                    // Load and render orders
+                    renderOrders();
 
                     // Notice Table
                     const noticeTbody = document.getElementById('notice-list');
@@ -553,6 +659,120 @@
                 } catch (err) {
                     console.error("Render Error:", err);
                     // alert("데이터 로딩 중 오류가 발생했습니다.");
+                }
+            }
+
+            // Order Management Functions
+            function renderOrders() {
+                try {
+                    orderList = JSON.parse(localStorage.getItem('kkuzy_orders')) || [];
+
+                    // Update dashboard count
+                    const orderCount = document.getElementById('dash-order-count');
+                    if (orderCount) orderCount.innerText = orderList.length;
+
+                    // Render order table
+                    const orderTbody = document.getElementById('order-list');
+                    if (orderTbody) {
+                        if (orderList.length === 0) {
+                            orderTbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">접수된 주문이 없습니다.</td></tr>';
+                        } else {
+                            let html = '';
+                            // Sort by date desc (newest first)
+                            orderList.sort((a, b) => {
+                                const idA = parseInt(a.id.split('-')[1]) || 0;
+                                const idB = parseInt(b.id.split('-')[1]) || 0;
+                                return idB - idA;
+                            });
+
+                            orderList.forEach(order => {
+                                const statusColor = getStatusColor(order.status || '입금대기');
+                                const shortId = order.id.substring(4, 14); // Show shorter ID
+                                html += `<tr>
+                                    <td>${shortId}</td>
+                                    <td>${order.name}</td>
+                                    <td>${order.phone}</td>
+                                    <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${order.product}</td>
+                                    <td>${order.price}</td>
+                                    <td><span style="color:${statusColor}; font-weight:bold;">${order.status || '입금대기'}</span></td>
+                                    <td>${order.date}</td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm" onclick="window.showOrderDetail('${order.id}')">상세</button>
+                                        <button class="btn btn-danger btn-sm" onclick="window.askDeleteOrder('${order.id}')">삭제</button>
+                                    </td>
+                                </tr>`;
+                            });
+                            orderTbody.innerHTML = html;
+                        }
+                    }
+                } catch (err) {
+                    console.error("Order Render Error:", err);
+                }
+            }
+
+            function getStatusColor(status) {
+                const colors = {
+                    '입금대기': '#dc3545',
+                    '입금확인': '#ffc107',
+                    '배송중': '#007bff',
+                    '배송완료': '#28a745'
+                };
+                return colors[status] || '#666';
+            }
+
+            window.showOrderDetail = function (orderId) {
+                currentOrderId = orderId;
+                const order = orderList.find(o => o.id === orderId);
+                if (!order) return;
+
+                $('#order-detail-id').text(order.id);
+                $('#order-detail-date').text(order.date);
+                $('#order-detail-name').text(order.name);
+                $('#order-detail-phone').text(order.phone);
+                $('#order-detail-address').text(order.address || '-');
+                $('#order-detail-product').text(order.product);
+                $('#order-detail-price').text(order.price);
+                $('#order-detail-payment').text(order.paymentMethod || '계좌이체');
+                $('#order-detail-request').text(order.request || '없음');
+
+                const status = order.status || '입금대기';
+                const statusColor = getStatusColor(status);
+                $('#order-status-current').html(`현재 상태: <span style="color:${statusColor};">${status}</span>`);
+
+                $('#order-detail-modal').css('display', 'flex');
+            }
+
+            window.updateOrderStatusBtn = function (newStatus) {
+                if (!currentOrderId) return;
+
+                try {
+                    const orders = JSON.parse(localStorage.getItem('kkuzy_orders')) || [];
+                    const order = orders.find(o => o.id === currentOrderId);
+                    if (order) {
+                        order.status = newStatus;
+                        localStorage.setItem('kkuzy_orders', JSON.stringify(orders));
+                        alert(`주문 상태가 "${newStatus}"로 변경되었습니다.`);
+                        $('#order-detail-modal').hide();
+                        renderOrders();
+                    }
+                } catch (err) {
+                    alert('상태 변경 중 오류가 발생했습니다: ' + err.message);
+                    console.error(err);
+                }
+            }
+
+            window.askDeleteOrder = function (orderId) {
+                if (confirm('이 주문을 삭제하시겠습니까?\n삭제 후 복구할 수 없습니다.')) {
+                    try {
+                        let orders = JSON.parse(localStorage.getItem('kkuzy_orders')) || [];
+                        orders = orders.filter(o => o.id !== orderId);
+                        localStorage.setItem('kkuzy_orders', JSON.stringify(orders));
+                        alert('주문이 삭제되었습니다.');
+                        renderOrders();
+                    } catch (err) {
+                        alert('삭제 중 오류가 발생했습니다: ' + err.message);
+                        console.error(err);
+                    }
                 }
             }
 
